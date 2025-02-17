@@ -1,0 +1,32 @@
+{
+  "name": "gw-oauth-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".src/authorizationServer.js.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server",
+    "restart": "cd ./oauth-server && npm run build && cd .. && node server",
+    "client": "cd ./src && node client",
+    "build": "react-scripts build && mv build/index.html build/app.html",
+    "test": "react-scripts test"
+  },
+  "author": "James YS Chang. iGoodWorks Inc. 2025",
+  "license": "ISC",
+  "dependencies": {
+    "blueimp-md5": "^2.19.0",
+    "body-parser": "^1.20.3",
+    "consolidate": "^1.0.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "firebase": "^11.3.1",
+    "firebase-admin": "^13.1.0",
+    "jsrsasign": "^11.1.0",
+    "ramda": "^0.30.1",
+    "randomstring": "^1.3.1",
+    "underscore": "^1.13.7",
+    "underscore.string": "^3.3.6"
+  }
+}
