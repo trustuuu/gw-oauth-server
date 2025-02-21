@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import bodyParser from "body-parser";
 import cons from "consolidate";
 import routerAuth from "./src/route/routes_auth.js";
-
+import logger from "morgan";
 import dotenv from "dotenv";
 dotenv.config(); //{ path: ".env.development" });
 
@@ -16,6 +16,8 @@ const oauth_server_path = path.join(__dirname, "./oauth-server/dist");
 const app = express();
 
 app.use(cors());
+app.use(logger("dev"));
+
 app.use(bodyParser.urlencoded({ extended: true })); // support form-encoded bodies (for the token endpoint)
 app.use(bodyParser.json());
 
