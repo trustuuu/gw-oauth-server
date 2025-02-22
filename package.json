@@ -10,7 +10,8 @@
     "start": "node server",
     "restart": "cd ./oauth-server && npm run build && cd .. && nodemon server",
     "client": "cd ./src && node client",
-    "build": "react-scripts build && mv build/index.html build/app.html",
+    "build": "npm install ",
+    "prod": "node server",
     "test": "react-scripts test"
   },
   "author": "James YS Chang. iGoodWorks Inc. 2025",
