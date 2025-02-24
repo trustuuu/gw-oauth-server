@@ -9,6 +9,7 @@ import logger from "morgan";
 import { expressjwt } from "express-jwt";
 import guard from "express-jwt-permissions";
 import jwks from "jwks-rsa";
+import compression from "compression";
 import dotenv from "dotenv";
 dotenv.config(); //{ path: ".env.development" });
 
