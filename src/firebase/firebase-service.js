@@ -29,23 +29,48 @@ export function getAuthUser() {
   return auth().currentUser;
 }
 
-export async function getDoc(path, whereArgs) {
-  const pathes = R.split("/", path);
-  let docName = null;
-
-  if (isEven(pathes.length)) {
-    path = R.init(pathes).join("/");
-    docName = R.last(pathes);
+function isMultiDimensionalArray(arr) {
+  // Check if the variable is an array
+  if (Array.isArray(arr)) {
+    // Check if any element of the array is also an array
+    return arr.some((item) => Array.isArray(item));
   }
+  return false; // Not an array
+}
 
-  let ref = db().collection(path);
+function applyConditions(query, conditions) {
+  if (isMultiDimensionalArray(conditions)) {
+    conditions.forEach(
+      (condition) => (query = query.where.apply(query, condition))
+    );
+  } else {
+    query = query.where.apply(query, conditions);
+  }
+  return query;
+}
+
+export async function getDoc(path, whereArgs) {
+  const [collectionPath, docName] = getCollectionPathAndDocId(path);
+
+  let ref = db().collection(collectionPath);
+
   if (docName) {
     return ref.doc(docName).get().then(toObject);
   }
 
-  const res = whereArgs
-    ? await ref.where.apply(ref, whereArgs).get()
-    : await ref.get();
+  const applyAllWhereArgs = () => {
+    return whereArgs.reduce((acc, cur) => {
+      acc = acc.where.apply(acc, cur);
+      return acc;
+    }, ref);
+  };
+
+  const res =
+    whereArgs && whereArgs.length > 0
+      ? Array.isArray(whereArgs[0])
+        ? await applyAllWhereArgs().get()
+        : await ref.where.apply(ref, whereArgs).get()
+      : await ref.get();
   return res.docs.map(toObject);
 }
 
