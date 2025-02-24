@@ -1,11 +1,10 @@
 import express from "express";
-import * as R from "ramda";
 import { init } from "../firebase/firebase-service.js";
-import { getClient, verifyUser, getUser, authData } from "./auth_service.js";
-import authorize from "./authorize.js";
-import login from "./login.js";
-import approve from "./approve.js";
-import token from "./token.js";
+import { authData } from "./oauth/auth_service.js";
+import authorize from "./oauth/authorize.js";
+import login from "./oauth/login.js";
+import approve from "./oauth/approve.js";
+import token from "./oauth/token.js";
 
 const routerAuth = express.Router();
 export default routerAuth;
