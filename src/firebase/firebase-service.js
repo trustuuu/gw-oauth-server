@@ -51,7 +51,6 @@ function applyConditions(query, conditions) {
 
 export async function getDoc(path, whereArgs) {
   const [collectionPath, docName] = getCollectionPathAndDocId(path);
-
   let ref = db().collection(collectionPath);
 
   if (docName) {
@@ -129,7 +128,7 @@ export function recursiveDeleteDoc(path) {
 export function deleteDoc(path, id) {
   const arr = path.split("/");
 
-  if (!id && isEven(arr.length)) {
+  if ((!id || R.isEmpty(id)) && isEven(arr.length)) {
     path = R.init(arr).join("/");
     id = R.last(arr);
   }

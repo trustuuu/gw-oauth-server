@@ -107,7 +107,6 @@ async function token(req, res, routerAuth) {
     return;
   } else if (req.body.grant_type == "authorization_code") {
     const code = await codeService.getData(authId, req.body.code);
-
     if (code && code.request) {
       await codeService.deleteData.apply(
         codeService,
