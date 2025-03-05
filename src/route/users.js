@@ -10,6 +10,7 @@ const routerUser = express.Router();
 export default routerUser;
 
 routerUser.get(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
+  console.log("req.query", req.query);
   if (req.query.condition) {
     run(res, () =>
       userService.getUsersWhere(
@@ -52,11 +53,16 @@ routerUser.post(
       return res.status(409).send("Item exists");
     }
 
-    run(res, () =>
-      userService.setData.apply(
-        userService,
-        [data].concat([req.params.id, req.params.domainId, data.id])
-      )
+    run(
+      res,
+      () =>
+        userService.setData.apply(
+          userService,
+          [data].concat([req.params.id, req.params.domainId, data.id])
+        ),
+      undefined,
+      undefined,
+      data
     );
   }
 );
@@ -113,10 +119,13 @@ routerUser.delete(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
 });
 
 // common functions
-function run(response, fn, success, error) {
+function run(response, fn, success, error, data) {
+  console.log("data", data);
   return fn()
     .then((result) =>
-      response.status(200).send(success ? success(result) : result)
+      response
+        .status(200)
+        .send(data ? data : success ? success(result) : result)
     )
     .catch((err) => {
       console.error(err);

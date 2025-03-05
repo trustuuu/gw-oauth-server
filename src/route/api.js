@@ -59,18 +59,28 @@ routerApi.get(`/:companyId/:domainId/api`, (req, res) => {
 
 routerApi.post(`/${apiPath}/`, (req, res) => {
   const data = { ...req.body, whenCreated: new Date(), status: "New" };
-  run(res, () =>
-    apiService.setData.apply(apiService, [data].concat([apiPath, data.id]))
+  run(
+    res,
+    () =>
+      apiService.setData.apply(apiService, [data].concat([apiPath, data.id])),
+    undefined,
+    undefined,
+    data
   );
 });
 
 routerApi.post(`/${apiPath}/:id/PermissionScopes`, (req, res) => {
   const data = { ...req.body, whenCreated: new Date(), status: "New" };
-  run(res, () =>
-    apiService.setData.apply(
-      apiService,
-      [data].concat([apiPath, req.params.id, "PermissionScopes", data.id])
-    )
+  run(
+    res,
+    () =>
+      apiService.setData.apply(
+        apiService,
+        [data].concat([apiPath, req.params.id, "PermissionScopes", data.id])
+      ),
+    undefined,
+    undefined,
+    data
   );
 });
 
@@ -138,11 +148,13 @@ routerApi.delete(`/${apiPath}`, (req, res) => {
 });
 
 // common functions
-function run(response, fn, success, error) {
+function run(response, fn, success, error, data) {
   return fn()
-    .then((result) => {
-      response.status(200).send(success ? success(result) : result);
-    })
+    .then((result) =>
+      response
+        .status(200)
+        .send(data ? data : success ? success(result) : result)
+    )
     .catch((err) => {
       console.error(err);
       return response.status(500).send(error ? error(err) : err);

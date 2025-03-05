@@ -50,6 +50,7 @@ function applyConditions(query, conditions) {
 }
 
 export async function getDoc(path, whereArgs) {
+  console.log("whereArgs", whereArgs);
   const [collectionPath, docName] = getCollectionPathAndDocId(path);
   let ref = db().collection(collectionPath);
 

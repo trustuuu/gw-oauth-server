@@ -125,3 +125,28 @@ const server = app.listen(port || 8080, hostheader, () => {
     port
   );
 });
+
+/*
+const cookieParser = require('cookie-parser');
+const crypto = require('crypto');
+
+app.use(cookieParser()); // 쿠키 파서 미들웨어 사용
+
+// XSRF-TOKEN 생성 함수
+const generateXsrfToken = () => {
+  return crypto.randomBytes(32).toString('hex'); // 32바이트 길이의 랜덤 토큰 생성
+};
+
+// 클라이언트에게 XSRF-TOKEN을 쿠키로 설정하는 미들웨어
+app.use((req, res, next) => {
+  if (!req.cookies['XSRF-TOKEN']) {
+    const token = generateXsrfToken();
+    res.cookie('XSRF-TOKEN', token, {
+      httpOnly: false, // 클라이언트에서 접근 가능하도록 설정 (JS에서 읽을 수 있도록)
+      secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 사용
+      sameSite: 'Strict', // CSRF 공격 방지 위해 SameSite 정책 설정
+    });
+  }
+  next();
+});
+*/

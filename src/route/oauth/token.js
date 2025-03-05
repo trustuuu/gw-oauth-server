@@ -79,7 +79,7 @@ async function token(req, res, routerAuth) {
       date.getUTCSeconds()
     );
     const expires_in = Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
-
+    console.log("token2", now_utc, api, api[0].tokenExpiration);
     const access_token = generateAccessToken(
       "http://oauth.unidir.igoodworks.com/",
       client.client_name,
@@ -135,7 +135,7 @@ async function token(req, res, routerAuth) {
         );
         const expires_in =
           Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
-
+        console.log("token2", now_utc, api, api[0].tokenExpiration);
         const access_token = generateAccessToken(
           "http://oauth.unidir.igoodworks.com/",
           client.client_name,

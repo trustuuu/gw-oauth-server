@@ -10,6 +10,7 @@ async function approve(req, res, routerAuth) {
   const reqid = req.body.reqid;
   const query = routerAuth.locals.requests[reqid];
   delete routerAuth.locals.requests[reqid];
+
   if (!query) {
     // there was no matching saved request, this is an error
     res.render("error", { error: "No matching authorization request" });
@@ -45,6 +46,7 @@ async function approve(req, res, routerAuth) {
         whenCreated: new Date(),
         status: "issued",
       };
+
       await codeService.setData.apply(
         codeService,
         [data].concat([authId, code])
@@ -54,6 +56,7 @@ async function approve(req, res, routerAuth) {
         code: code,
         state: query.state,
       });
+
       res.redirect(urlParsed);
       return;
     } else {
