@@ -71,11 +71,16 @@ routerGroup.post(
       return res.status(409).send("Item exists");
     }
 
-    run(res, () =>
-      groupService.setData.apply(
-        groupService,
-        [data].concat([req.params.id, req.params.domainId, data.id])
-      )
+    run(
+      res,
+      () =>
+        groupService.setData.apply(
+          groupService,
+          [data].concat([req.params.id, req.params.domainId, data.id])
+        ),
+      undefined,
+      undefined,
+      data
     );
   }
 );
@@ -109,17 +114,22 @@ routerGroup.post(
         id: generateId(req.body.name),
         whenCreated: new Date(),
       };
-      run(res, () =>
-        groupService.setData.apply(
-          groupService,
-          [data].concat([
-            req.params.id,
-            req.params.domainId,
-            req.params.groupId,
-            memberPath,
-            data.id,
-          ])
-        )
+      run(
+        res,
+        () =>
+          groupService.setData.apply(
+            groupService,
+            [data].concat([
+              req.params.id,
+              req.params.domainId,
+              req.params.groupId,
+              memberPath,
+              data.id,
+            ])
+          ),
+        undefined,
+        undefined,
+        data
       );
     }
   }
@@ -219,10 +229,12 @@ routerGroup.delete(
 );
 
 // common functions
-function run(response, fn, success, error) {
+function run(response, fn, success, error, data) {
   return fn()
     .then((result) =>
-      response.status(200).send(success ? success(result) : result)
+      response
+        .status(200)
+        .send(data ? data : success ? success(result) : result)
     )
     .catch((err) => {
       console.error(err);

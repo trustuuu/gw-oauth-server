@@ -69,11 +69,16 @@ routerApplication.post(`/${appPath}/`, (req, res) => {
     client_id_created_at: new Date(),
     client_status: "New",
   };
-  run(res, () =>
-    applicationService.setData.apply(
-      applicationService,
-      [data].concat([appPath, data.client_id])
-    )
+  run(
+    res,
+    () =>
+      applicationService.setData.apply(
+        applicationService,
+        [data].concat([appPath, data.client_id])
+      ),
+    undefined,
+    undefined,
+    data
   );
 });
 
@@ -119,11 +124,13 @@ routerApplication.delete(`/${appPath}`, (req, res) => {
 });
 
 // common functions
-function run(response, fn, success, error) {
+function run(response, fn, success, error, data) {
   return fn()
-    .then((result) => {
-      response.status(200).send(success ? success(result) : result);
-    })
+    .then((result) =>
+      response
+        .status(200)
+        .send(data ? data : success ? success(result) : result)
+    )
     .catch((err) => {
       console.error(err);
       return response.status(500).send(error ? error(err) : err);

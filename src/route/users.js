@@ -120,7 +120,6 @@ routerUser.delete(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
 
 // common functions
 function run(response, fn, success, error, data) {
-  console.log("data", data);
   return fn()
     .then((result) =>
       response

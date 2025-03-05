@@ -30,11 +30,16 @@ routerDomain.post(`/:id/${DOMAIN_COLL}`, async (req, res) => {
   if (domain.name) {
     return res.status(409).send("Item exists");
   }
-  run(res, () =>
-    domainService.setData.apply(
-      domainService,
-      [data].concat([req.params.id, data.id])
-    )
+  run(
+    res,
+    () =>
+      domainService.setData.apply(
+        domainService,
+        [data].concat([req.params.id, data.id])
+      ),
+    undefined,
+    undefined,
+    data
   );
 });
 
@@ -85,10 +90,12 @@ routerDomain.delete(`/:id/${DOMAIN_COLL}`, (req, res) => {
 });
 
 // common functions
-function run(response, fn, success, error) {
+function run(response, fn, success, error, data) {
   return fn()
     .then((result) =>
-      response.status(200).send(success ? success(result) : result)
+      response
+        .status(200)
+        .send(data ? data : success ? success(result) : result)
     )
     .catch((err) => {
       console.error(err);

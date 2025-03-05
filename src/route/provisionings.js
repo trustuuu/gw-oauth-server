@@ -38,11 +38,16 @@ routerProvisioning.post(`/:id/${PROVISIONING_COLL}`, async (req, res) => {
     return res.status(409).send("Item exists");
   }
 
-  run(res, () =>
-    provisioningService.setData.apply(
-      provisioningService,
-      [data].concat([req.params.id, data.id])
-    )
+  run(
+    res,
+    () =>
+      provisioningService.setData.apply(
+        provisioningService,
+        [data].concat([req.params.id, data.id])
+      ),
+    undefined,
+    undefined,
+    data
   );
 });
 
@@ -73,10 +78,12 @@ routerProvisioning.delete(
 );
 
 // common functions
-function run(response, fn, success, error) {
+function run(response, fn, success, error, data) {
   return fn()
     .then((result) =>
-      response.status(200).send(success ? success(result) : result)
+      response
+        .status(200)
+        .send(data ? data : success ? success(result) : result)
     )
     .catch((err) => {
       console.error(err);

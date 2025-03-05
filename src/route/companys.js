@@ -34,8 +34,13 @@ routerCompany.post("/", async (req, res) => {
     return res.status(409).send("Item exists");
   }
 
-  run(res, () =>
-    companyService.setData.apply(companyService, [data].concat([data.id]))
+  run(
+    res,
+    () =>
+      companyService.setData.apply(companyService, [data].concat([data.id])),
+    undefined,
+    undefined,
+    data
   );
 });
 
@@ -69,11 +74,13 @@ routerCompany.delete(`/`, (req, res) => {
 });
 
 // common functions
-function run(response, fn, success, error) {
+function run(response, fn, success, error, data) {
   return fn()
-    .then((result) => {
-      response.status(200).send(success ? success(result) : result);
-    })
+    .then((result) =>
+      response
+        .status(200)
+        .send(data ? data : success ? success(result) : result)
+    )
     .catch((err) => {
       console.error(err);
       return response.status(500).send(error ? error(err) : err);
