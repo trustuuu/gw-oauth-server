@@ -98,7 +98,6 @@ routerUser.put(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
 routerUser.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId`,
   (req, res) => {
-    const data = {};
     run(res, () =>
       userService.deleteData.apply(
         userService,

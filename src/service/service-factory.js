@@ -4,6 +4,7 @@ import {
   geChildtDoc,
   getCollectionCount,
   setDoc,
+  addDoc,
   updateDoc,
   deleteDoc,
 } from "../firebase/firebase-service.js";

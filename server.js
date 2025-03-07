@@ -1,4 +1,7 @@
 import express from "express";
+// import { createRequire } from "module";
+// const require = createRequire(import.meta.url);
+
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -26,9 +29,9 @@ import { COMPANY_COLL } from "./src/service/remote-path-service.js";
 const isProduction = process.env.NODE_ENV === "production";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const oauth_server_path = path.join(__dirname, "./oauth-server/public");
+const oauth_server_path = path.join(__dirname, "./src/oauth-server");
 
-const app = express();
+export const app = express();
 
 const Guard = guard({
   requestProperty: "auth",
@@ -48,29 +51,29 @@ const jwtCheck = expressjwt({
   algorithms: ["RS256"],
 });
 
-const jwtCheckService = expressjwt({
-  secret: jwks.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri:
-      "https://gw-oauth-server-hcf3ceajdpg2gcbg.canadacentral-01.azurewebsites.net/jwks.json",
-  }),
-  audience: "http://service.unidir.api.igoodworks.com/",
-  issuer: "http://service.oauth.unidir.igoodworks.com/",
-  algorithms: ["RS256"],
-});
+// const jwtCheckService = expressjwt({
+//   secret: jwks.expressJwtSecret({
+//     cache: true,
+//     rateLimit: true,
+//     jwksRequestsPerMinute: 5,
+//     jwksUri:
+//       "https://gw-oauth-server-hcf3ceajdpg2gcbg.canadacentral-01.azurewebsites.net/jwks.json",
+//   }),
+//   audience: "http://service.unidir.api.igoodworks.com/",
+//   issuer: "http://service.oauth.unidir.igoodworks.com/",
+//   algorithms: ["RS256"],
+// });
 
 if (isProduction) {
   console.log("production");
   app.use(compression());
 }
 
-const corsOptions = {
-  origin: "http://localhost:3000",
-  credentials: true, //access-control-allow-credentials:true
-  optionSuccessStatus: 200,
-};
+// const corsOptions = {
+//   origin: "http://localhost:3000",
+//   credentials: true, //access-control-allow-credentials:true
+//   optionSuccessStatus: 200,
+// };
 app.use(cors());
 app.use(logger("dev"));
 

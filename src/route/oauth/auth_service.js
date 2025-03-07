@@ -2,10 +2,8 @@ import userService from "../../service/user-service.js";
 import applicationService from "../../service/application-service.js";
 import authService from "../../service/authorization-service.js";
 
-let requests = {};
 const authId = "authorization";
 const appId = "application";
-const apiId = "api";
 
 export const authData = async () => {
   return await authService.getData(authId);

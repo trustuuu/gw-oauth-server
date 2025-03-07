@@ -14,21 +14,30 @@ async function token(req, res, routerAuth) {
   const apiId = "api";
 
   const auth = req.headers["authorization"];
+  let clientId = "";
+  let clientSecret = "";
   if (auth) {
     // check the auth header
     const clientCredentials = decodeClientCredentials(auth);
-    var { id: clientId, secret: clientSecret } = clientCredentials;
+    //let { id: clientId, secret: clientSecret } = clientCredentials;
+    clientId = clientCredentials.id;
+    clientSecret = clientCredentials.secret;
   }
 
   // otherwise, check the post body
   if (req.body.client_id) {
     if (clientId) {
       // if we've already seen the client's credentials in the authorization header, this is an error
-      console.log("Client attempted to authenticate with multiple methods");
+      console.log(
+        "Client attempted to authenticate with multiple methods",
+        routerAuth
+      );
       res.status(401).json({ error: "invalid_client" });
       return;
     }
-    var { client_id: clientId, client_secret: clientSecret } = req.body;
+    clientId = req.body.client_id;
+    clientSecret = req.body.client_secret;
+    //var { client_id: clientId, client_secret: clientSecret } = req.body;
   }
 
   const client = await getClient(clientId);
@@ -186,19 +195,19 @@ async function token(req, res, routerAuth) {
       if (token.client_id != clientId) {
         tokenService.deleteData.apply(
           tokenService,
-          [data].concat([authId, req.body.refresh_token])
+          [{}].concat([authId, req.body.refresh_token])
         );
         //nosql.remove().make(function(builder) { builder.where('refresh_token', req.body.refresh_token); });
         res.status(400).json({ error: "invalid_grant" });
         return;
       }
       const access_token = randomstring.generate();
-      token_data = {
-        access_token: access_token,
-        client_id: clientId,
-        whenCreated: new Date(),
-        type: "access_token",
-      };
+      // token_data = {
+      //   access_token: access_token,
+      //   client_id: clientId,
+      //   whenCreated: new Date(),
+      //   type: "access_token",
+      // };
 
       const token_response = {
         access_token: access_token,

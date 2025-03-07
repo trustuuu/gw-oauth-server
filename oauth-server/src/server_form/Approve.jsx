@@ -18,7 +18,7 @@ export default function Approve() {
       );
       setDecryptJson(JSON.parse(decryptString));
     })();
-  }, []);
+  }, [data]);
 
   const handleChange = () => {
     setIsAgree(!isAgree);

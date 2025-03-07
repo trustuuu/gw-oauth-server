@@ -17,7 +17,7 @@ export default function Login() {
       );
       setDecryptJson(JSON.parse(decryptString));
     })();
-  }, []);
+  }, [data]);
 
   return (
     <div className="h-screen flex flex-col gap-2 w-md max-w-xl mx-auto *:text-neutral-800 dark:*:text-white m-10">

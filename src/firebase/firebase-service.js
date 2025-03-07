@@ -29,25 +29,25 @@ export function getAuthUser() {
   return auth().currentUser;
 }
 
-function isMultiDimensionalArray(arr) {
-  // Check if the variable is an array
-  if (Array.isArray(arr)) {
-    // Check if any element of the array is also an array
-    return arr.some((item) => Array.isArray(item));
-  }
-  return false; // Not an array
-}
+// function isMultiDimensionalArray(arr) {
+//   // Check if the variable is an array
+//   if (Array.isArray(arr)) {
+//     // Check if any element of the array is also an array
+//     return arr.some((item) => Array.isArray(item));
+//   }
+//   return false; // Not an array
+// }
 
-function applyConditions(query, conditions) {
-  if (isMultiDimensionalArray(conditions)) {
-    conditions.forEach(
-      (condition) => (query = query.where.apply(query, condition))
-    );
-  } else {
-    query = query.where.apply(query, conditions);
-  }
-  return query;
-}
+// function applyConditions(query, conditions) {
+//   if (isMultiDimensionalArray(conditions)) {
+//     conditions.forEach(
+//       (condition) => (query = query.where.apply(query, condition))
+//     );
+//   } else {
+//     query = query.where.apply(query, conditions);
+//   }
+//   return query;
+// }
 
 export async function getDoc(path, whereArgs) {
   const [collectionPath, docName] = getCollectionPathAndDocId(path);

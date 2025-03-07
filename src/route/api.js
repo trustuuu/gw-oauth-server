@@ -122,7 +122,6 @@ routerApi.delete(`/${apiPath}/:id`, (req, res) => {
 });
 
 routerApi.delete(`/${apiPath}/:id/PermissionScopes/:scopeId`, (req, res) => {
-  const data = {};
   run(res, () =>
     apiService.deleteData.apply(
       apiService,

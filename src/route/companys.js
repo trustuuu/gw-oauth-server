@@ -1,10 +1,7 @@
 import express from "express";
-import { expressjwt } from "express-jwt";
-import guard from "express-jwt-permissions";
 import companyService from "../service/company-service.js";
 import { generateId } from "../service/remote-path-service.js";
 
-const Guard = guard();
 const routerCompany = express.Router();
 export default routerCompany;
 

@@ -34,7 +34,7 @@ export const buildUrl = (base, options, hash) => {
 	if (!newUrl.query) {
 		newUrl.query = {};
 	}
-	__.each(options, function(value, key, list) {
+	__.each(options, function(value, key) {
 		newUrl.query[key] = value;
 	});
 	if (hash) {
