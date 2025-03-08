@@ -2,7 +2,7 @@
   "name": "gw-oauth-server",
   "version": "1.0.0",
   "description": "",
-  "main": "public/server.js",
+  "main": "server.js",
   "type": "module",
   "private": true,
   "scripts": {
