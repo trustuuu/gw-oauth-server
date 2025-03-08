@@ -1,4 +1,5 @@
 import express from "express";
+//const { default: express } = await import("express");
 import companyService from "../service/company-service.js";
 import { generateId } from "../service/remote-path-service.js";
 

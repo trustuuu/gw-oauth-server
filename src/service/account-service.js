@@ -1,4 +1,5 @@
 import * as R from "ramda";
+//const { default: R } = await import("ramda");
 import { accountPath } from "./remote-path-service.js";
 import { getDoc } from "../firebase/firebase-service.js";
 

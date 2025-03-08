@@ -1,4 +1,5 @@
 import express from "express";
+//const { default: express } = await import("express");
 import userService from "../service/user-service.js";
 import {
   DOMAIN_COLL,

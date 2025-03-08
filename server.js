@@ -1,7 +1,4 @@
 import express from "express";
-// import { createRequire } from "module";
-// const require = createRequire(import.meta.url);
-
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -14,6 +11,11 @@ import guard from "express-jwt-permissions";
 import jwks from "jwks-rsa";
 import compression from "compression";
 import dotenv from "dotenv";
+
+// import { createRequire } from "module";
+// const require = createRequire(import.meta.url); // Create a require function
+// const cors = require("cors");
+
 dotenv.config(); //{ path: ".env.development" });
 
 import routerConnection from "./src/route/connections.js";
@@ -29,9 +31,9 @@ import { COMPANY_COLL } from "./src/service/remote-path-service.js";
 const isProduction = process.env.NODE_ENV === "production";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const oauth_server_path = path.join(__dirname, "./src/oauth-server");
+const oauth_server_path = path.join(__dirname, "./public/oauth-server");
 
-export const app = express();
+const app = express();
 
 const Guard = guard({
   requestProperty: "auth",

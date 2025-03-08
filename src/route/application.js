@@ -1,4 +1,5 @@
 import express from "express";
+//const { default: express } = await import("express");
 import applicationService from "../service/application-service.js";
 
 const routerApplication = express.Router();

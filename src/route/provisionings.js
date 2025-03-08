@@ -1,4 +1,5 @@
 import express from "express";
+//const { default: express } = await import("express");
 import provisioningService from "../service/provisioning-service.js";
 import {
   PROVISIONING_COLL,

@@ -3,8 +3,8 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import admin from "firebase-admin";
 import "firebase/functions";
-import serviceAccount from "./firebase-account.js";
 import md5 from "blueimp-md5";
+import serviceAccount from "./firebase-account.js";
 
 export function init() {
   firebase.initializeApp({

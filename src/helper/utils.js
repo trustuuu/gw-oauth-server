@@ -5,6 +5,7 @@ import querystring from 'querystring';
 import * as __ from 'underscore';
 import __string from 'underscore.string';
 
+
 import rsaKey from '../route/rsaKey.json' with { type: "json" };
 
 export const generateAccessToken = (iss, sub, aud, iat, exp, permissions) => {

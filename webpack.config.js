@@ -3,7 +3,7 @@ import webpackNodeExternals from "webpack-node-externals";
 
 export default {
   mode: "production",
-  entry: ["./server.js", "index.html"],
+  entry: ["./server.js"],
   output: {
     filename: "server.js",
     path: path.resolve("public"),
@@ -16,7 +16,12 @@ export default {
   },
   resolve: {
     extensions: [".js", ".json", ".mjs"], // To support JS, JSON, and modules
-    modules: [resolve("./src"), "node_modules", "./src/oauth-server"],
+    modules: [
+      resolve("./src"),
+      "server.js",
+      "node_modules",
+      "./src/oauth-server",
+    ],
     //fallback: { url: url },
   },
   externals: [

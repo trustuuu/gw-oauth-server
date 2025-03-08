@@ -1,5 +1,6 @@
-import * as R from "ramda";
 import { Blob } from "buffer";
+import * as R from "ramda";
+//const { default: R } = await import("ramda");
 
 export const AUTH_COLL = "Auth2";
 export const API_COLL = "registers";
