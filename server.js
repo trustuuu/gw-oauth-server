@@ -1,3 +1,6 @@
+// import { createRequire } from "module";
+// const require = createRequire(import.meta.url); // Create a require function
+// const cors = require("cors");
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -11,12 +14,7 @@ import guard from "express-jwt-permissions";
 import jwks from "jwks-rsa";
 import compression from "compression";
 import dotenv from "dotenv";
-
-// import { createRequire } from "module";
-// const require = createRequire(import.meta.url); // Create a require function
-// const cors = require("cors");
-
-dotenv.config(); //{ path: ".env.development" });
+dotenv.config();
 
 import routerConnection from "./src/route/connections.js";
 import routerDomain from "./src/route/domains.js";
@@ -132,11 +130,6 @@ const server = app.listen(port || 8080, hostheader, () => {
 });
 
 /*
-const cookieParser = require('cookie-parser');
-const crypto = require('crypto');
-
-app.use(cookieParser()); // 쿠키 파서 미들웨어 사용
-
 // XSRF-TOKEN 생성 함수
 const generateXsrfToken = () => {
   return crypto.randomBytes(32).toString('hex'); // 32바이트 길이의 랜덤 토큰 생성
