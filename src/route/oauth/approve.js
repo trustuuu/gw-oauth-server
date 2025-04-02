@@ -2,6 +2,7 @@ import * as R from "ramda";
 //const { default: R } = await import("ramda");
 import { getClient, getUser } from "./auth_service.js";
 import codeService from "../../service/code-service.js";
+import reqIdService from "../../service/reqid-service.js";
 
 import { buildUrl, getScopesFromForm } from "../../helper/utils.js";
 import randomstring from "randomstring";
@@ -9,8 +10,13 @@ import randomstring from "randomstring";
 async function approve(req, res, routerAuth) {
   const authId = "authorization";
   const reqid = req.body.reqid;
-  const query = routerAuth.locals.requests[reqid];
+  //const query = routerAuth.locals.requests[reqid];
   delete routerAuth.locals.requests[reqid];
+  const query = await reqIdService.getData(authId, reqid);
+  await reqIdService.deleteData.apply(
+    reqIdService,
+    [{}].concat([authId, reqid])
+  );
 
   if (!query) {
     // there was no matching saved request, this is an error

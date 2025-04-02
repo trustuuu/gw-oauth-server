@@ -6,6 +6,7 @@ export const AUTH_COLL = "Auth2";
 export const API_COLL = "registers";
 export const APPLICATION_COLL = "registers";
 export const CODE_COLL = "codes";
+export const REQID_COLL = "reqids";
 export const TOKEN_COLL = "tokens";
 
 export const COMPANY_COLL = "companys";
@@ -60,6 +61,9 @@ export const applicationPath = (authId, appId) =>
   concat(authPath(authId), APPLICATION_COLL, appId);
 export const authCodePath = (authId, codeId) =>
   concat(authPath(authId), CODE_COLL, codeId);
+export const authReqIdPath = (authId, reqId) =>
+  concat(authPath(authId), REQID_COLL, reqId);
+
 export const tokenPath = (authId, token) =>
   concat(authPath(authId), TOKEN_COLL, token);
 
