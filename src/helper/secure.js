@@ -84,3 +84,11 @@ export async function buildQueryUrl(baseUrl, params) {
 
   return `${baseUrl}?d=${encripedParams.cipherText}&i=${encripedParams.iv}&s=${encripedParams.salt}`;
 }
+
+export function parseQuery(encrypedParams) {
+  return {
+    cipherText: encrypedParams.d,
+    iv: encrypedParams.i,
+    salt: encrypedParams.s,
+  };
+}

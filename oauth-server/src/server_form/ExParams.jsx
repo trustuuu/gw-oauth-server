@@ -73,10 +73,10 @@ export async function decryptText(encryptedData, password) {
   return decoder.decode(decrypted);
 }
 
-export function parseQuery(encripedParams) {
+export function parseQuery(encrypedParams) {
   return {
-    cipherText: encripedParams.get("d"),
-    iv: encripedParams.get("i"),
-    salt: encripedParams.get("s"),
+    cipherText: encrypedParams.get("d"),
+    iv: encrypedParams.get("i"),
+    salt: encrypedParams.get("s"),
   };
 }
