@@ -1,10 +1,22 @@
 import express from "express";
-//const { default: express } = await import("express");
 import companyService from "../service/company-service.js";
-import { generateId } from "../service/remote-path-service.js";
 
 const routerCompany = express.Router();
 export default routerCompany;
+
+// routerCompany.get(`/`,  Guard.check(["profile:view"]), Guard.roles(["Admin", "SuperUser"]), (req, res) => {
+//   run(res, () => companyService.getData(req.params.id));
+// });
+
+//OR
+// routerCompany.get(`/`,  Guard.check(["profile:view"],["profile:admin"]), (req, res) => {
+//   run(res, () => companyService.getData(req.params.id));
+// });
+
+//And
+// routerCompany.get(`/`,  Guard.check(["profile:view", "profile:admin"]), (req, res) => {
+//   run(res, () => companyService.getData(req.params.id));
+// });
 
 routerCompany.get(`/`, (req, res) => {
   run(res, () => companyService.getData(req.params.id));
@@ -21,13 +33,13 @@ routerCompany.get(`/:id/childCompanys`, (req, res) => {
 routerCompany.post("/", async (req, res) => {
   const data = {
     ...req.body,
-    id: generateId(req.body.name),
+    id: req.body.name,
     whenCreated: new Date(),
     status: "New",
   };
 
-  const company = await companyService.getData(data.id);
-  if (company.name) {
+  const company = await companyService.getCompanyByName(data.name);
+  if (company.length > 0) {
     console.log("company exist", company);
     return res.status(409).send("Item exists");
   }

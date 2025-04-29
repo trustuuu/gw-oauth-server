@@ -52,7 +52,6 @@ export function getAuthUser() {
 export async function getDoc(path, whereArgs) {
   const [collectionPath, docName] = getCollectionPathAndDocId(path);
   let ref = db().collection(collectionPath);
-
   if (docName) {
     return ref.doc(docName).get().then(toObject);
   }
@@ -73,7 +72,45 @@ export async function getDoc(path, whereArgs) {
   return res.docs.map(toObject);
 }
 
-export function getDocRef(path) {
+function extractCompanyAndDomain(path) {
+  const segments = path.split("/");
+
+  const companyIdIndex = segments.indexOf("companys") + 1;
+  const domainIdIndex = segments.indexOf("domainNames") + 1;
+
+  const companyId = segments[companyIdIndex];
+  const domainId = segments[domainIdIndex];
+
+  return { companyId, domainId };
+}
+
+export async function getUserFromRef(email) {
+  if (email) {
+    const userRef = await getDoc(`accounts/${email}`);
+    if ("ref" in userRef) {
+      const parent = extractCompanyAndDomain(userRef.ref.path);
+      return { ...toObject(await userRef.ref.get()), ...parent };
+    } else {
+      return null;
+    }
+  }
+}
+
+export async function addUserToAuth(path) {
+  if (path) {
+    const userRef = getDocByPath(path);
+    const user = await userRef.get();
+    if ("email" in user.data()) {
+      return await setDoc(`accounts/${user.data().email}`, {
+        ref: userRef,
+      });
+    } else {
+      return null;
+    }
+  }
+}
+
+export function getDocByPath(path) {
   return db().doc(path);
 }
 
@@ -127,7 +164,6 @@ export function recursiveDeleteDoc(path) {
 
 export function deleteDoc(path, id) {
   const arr = path.split("/");
-
   if ((!id || R.isEmpty(id)) && isEven(arr.length)) {
     path = R.init(arr).join("/");
     id = R.last(arr);
@@ -157,6 +193,14 @@ function getUid() {
 function isEven(num) {
   return num % 2 === 0;
 }
+
+// function toObject(fbReturn) {
+//   if (!fbReturn.exists) {
+//     console.log("no exist");
+//     return null;
+//   }
+//   return { id: fbReturn.id, ...fbReturn.data() };
+// }
 
 function toObject(fbReturn) {
   return { id: fbReturn.id, ...fbReturn.data() };

@@ -6,12 +6,12 @@ import {
   USER_COLL,
   generateId,
 } from "../service/remote-path-service.js";
+import md5 from "blueimp-md5";
 
 const routerUser = express.Router();
 export default routerUser;
 
 routerUser.get(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
-  console.log("req.query", req.query);
   if (req.query.condition) {
     run(res, () =>
       userService.getUsersWhere(
@@ -34,24 +34,44 @@ routerUser.get(
   }
 );
 
+routerUser.get(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/PermissionScopes`,
+  (req, res) => {
+    run(res, () =>
+      userService.getUserPermissionScopes(
+        req.params.id,
+        req.params.domainId,
+        req.params.userId
+      )
+    );
+  }
+);
+
 routerUser.post(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`,
   async (req, res) => {
     const data = {
       ...req.body,
       id: generateId(req.body.username),
+      authVerification: md5(req.body.authVerification),
       whenCreated: new Date(),
       status: "new",
     };
 
-    const user = await userService.getData(
+    const user = await userService.getUserByEmail(
       req.params.id,
       req.params.domainId,
-      data.id
+      data.email
     );
-    if (user.name) {
+    if (user.length > 0) {
       console.log("user exist", user);
       return res.status(409).send("Item exists");
+    }
+
+    let postFn = null;
+    if ("root" in data) {
+      postFn = () =>
+        userService.createAuthUser(req.params.id, req.params.domainId, data.id);
     }
 
     run(
@@ -63,8 +83,50 @@ routerUser.post(
         ),
       undefined,
       undefined,
-      data
+      data,
+      postFn
     );
+  }
+);
+
+routerUser.post(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/PermissionScopes`,
+  async (req, res) => {
+    if (Array.isArray(req.body)) {
+      const data = [...req.body];
+      const allAdds = data.map((data) => {
+        return userService.setData.apply(
+          userService,
+          [data].concat([
+            req.params.id,
+            req.params.domainId,
+            req.params.userId,
+            "PermissionScopes",
+            data.id,
+          ])
+        );
+      });
+      run(res, () => Promise.all(allAdds));
+    } else {
+      const data = req.body;
+      run(
+        res,
+        () =>
+          userService.setData.apply(
+            userService,
+            [data].concat([
+              req.params.id,
+              req.params.domainId,
+              req.params.userId,
+              "PermissionScopes",
+              data.id,
+            ])
+          ),
+        undefined,
+        undefined,
+        data
+      );
+    }
   }
 );
 
@@ -96,6 +158,24 @@ routerUser.put(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
   run(res, () => Promise.all(allUpdates));
 });
 
+routerUser.put(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/PermissionScopes/:scopeId`,
+  (req, res) => {
+    const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
+    run(res, () =>
+      userService.updateData.apply(
+        userService,
+        [data].concat([
+          req.params.id,
+          req.params.domainId,
+          req.params.userId,
+          req.params.scopeId,
+        ])
+      )
+    );
+  }
+);
+
 routerUser.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId`,
   (req, res) => {
@@ -119,14 +199,55 @@ routerUser.delete(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
   run(res, () => Promise.all(allDeletes));
 });
 
+routerUser.delete(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/PermissionScopes/:scopeId`,
+  (req, res) => {
+    run(res, () =>
+      userService.deleteData.apply(
+        userService,
+        [null].concat([
+          req.params.id,
+          req.params.domainId,
+          req.params.userId,
+          "PermissionScopes",
+          req.params.scopeId,
+        ])
+      )
+    );
+  }
+);
+
+routerUser.delete(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/PermissionScopes`,
+  (req, res) => {
+    const data = [...req.body];
+    const allDeletes = data.map((item) => {
+      return userService.deleteData.apply(
+        userService,
+        [null].concat([
+          req.params.id,
+          req.params.domainId,
+          req.params.userId,
+          "PermissionScopes",
+          item.id,
+        ])
+      );
+    });
+    run(res, () => Promise.all(allDeletes));
+  }
+);
+
 // common functions
-function run(response, fn, success, error, data) {
+function run(response, fn, success, error, data, postFn) {
   return fn()
-    .then((result) =>
+    .then((result) => {
+      if (postFn) {
+        postFn();
+      }
       response
         .status(200)
-        .send(data ? data : success ? success(result) : result)
-    )
+        .send(data ? data : success ? success(result) : result);
+    })
     .catch((err) => {
       console.error(err);
       return response.status(500).send(error ? error(err) : err);

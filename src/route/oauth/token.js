@@ -3,11 +3,16 @@ import * as R from "ramda";
 import {
   decodeClientCredentials,
   generateAccessToken,
+  generateCodeChallenge,
+  generateIdToken,
+  verifyCodeChallenge,
+  //getJwtExpire,
 } from "../../helper/utils.js";
 import { getClient } from "./auth_service.js";
 import apiService from "../../service/api-service.js";
 import tokenService from "../../service/token-service.js";
 import codeService from "../../service/code-service.js";
+import userService from "../../service/user-service.js";
 import randomstring from "randomstring";
 
 async function token(req, res, routerAuth) {
@@ -24,7 +29,6 @@ async function token(req, res, routerAuth) {
     clientId = clientCredentials.id;
     clientSecret = clientCredentials.secret;
   }
-
   // otherwise, check the post body
   if (req.body.client_id) {
     if (clientId) {
@@ -67,7 +71,6 @@ async function token(req, res, routerAuth) {
     res.status(401).json({ error: "invalid_client_grant_type" });
     return;
   }
-
   if (req.body.grant_type == "client_credentials") {
     const api = await apiService.getApiByIdentifier(apiId, client.audience);
     if (api.length < 1) {
@@ -89,15 +92,23 @@ async function token(req, res, routerAuth) {
       date.getUTCSeconds()
     );
     const expires_in = Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
-    console.log("token2", now_utc, api, api[0].tokenExpiration);
+    console.log("api", api);
     const access_token = generateAccessToken(
-      "http://oauth.unidir.igoodworks.com/",
+      api[0].issuer, //process.env.OAUTH_ISSUER,
       client.client_name,
       api[0].identifier,
       Math.floor(now_utc / 1000),
       expires_in,
-      client.scope
+      client.scope,
+      ["admins", "support"]
     );
+
+    // const id_token = generateIdToken(
+    //   process.env.OAUTH_ISSUER,
+    //   code.user,
+    //   clientId
+    // );
+
     //console.log("client_credentials Issuing access token %s", access_token);
     const tokenClient = {
       client_id: clientId,
@@ -145,23 +156,49 @@ async function token(req, res, routerAuth) {
         );
         const expires_in =
           Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
-        console.log("token2", now_utc, api, api[0].tokenExpiration);
+
+        if (
+          !verifyCodeChallenge(
+            req.body.code_verifier,
+            code.request.code_challenge
+          )
+        ) {
+          return res.status(400).send("Invalid code_verifier");
+        }
+        console.log("authorization_code api", api, code.user);
+        const userPermissionRaw = await userService.getUserPermissionScopes(
+          code.user.companyId,
+          code.user.domainId,
+          code.user.id
+        );
+        const userPermissions = userPermissionRaw.map((p) => {
+          return { id: p.id.split("#")[0], permission: p.permission };
+        });
+        console.log("userPermission", userPermissionRaw, userPermissions);
         const access_token = generateAccessToken(
-          "http://oauth.unidir.igoodworks.com/",
+          api[0].issuer, //process.env.OAUTH_ISSUER,
           client.client_name,
           api[0].identifier,
           Math.floor(now_utc / 1000),
           expires_in,
-          client.scope
+          client.scope,
+          ["admins", "support"]
         );
-        //console.log("Issuing access token %s", access_token);
+
+        const id_token = generateIdToken(
+          api[0].issuer, //process.env.OAUTH_ISSUER,
+          code.user,
+          clientId
+        );
         const tokenClient = {
           client_id: clientId,
-          companyId: client.companyId,
-          domain: client.domain,
+          companyId: code.user.companyId,
+          domain: code.user.domainId,
         };
+
         const token_response = {
           access_token: access_token,
+          id_token: id_token,
           expires_in: expires_in,
           client: tokenClient,
           scope: code.scope,

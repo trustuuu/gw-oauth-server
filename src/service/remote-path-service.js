@@ -35,8 +35,20 @@ export const groupPath = (companyId, domainId, groupId, memberPath, memberId) =>
     memberPath,
     memberId
   );
-export const userPath = (companyId, domainId, userId) =>
-  concat(domainPath(companyId, domainId), USER_COLL, userId);
+export const userPath = (
+  companyId,
+  domainId,
+  userId,
+  permissionScopes,
+  permissionScopeId
+) =>
+  concat(
+    domainPath(companyId, domainId),
+    USER_COLL,
+    userId,
+    permissionScopes,
+    permissionScopeId
+  );
 export const provisioningPath = (companyId, provisioningId) =>
   concat(companyPath(companyId), PROVISIONING_COLL, provisioningId);
 

@@ -7,18 +7,17 @@ export default function Approve() {
   const [searchParams] = useSearchParams();
   const [decryptJson, setDecryptJson] = useState({});
   const data = parseQuery(searchParams);
-  const { reqid, scope, client, email } = decryptJson;
+  const { reqid, scope, client, email, code_challenge, code_challenge_method } =
+    decryptJson;
   const [isAgree, setIsAgree] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const decryptString = await decryptText(
-        data,
-        import.meta.env.VITE_ENCRIPTION_PASSWORD
-      );
-      setDecryptJson(JSON.parse(decryptString));
-    })();
-  }, [data]);
+    decryptText(data, import.meta.env.VITE_ENCRIPTION_PASSWORD).then(
+      (response) => {
+        setDecryptJson(JSON.parse(response));
+      }
+    );
+  }, []);
 
   const handleChange = () => {
     setIsAgree(!isAgree);
@@ -60,7 +59,7 @@ export default function Approve() {
 
           <form
             className="w-md max-w-xl mx-auto"
-            action="oauth/approve"
+            action="oauth/v1/approve"
             method="POST"
           >
             <div className="flex items-start mb-5">
@@ -82,6 +81,13 @@ export default function Approve() {
             </div>
             <input type="hidden" name="reqid" value={reqid} />
             <input type="hidden" name="email" value={email} />
+            <input type="hidden" name="code_challenge" value={code_challenge} />
+
+            <input
+              type="hidden"
+              name="code_challenge_method"
+              value={code_challenge_method}
+            />
 
             <button
               disabled={!isAgree}

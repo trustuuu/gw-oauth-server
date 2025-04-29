@@ -108,7 +108,12 @@ routerApi.put(`/${apiPath}/:id/PermissionScopes/:scopeId`, (req, res) => {
   run(res, () =>
     apiService.updateData.apply(
       apiService,
-      [data].concat([apiPath, req.params.id, req.params.scopeId])
+      [data].concat([
+        apiPath,
+        req.params.id,
+        "PermissionScopes",
+        req.params.scopeId,
+      ])
     )
   );
 });
@@ -137,12 +142,12 @@ routerApi.delete(`/${apiPath}/:id/PermissionScopes/:scopeId`, (req, res) => {
   );
 });
 
-routerApi.delete(`/${apiPath}`, (req, res) => {
+routerApi.delete(`/${apiPath}/:id/PermissionScopes`, (req, res) => {
   const data = [...req.body];
   const allDeletes = data.map((item) => {
     return apiService.deleteData.apply(
       apiService,
-      [null].concat([apiPath, item.id])
+      [null].concat([apiPath, req.params.id, "PermissionScopes", item.id])
     );
   });
   run(res, () => Promise.all(allDeletes));
@@ -151,11 +156,12 @@ routerApi.delete(`/${apiPath}`, (req, res) => {
 // common functions
 function run(response, fn, success, error, data) {
   return fn()
-    .then((result) =>
+    .then((result) => {
+      if (response.headersSent) return;
       response
         .status(200)
-        .send(data ? data : success ? success(result) : result)
-    )
+        .send(data ? data : success ? success(result) : result);
+    })
     .catch((err) => {
       console.error(err);
       return response.status(500).send(error ? error(err) : err);

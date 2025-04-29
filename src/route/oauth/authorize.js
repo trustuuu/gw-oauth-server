@@ -1,6 +1,6 @@
 import * as R from "ramda";
 //const { default: R } = await import("ramda");
-import { getClient, verifyUser } from "./auth_service.js";
+import { getClient, verifyUser, getUserRef } from "./auth_service.js";
 import randomstring from "randomstring";
 import { buildUrl } from "../../helper/utils.js";
 import { buildQueryUrl, parseQuery, decryptText } from "../../helper/secure.js";
@@ -15,7 +15,6 @@ async function authorize(req, res, routerAuth) {
     process.env.ENCRIPTION_PASSWORD
   );
   const reqQuery = JSON.parse(decryptString);
-
   if (R.includes("openId", reqQuery.scope.split(" "))) {
     if (!reqQuery.email && !reqQuery.password) {
       const params = {
@@ -23,29 +22,36 @@ async function authorize(req, res, routerAuth) {
         redirect_uri: reqQuery.redirect_uri,
         scope: reqQuery.scope,
         state: reqQuery.state,
+        code_challenge: reqQuery.code_challenge,
+        code_challenge_method: reqQuery.code_challenge_method,
       };
-      const redirectURL = await buildQueryUrl("../login", params);
+
+      const redirectURL = await buildQueryUrl("../../login", params);
       res.redirect(redirectURL);
 
       return;
     } else {
       client = await getClient(reqQuery.client_id);
-
-      const isVerified = await verifyUser(
-        client.companyId,
-        client.domain,
-        reqQuery.email,
-        reqQuery.password
-      );
-
+      const user = await getUserRef(reqQuery.email);
+      let isVerified = false;
+      if (user) {
+        isVerified = await verifyUser(
+          user.companyId,
+          user.domainId,
+          reqQuery.email,
+          reqQuery.password
+        );
+      }
       if (!isVerified) {
         const params = {
           client_id: reqQuery.client_id,
           redirect_uri: reqQuery.redirect_uri,
           scope: reqQuery.scope,
           state: reqQuery.state,
+          code_challenge: reqQuery.code_challenge,
+          code_challenge_method: reqQuery.code_challenge_method,
         };
-        const redirectURL = await buildQueryUrl("../login", params);
+        const redirectURL = await buildQueryUrl("../../login", params);
         res.redirect(redirectURL);
 
         return;
@@ -92,8 +98,10 @@ async function authorize(req, res, routerAuth) {
       reqid: reqid,
       scope: rscope,
       email: reqQuery.email,
+      code_challenge: reqQuery.code_challenge,
+      code_challenge_method: reqQuery.code_challenge_method,
     };
-    const redirectURL = await buildQueryUrl("../approve", params);
+    const redirectURL = await buildQueryUrl("../../approve", params);
     res.redirect(redirectURL);
 
     return;

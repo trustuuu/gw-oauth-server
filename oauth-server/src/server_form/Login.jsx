@@ -2,12 +2,32 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { parseQuery, decryptText } from "./ExParams";
 import logo from "../assets/igw_logo.png";
+// import { generateCodeChallenge, generateCodeVerifier } from "./Utils";
 
 export default function Login() {
   const [searchParams] = useSearchParams();
   const [decryptJson, setDecryptJson] = useState({});
   const data = parseQuery(searchParams);
-  const { client_id, redirect_uri, scope, state } = decryptJson;
+  const {
+    client_id,
+    redirect_uri,
+    scope,
+    state,
+    code_challenge,
+    code_challenge_method,
+  } = decryptJson;
+  // const [codeChallenge, setCodeChallenge] = useState("");
+  // const [codeVerifier, setCodeVerifier] = useState("");
+
+  // const code_challenge_method = "sha256";
+  // const code_verifier = generateCodeVerifier();
+  // useEffect(() => {
+  //   setCodeVerifier(code_verifier);
+  //   sessionStorage.setItem("session", code_verifier);
+  //   generateCodeChallenge(code_verifier).then((response) => {
+  //     setCodeChallenge(response);
+  //   });
+  // }, []);
 
   useEffect(() => {
     (async () => {
@@ -17,7 +37,7 @@ export default function Login() {
       );
       setDecryptJson(JSON.parse(decryptString));
     })();
-  }, [data]);
+  }, []);
 
   return (
     <div className="h-screen flex flex-col gap-2 w-md max-w-xl mx-auto *:text-neutral-800 dark:*:text-white m-10">
@@ -30,7 +50,7 @@ export default function Login() {
       </div>
       <form
         className="w-md max-w-xl mx-auto "
-        action="oauth/login"
+        action="oauth/v1/login"
         method="POST"
       >
         <div className="mb-5">
@@ -84,6 +104,12 @@ export default function Login() {
         <input type="hidden" name="redirect_uri" value={redirect_uri} />
         <input type="hidden" name="scope" value={scope} />
         <input type="hidden" name="state" value={state} />
+        <input type="hidden" name="code_challenge" value={code_challenge} />
+        <input
+          type="hidden"
+          name="code_challenge_method"
+          value={code_challenge_method}
+        />
 
         <button
           type="submit"

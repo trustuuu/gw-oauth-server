@@ -6,6 +6,8 @@ import authorize from "./oauth/authorize.js";
 import login from "./oauth/login.js";
 import approve from "./oauth/approve.js";
 import token from "./oauth/token.js";
+import callback from "./oauth/callback.js";
+import getSession from "./oauth/session.js";
 
 const routerAuth = express.Router();
 export default routerAuth;
@@ -16,6 +18,8 @@ const authDataValue = await authData();
 const authServer = {
   authorizationEndpoint: authDataValue.authorizationEndpoint,
   tokenEndpoint: authDataValue.tokenEndpoint,
+  authorizationEndpointDev: authDataValue.authorizationEndpointDev,
+  tokenEndpointDev: authDataValue.tokenEndpointDev,
 };
 
 const requests = {};
@@ -38,4 +42,14 @@ routerAuth.post(
 routerAuth.post(
   "/token",
   async (req, res) => await token(req, res, routerAuth)
+);
+
+routerAuth.post(
+  "/callback",
+  async (req, res) => await callback(req, res, routerAuth)
+);
+
+routerAuth.post(
+  "/session",
+  async (req, res) => await getSession(req, res, routerAuth)
 );

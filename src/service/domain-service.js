@@ -6,9 +6,11 @@ const getDomainInfo = (companyId, domainId) =>
   getDoc(domainPath(companyId, domainId), null);
 const getPrimaryDomain = (companyId) =>
   getDoc(domainPath(companyId), ["primary", "==", true]);
-
+const getDomainByName = (companyId, domainName) =>
+  getDoc(domainPath(companyId), ["name", "==", domainName]);
 export default {
   ...createService(domainPath),
   getDomainInfo,
   getPrimaryDomain,
+  getDomainByName,
 };

@@ -1,6 +1,6 @@
 import * as R from "ramda";
 //const { default: R } = await import("ramda");
-import { getClient, getUser } from "./auth_service.js";
+import { getClient, getUserRef } from "./auth_service.js";
 import codeService from "../../service/code-service.js";
 import reqIdService from "../../service/reqid-service.js";
 
@@ -10,6 +10,7 @@ import randomstring from "randomstring";
 async function approve(req, res, routerAuth) {
   const authId = "authorization";
   const reqid = req.body.reqid;
+
   //const query = routerAuth.locals.requests[reqid];
   delete routerAuth.locals.requests[reqid];
   const query = await reqIdService.getData(authId, reqid);
@@ -30,11 +31,12 @@ async function approve(req, res, routerAuth) {
 
       const rscope = getScopesFromForm(req.body);
       const client = await getClient(query.client_id);
-      const user = await getUser(
-        client.companyId,
-        client.domain,
-        req.body.email
-      );
+      const user = await getUserRef(req.body.email);
+      // const user = await getUser(
+      //   client.companyId,
+      //   client.domain,
+      //   req.body.email
+      // );
 
       if (R.difference(rscope, client.scope).length > 0) {
         const urlParsed = buildUrl(query.redirect_uri, {
@@ -45,15 +47,15 @@ async function approve(req, res, routerAuth) {
       }
 
       const code = randomstring.generate(8);
-
       const data = {
-        request: query,
-        user: user,
+        request: { ...query, password: null },
+        user: { ...user, authVerification: null },
         scope: rscope,
+        code_challenge: req.body.code_challenge,
+        code_challenge_method: req.body.code_challenge_method,
         whenCreated: new Date(),
         status: "issued",
       };
-
       await codeService.setData.apply(
         codeService,
         [data].concat([authId, code])

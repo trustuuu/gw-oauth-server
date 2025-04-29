@@ -9,8 +9,31 @@ export const authData = async () => {
   return await authService.getData(authId);
 };
 
+export const getUserRef = async (email) => {
+  const user = await userService.getUserRef(email);
+  return user;
+};
+
+export const createAuthUser = async (companyId, domainId, userId) => {
+  await userService.createAuthUser(companyId, domainId, userId);
+};
+
 export const getUser = async (companyId, domainName, email) => {
   const users = await userService.getUserByEmail(companyId, domainName, email);
+  let user = null;
+  if (users.length == 1) {
+    user = users[0];
+  }
+
+  return user;
+};
+
+export const getUserById = async (companyId, domainName, userId) => {
+  const users = await userService.getUsersWhere(companyId, domainName, [
+    "id",
+    "==",
+    userId,
+  ]);
   let user = null;
   if (users.length == 1) {
     user = users[0];
@@ -36,4 +59,16 @@ export const getClient = async (clientId) => {
   if (appData.client_id == undefined) return null;
 
   return appData;
+};
+
+export const saveTokenToDB = async (data) => {
+  const { companyId, domainId, accessToken, userId, sessionId } = data;
+  await userService.updateData.apply(
+    userService,
+    [{ session: { sessionId, accessToken } }].concat([
+      companyId,
+      domainId,
+      userId,
+    ])
+  );
 };

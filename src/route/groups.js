@@ -94,7 +94,7 @@ routerGroup.post(
       const allAdds = data.map((itemTemp) => {
         const item = {
           ...itemTemp,
-          id: generateId(req.body.name),
+          id: generateId(itemTemp.id),
           whenCreated: new Date(),
         };
         return groupService.setData.apply(

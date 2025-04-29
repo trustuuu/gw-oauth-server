@@ -23,12 +23,12 @@ routerDomain.get(`/:id/${DOMAIN_COLL}`, (req, res) => {
 routerDomain.post(`/:id/${DOMAIN_COLL}`, async (req, res) => {
   const data = {
     ...req.body,
-    id: generateId(req.body.name),
+    id: req.body.name,
     whenCreated: new Date(),
     status: "New",
   };
-  const domain = await domainService.getDomainInfo(req.params.id, data.id);
-  if (domain.name) {
+  const domain = await domainService.getDomainByName(req.params.id, data.name);
+  if (domain.length > 0) {
     return res.status(409).send("Item exists");
   }
   run(

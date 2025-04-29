@@ -62,7 +62,6 @@ export async function encryptText(text, password) {
 export async function decryptText(encryptedData, password) {
   const { cipherText, iv, salt } = encryptedData;
   const key = await deriveKey(password, hexToArrayBuffer(salt));
-
   const decrypted = await crypto.subtle.decrypt(
     { name: "AES-GCM", iv: hexToArrayBuffer(iv) },
     key,
