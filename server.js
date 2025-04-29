@@ -125,7 +125,7 @@ try {
       saveUninitialized: true,
       cookie: {
         httpOnly: true,
-        secure: import.meta.env.COOKIE_SECURE,
+        secure: process.env.COOKIE_SECURE,
         sameSite: "lax",
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       },

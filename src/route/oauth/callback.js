@@ -13,7 +13,7 @@ async function callback(req, res, routerAuth) {
   //쿠키는 최소한의 정보만 설정 (예: 닉네임은 UI용으로 클라이언트에서 사용)
   res.cookie("user", JSON.stringify(user), {
     httpOnly: true,
-    secure: import.meta.env.COOKIE_SECURE,
+    secure: process.env.COOKIE_SECURE,
     sameSite: "lax",
     path: "/",
     maxAge: 24 * 60 * 60 * 1000,
