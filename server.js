@@ -38,20 +38,20 @@ const __dirname = path.dirname(__filename);
 const oauth_server_path = path.join(__dirname, "./public/oauth-server");
 
 const app = express();
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        connectSrc: ["*"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        objectSrc: ["'none'"],
-        formAction: ["*"], // ✅ 허용 추가
-      },
-    },
-  })
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"],
+//         connectSrc: ["*"],
+//         scriptSrc: ["'self'", "'unsafe-inline'"],
+//         styleSrc: ["'self'", "'unsafe-inline'"],
+//         objectSrc: ["'none'"],
+//         formAction: ["*"], // ✅ 허용 추가
+//       },
+//     },
+//   })
+// );
 
 // const Guard = guard({
 //   requestProperty: "auth",
