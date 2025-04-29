@@ -120,12 +120,12 @@ try {
   app.use(cookieParser()); // it should be before session
   app.use(
     session({
-      secret: "your-secret-key",
+      secret: "JesusfavorForiGoodWorksInc!",
       resave: false,
       saveUninitialized: true,
       cookie: {
         httpOnly: true,
-        secure: false,
+        secure: import.meta.env.COOKIE_SECURE,
         sameSite: "lax",
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       },
