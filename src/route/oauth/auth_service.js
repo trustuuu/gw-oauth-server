@@ -28,6 +28,26 @@ export const getUser = async (companyId, domainName, email) => {
   return user;
 };
 
+export const getUserAppRoles = async (
+  companyId,
+  domainName,
+  email,
+  condition
+) => {
+  const users = await userService.getUserAppRoles(
+    companyId,
+    domainName,
+    email,
+    condition
+  );
+  let user = null;
+  if (users.length == 1) {
+    user = users[0];
+  }
+
+  return user;
+};
+
 export const getUserById = async (companyId, domainName, userId) => {
   const users = await userService.getUsersWhere(companyId, domainName, [
     "id",

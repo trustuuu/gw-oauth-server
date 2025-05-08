@@ -1,6 +1,6 @@
 import express from "express";
 import companyService from "../service/company-service.js";
-
+import { GuardLeast } from "../../igwGuard.js";
 const routerCompany = express.Router();
 export default routerCompany;
 
@@ -18,70 +18,110 @@ export default routerCompany;
 //   run(res, () => companyService.getData(req.params.id));
 // });
 
-routerCompany.get(`/`, (req, res) => {
-  run(res, () => companyService.getData(req.params.id));
-});
-
-routerCompany.get(`/:id`, (req, res) => {
-  run(res, () => companyService.getData(req.params.id));
-});
-
-routerCompany.get(`/:id/childCompanys`, (req, res) => {
-  run(res, () => companyService.getChildCompanys(req.params.id));
-});
-
-routerCompany.post("/", async (req, res) => {
-  const data = {
-    ...req.body,
-    id: req.body.name,
-    whenCreated: new Date(),
-    status: "New",
-  };
-
-  const company = await companyService.getCompanyByName(data.name);
-  if (company.length > 0) {
-    console.log("company exist", company);
-    return res.status(409).send("Item exists");
+routerCompany.get(
+  `/`,
+  GuardLeast.check(undefined, [
+    ["tenant:admin"],
+    ["company:admin"],
+    ["Ops:Admin"],
+  ]),
+  (req, res) => {
+    run(res, () => companyService.getData(req.params.id));
   }
+);
 
-  run(
-    res,
-    () =>
-      companyService.setData.apply(companyService, [data].concat([data.id])),
-    undefined,
-    undefined,
-    data
-  );
-});
+routerCompany.get(
+  `/:id`,
+  GuardLeast.check(undefined, [
+    ["tenant:admin"],
+    ["company:admin"],
+    ["Ops:Admin"],
+  ]),
+  (req, res) => {
+    run(res, () => companyService.getData(req.params.id));
+  }
+);
 
-routerCompany.put("/:id", (req, res) => {
-  const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
-  run(res, () =>
-    companyService.updateData.apply(
-      companyService,
-      [data].concat([req.params.id])
-    )
-  );
-});
+routerCompany.get(
+  `/:id/childCompanys`,
+  GuardLeast.check(undefined, [
+    ["tenant:admin"],
+    ["company:admin"],
+    ["Ops:Admin"],
+  ]),
+  (req, res) => {
+    run(res, () => companyService.getChildCompanys(req.params.id));
+  }
+);
 
-routerCompany.delete(`/:id`, (req, res) => {
-  const data = {};
-  //run(res, () => companyService.deleteData(req.params.id));
-  run(res, () =>
-    companyService.deleteData.apply(
-      companyService,
-      [data].concat([req.params.id])
-    )
-  );
-});
+routerCompany.post(
+  "/",
+  GuardLeast.check(["company:write"], [["tenant:admin"], ["company:admin"]]),
+  async (req, res) => {
+    const data = {
+      ...req.body,
+      id: req.body.name,
+      whenCreated: new Date(),
+      status: "New",
+    };
 
-routerCompany.delete(`/`, (req, res) => {
-  const data = [...req.body];
-  const allDeletes = data.map((item) => {
-    return companyService.deleteData.apply(companyService, [item]);
-  });
-  run(res, () => Promise.all(allDeletes));
-});
+    const company = await companyService.getCompanyByName(data.name);
+    if (company.length > 0) {
+      console.log("company exist", company);
+      return res.status(409).send("Item exists");
+    }
+
+    run(
+      res,
+      () =>
+        companyService.setData.apply(companyService, [data].concat([data.id])),
+      undefined,
+      undefined,
+      data
+    );
+  }
+);
+
+routerCompany.put(
+  "/:id",
+  GuardLeast.check(["company:write"], [["tenant:admin"], ["company:admin"]]),
+  (req, res) => {
+    const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
+    run(res, () =>
+      companyService.updateData.apply(
+        companyService,
+        [data].concat([req.params.id])
+      )
+    );
+  }
+);
+
+routerCompany.delete(
+  `/:id`,
+  GuardLeast.check(["company:delete"], [["tenant:admin"], ["company:admin"]]),
+  (req, res) => {
+    const data = {};
+    //run(res, () => companyService.deleteData(req.params.id));
+    run(res, () =>
+      companyService.deleteData.apply(
+        companyService,
+        [data].concat([req.params.id])
+      )
+    );
+  }
+);
+
+routerCompany.delete(
+  `/`,
+  GuardLeast.check(["company:delete"], [["tenant:admin"], ["company:admin"]]),
+  (req, res) => {
+    const data = [...req.body];
+    const allDeletes = data.map((item) => {
+      return companyService.deleteData.apply(companyService, [item]);
+    });
+    run(res, () => Promise.all(allDeletes));
+  }
+);
 
 // common functions
 function run(response, fn, success, error, data) {

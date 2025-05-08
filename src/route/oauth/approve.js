@@ -3,9 +3,9 @@ import * as R from "ramda";
 import { getClient, getUserRef } from "./auth_service.js";
 import codeService from "../../service/code-service.js";
 import reqIdService from "../../service/reqid-service.js";
-
 import { buildUrl, getScopesFromForm } from "../../helper/utils.js";
 import randomstring from "randomstring";
+import { generateCodeUrlBuild } from "./auth_shared.js";
 
 async function approve(req, res, routerAuth) {
   const authId = "authorization";
@@ -31,7 +31,7 @@ async function approve(req, res, routerAuth) {
 
       const rscope = getScopesFromForm(req.body);
       const client = await getClient(query.client_id);
-      const user = await getUserRef(req.body.email);
+      //const user = await getUserRef(req.body.email);
       // const user = await getUser(
       //   client.companyId,
       //   client.domain,
@@ -45,27 +45,13 @@ async function approve(req, res, routerAuth) {
         res.redirect(urlParsed);
         return;
       }
-
-      const code = randomstring.generate(8);
-      const data = {
-        request: { ...query, password: null },
-        user: { ...user, authVerification: null },
-        scope: rscope,
-        code_challenge: req.body.code_challenge,
-        code_challenge_method: req.body.code_challenge_method,
-        whenCreated: new Date(),
-        status: "issued",
-      };
-      await codeService.setData.apply(
-        codeService,
-        [data].concat([authId, code])
+      const urlParsed = await generateCodeUrlBuild(
+        { ...query, password: null },
+        req.body.email,
+        rscope,
+        req.body.code_challenge,
+        req.body.code_challenge_method
       );
-
-      const urlParsed = buildUrl(query.redirect_uri, {
-        code: code,
-        state: query.state,
-      });
-
       res.redirect(urlParsed);
       return;
     } else {

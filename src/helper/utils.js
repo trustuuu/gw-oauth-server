@@ -5,21 +5,49 @@ import querystring from 'querystring';
 import * as __ from 'underscore';
 import __string from 'underscore.string';
 import crypto from 'crypto';
+import userService from '../service/user-service.js';
 
 import rsaKey from '../route/rsaKey.json' with { type: "json" };
 import rsaKeyService from '../route/rsaKeyService.json' with { type: "json" };
 
-export const generateAccessToken = (iss, sub, aud, iat, exp, permissions, roles) => {
-    const access_token = generateAccessTokenCommon(rsaKey, iss, sub, aud, iat, exp, permissions, roles);
+export const generateCodeAccessToken = async (iss, sub, aud, iat, exp, api, user) => {
+    const access_token = await generateAccessTokenCommon(rsaKey, iss, sub, aud, iat, exp, null, api, user);
     return access_token;
 }
-export const generateServiceAccessToken = (iss, sub, aud, iat, exp, permissions, roles) => {
-    const access_token = generateAccessTokenCommon(rsaKeyService, iss, sub, aud, iat, exp, permissions, roles);
+export const generateServiceAccessToken = async (iss, sub, aud, iat, exp, permission, api) => {
+    const access_token = await generateAccessTokenCommon(rsaKeyService, iss, sub, aud, iat, exp, permission, api);
     return access_token;
 
 }
 
-export const generateAccessTokenCommon = (selectedRasKey, iss, sub, aud, iat, exp, permissions, roles) => {
+export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, iat, exp, permission, api, user) => {
+  let userPermissions = null
+  let roles = null
+  if (api.addPermissionAccessToken && user){
+    const userPermissionRaw = await userService.getUserPermissionScopes(
+      user.companyId,
+      user.domainId,
+      user.id
+    );
+    userPermissions = userPermissionRaw.map((p) => {
+      return p.permission;
+      //return { id: p.id.split("#")[0], permission: p.permission };
+    });
+  }
+  if (api.RBAC && user){
+    const appRoles = await userService.getUserAppRoles(
+      user.companyId,
+      user.domainId,
+      user.id,
+      ["api", "==", api.id]
+    );
+    console.log(
+      "authorization_code appRoles",
+      appRoles.map((r) => r.role)
+    );
+    roles = appRoles ? appRoles.map((r) => r.role) : [];
+  }
+
     var header = { 'typ': 'JWT', 'alg': selectedRasKey.alg, 'kid': selectedRasKey.kid };
     var payload = {
         iss: iss,
@@ -28,7 +56,7 @@ export const generateAccessTokenCommon = (selectedRasKey, iss, sub, aud, iat, ex
         iat: iat,
         exp: exp,
         jti: randomstring.generate(8),
-        permissions: permissions,
+        permissions: permission? permission : userPermissions?userPermissions:[],
         roles: roles?roles:[]
     };
    
@@ -83,7 +111,6 @@ export const getJwtExpire = (token) => {
 	if (!payload.exp) throw new Error("No expire info.");
   
 	const expireDate = new Date(payload.exp * 1000);
-	console.log("expire at:", expireDate.toISOString());
 	return expireDate;
   }
 
@@ -148,3 +175,18 @@ export function verifyCodeChallenge(code_verifier, original_code_challenge) {
     return computed_challenge === original_code_challenge;
   }
   
+export const corsOptionsDelegate = function (req, callback) {
+  const whitelist = ["http://localhost:3000", "https://app.trusted.com"];
+
+  const origin = req.get("Origin");
+  const isAllowed = whitelist.includes(origin);
+  console.log("origin", isAllowed, origin);
+
+  const corsInnerOptions = {
+    origin: isAllowed ? true : false, // only allow if in whitelist
+    credentials: true, // allow cookies/auth headers
+    optionSuccessStatus: 200,
+  };
+
+  callback(null, corsInnerOptions);
+};

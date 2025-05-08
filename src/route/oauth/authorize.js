@@ -5,6 +5,8 @@ import randomstring from "randomstring";
 import { buildUrl } from "../../helper/utils.js";
 import { buildQueryUrl, parseQuery, decryptText } from "../../helper/secure.js";
 import reqIdService from "../../service/reqid-service.js";
+import apiService from "../../service/api-service.js";
+import { generateCodeUrlBuild } from "./auth_shared.js";
 
 async function authorize(req, res, routerAuth) {
   let client = null;
@@ -32,6 +34,7 @@ async function authorize(req, res, routerAuth) {
       return;
     } else {
       client = await getClient(reqQuery.client_id);
+      console.log("client", client);
       const user = await getUserRef(reqQuery.email);
       let isVerified = false;
       if (user) {
@@ -84,28 +87,59 @@ async function authorize(req, res, routerAuth) {
       return;
     }
 
-    const reqid = randomstring.generate(8);
+    const userConsent = await allowUserConsentSkip(res, client);
+    if (userConsent) {
+      const redirectURL = await generateCodeUrlBuild(
+        { ...reqQuery, password: null },
+        reqQuery.email,
+        reqQuery.scope.split(" "),
+        reqQuery.code_challenge,
+        reqQuery.code_challenge_method
+      );
+      res.redirect(redirectURL);
 
-    //const requests = [{reqid:reqQuery}];
-    //routerAuth.locals.requests[reqid] = reqQuery;
-    await reqIdService.setData.apply(
-      reqIdService,
-      [reqQuery].concat([authId, reqid])
-    );
+      return;
+    } else {
+      const reqid = randomstring.generate(8);
 
-    const params = {
-      client: client,
-      reqid: reqid,
-      scope: rscope,
-      email: reqQuery.email,
-      code_challenge: reqQuery.code_challenge,
-      code_challenge_method: reqQuery.code_challenge_method,
-    };
-    const redirectURL = await buildQueryUrl("../../approve", params);
-    res.redirect(redirectURL);
+      //const requests = [{reqid:reqQuery}];
+      //routerAuth.locals.requests[reqid] = reqQuery;
+      await reqIdService.setData.apply(
+        reqIdService,
+        [reqQuery].concat([authId, reqid])
+      );
 
-    return;
+      const params = {
+        client: client,
+        reqid: reqid,
+        scope: rscope,
+        email: reqQuery.email,
+        code_challenge: reqQuery.code_challenge,
+        code_challenge_method: reqQuery.code_challenge_method,
+      };
+      const redirectURL = await buildQueryUrl("../../approve", params);
+      res.redirect(redirectURL);
+
+      return;
+    }
   }
 }
+
+const allowUserConsentSkip = async (res, client) => {
+  const apiId = "api";
+  const api = await apiService.getApiByIdentifier(apiId, client.audience);
+  if (api.length < 1) {
+    console.log(
+      "Authence has not been found, expected %s got %s",
+      client.Id,
+      client.audience
+    );
+    res.status(400).json({ error: "invalid_grant" });
+    return;
+  }
+  return api[0].allowSkippingUserConsent
+    ? api[0].allowSkippingUserConsent
+    : false;
+};
 
 export default authorize;

@@ -8,7 +8,7 @@ import routerAuth from "./src/route/routes_auth.js";
 import logger from "morgan";
 //import { expressjwt } from "express-jwt";
 //import guard from "express-jwt-permissions";
-import { Guard, GuardLeast } from "./igwGuard.js";
+//import { Guard, GuardLeast } from "./igwGuard.js";
 //import jwks from "jwks-rsa";
 import compression from "compression";
 import dotenv from "dotenv";
@@ -27,7 +27,12 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import { authenticate } from "./jwks.js";
+import { decodeClientCredentials } from "./src/helper/utils.js";
+import { getClient } from "./src/route/oauth/auth_service.js";
+import { GuardLeast } from "./igwGuard.js";
 //import { getJwtExpire } from "./src/helper/utils.js";
+// import { EventEmitter } from 'events';
+// EventEmitter.defaultMaxListeners = 20;
 
 const isProduction = process.env.NODE_ENV === "production";
 const __filename = fileURLToPath(import.meta.url);
@@ -90,7 +95,8 @@ const corsOptions = {
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
-app.use(cors(corsOptions));
+
+//app.use(cors(corsOptions));
 app.use(logger("dev"));
 
 app.use(bodyParser.urlencoded({ extended: true })); // support form-encoded bodies (for the token endpoint)
@@ -129,19 +135,133 @@ try {
       },
     })
   );
-  app.use("/oauth/v1", routerAuth);
 
+  const allowedOriginsCache = new Map();
+  async function fetchOriginFromDB(origin, req) {
+    try {
+      let clientId = "";
+
+      const auth = req.headers["authorization"];
+      if (auth) {
+        const clientCredentials = decodeClientCredentials(auth);
+        clientId = clientCredentials.id;
+      } else if (req.body.client_id) {
+        clientId = req.body.client_id;
+      }
+      console.log("clientId", clientId);
+      if (!clientId) {
+        return true;
+      }
+
+      const allowedOrigins = allowedOriginsCache.get(clientId);
+      console.log(
+        "allowedOriginsCache, allowedOrigins",
+        allowedOriginsCache,
+        allowedOrigins
+      );
+      if (
+        allowedOrigins &&
+        allowedOrigins.some((o) => o === origin || o === "*")
+      ) {
+        return true;
+      }
+
+      const client = await getClient(clientId);
+      if (!client) return false;
+      console.log("client.allowed_web_orgins", client.allowed_web_orgins);
+      if (!client.allowed_web_orgins || !client.allowed_web_orgins[0]) {
+        allowedOriginsCache.set(client.client_id, ["*"]);
+        return true;
+      }
+
+      if (client.allowed_web_orgins.some((o) => o === origin)) {
+        allowedOriginsCache.set(client.client_id, client.allowed_web_orgins);
+        console.log("allowedOriginsCache added", allowedOriginsCache);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.log(`Checking orgin error: ${error}`);
+      return false;
+    }
+  }
+
+  app.use(async (req, res, next) => {
+    try {
+      const origin = req.headers.origin;
+
+      if (!origin) return next();
+      if (req.path.replace(/\/$/, "") !== "/oauth/v1/token") return next();
+
+      const isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
+      if (isAllowed) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+      }
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+      );
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+      );
+
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(200); // preflight
+      }
+
+      if (!isAllowed) {
+        res.sendStatus(401);
+      }
+      next();
+    } catch (error) {
+      console.log(`origin checking error: ${error}`);
+      next();
+    }
+  });
+
+  //app.use("/oauth/v1", cors(corsOptionsDelegate), routerAuth);
+  app.use("/oauth/v1", cors(corsOptions), routerAuth);
   app.use(
     `/oauthapi/v1`,
+    cors(corsOptions),
     authenticate,
-    Guard.check(["openId"]),
     routerApplication,
     routerApi
   );
+
+  app.post(
+    `/v1/${COMPANY_COLL}/:companyId/domainNames/:domainId/purge/cors`,
+    cors(corsOptions),
+    authenticate,
+    GuardLeast.check(undefined, [
+      ["tenant:admin"],
+      ["company:admin"],
+      ["Ops:Admin"],
+    ]),
+    (req, res) => {
+      console.log(
+        "companyId, domainId",
+        req.params.companyId,
+        req.params.domainId
+      );
+      if (req.body.client_id) {
+        console.log("allowedOriginsCache before", allowedOriginsCache);
+        allowedOriginsCache.delete(req.body.client_id);
+        console.log("allowedOriginsCache after", allowedOriginsCache);
+      }
+      res
+        .status(200)
+        .json({ message: "Task completed", received: req.body.client_id });
+    }
+  );
+
   app.use(
     `/v1/${COMPANY_COLL}`,
+    cors(corsOptions),
     authenticate,
-    GuardLeast.check([["user:admin"], ["service"]]),
     routerCompany,
     routerDomain,
     routerGroup,

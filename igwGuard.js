@@ -35,12 +35,10 @@ export const Guard = {
       const authorized = requiredScopes.some(function (scopeGroup) {
         if (Array.isArray(scopeGroup)) {
           // AND 모드: 그룹 안 모든 스코프를 permissions에 포함해야 함
-          console.log("AND requiredScopes", scopeGroup, permissions);
           return scopeGroup.every(function (scope) {
             return permissions.includes(scope);
           });
         } else {
-          console.log("OR requiredScopes", scopeGroup, permissions);
           // OR 모드: 하나라도 permissions에 있으면 통과
           return permissions.includes(scopeGroup);
         }
@@ -62,12 +60,10 @@ export const Guard = {
       const authorized = requiredRoles.some(function (roleGroup) {
         if (Array.isArray(roleGroup)) {
           // AND 모드: 그룹 안 모든 롤을 roles에 포함해야 함
-          console.log("requiredRoles AND", roleGroup, roles);
           return roleGroup.every(function (role) {
             return roles.includes(role);
           });
         } else {
-          console.log("requiredRoles OR", roleGroup, roles);
           // OR 모드: 하나라도 roles에 있으면 통과
           return roles.includes(roleGroup);
         }
@@ -91,53 +87,53 @@ export const GuardLeast = {
         ? auth.permissions
         : [];
       const roles = Array.isArray(auth.roles) ? auth.roles : [];
-      console.log(
-        "permissions",
-        permissions,
-        "roles",
-        roles,
-        requiredScopes,
-        requiredRoles,
-        requiredScopes,
-        requiredRoles
-      );
       // 스코프 OR 로 체크
-      const scopesAuthorized = !requiredScopes
-        ? true
-        : requiredScopes.some(function (scopeGroup) {
-            if (Array.isArray(scopeGroup)) {
-              // AND 모드: 그룹 안 모든 스코프를 permissions에 포함해야 함
-              return scopeGroup.every(function (scope) {
-                return permissions.includes(scope);
-              });
-            } else {
-              // OR 모드: 하나라도 permissions에 있으면 통과
-              return permissions.includes(scopeGroup);
-            }
-          });
+      //      const scopesAuthorized = !requiredScopes
+      const scopesAuthorized =
+        requiredScopes === undefined
+          ? requiredScopes
+          : !requiredScopes
+          ? true
+          : requiredScopes.some(function (scopeGroup) {
+              if (Array.isArray(scopeGroup)) {
+                // AND 모드: 그룹 안 모든 스코프를 permissions에 포함해야 함
+                return scopeGroup.every(function (scope) {
+                  return permissions.includes(scope);
+                });
+              } else {
+                // OR 모드: 하나라도 permissions에 있으면 통과
+                return permissions.includes(scopeGroup);
+              }
+            });
 
       // 롤 OR 로 체크
-      const rolesAuthorized = !requiredRoles
-        ? true
-        : requiredRoles.some(function (roleGroup) {
-            if (Array.isArray(roleGroup)) {
-              // AND 모드: 그룹 안 모든 롤을 roles에 포함해야 함
-              return roleGroup.every(function (role) {
-                return roles.includes(role);
-              });
-            } else {
-              // OR 모드: 하나라도 roles에 있으면 통과
-              return roles.includes(roleGroup);
-            }
-          });
-
-      if (!scopesAuthorized && !rolesAuthorized) {
+      //const rolesAuthorized = !requiredRoles
+      const rolesAuthorized =
+        requiredRoles === undefined
+          ? requiredRoles
+          : !requiredRoles
+          ? true
+          : requiredRoles.some(function (roleGroup) {
+              if (Array.isArray(roleGroup)) {
+                // AND 모드: 그룹 안 모든 롤을 roles에 포함해야 함
+                return roleGroup.every(function (role) {
+                  return roles.includes(role);
+                });
+              } else {
+                // OR 모드: 하나라도 roles에 있으면 통과
+                return roles.includes(roleGroup);
+              }
+            });
+      if (
+        (scopesAuthorized === true || rolesAuthorized === true) &&
+        (scopesAuthorized !== false || rolesAuthorized !== false)
+      ) {
+        next();
+      } else {
         return res
           .status(403)
           .send("Forbidden: insufficient permissions or roles");
       }
-
-      next();
     };
   },
 };

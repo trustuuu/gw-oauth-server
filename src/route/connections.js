@@ -6,12 +6,14 @@ import {
   PROVISIONING_COLL,
   generateId,
 } from "../service/remote-path-service.js";
+import { GuardLeast } from "../../igwGuard.js";
 
 const routerConnection = express.Router();
 export default routerConnection;
 
 routerConnection.get(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
   (req, res) => {
     run(res, () =>
       connectionService.getData(
@@ -25,6 +27,7 @@ routerConnection.get(
 
 routerConnection.get(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
   (req, res) => {
     run(res, () =>
       connectionService.getData(req.params.id, req.params.provisioningId)
@@ -34,6 +37,7 @@ routerConnection.get(
 
 routerConnection.post(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
   async (req, res) => {
     const data = {
       ...req.body,
@@ -69,6 +73,7 @@ routerConnection.post(
 
 routerConnection.put(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
   (req, res) => {
     const data = {
       ...req.body,
@@ -91,6 +96,7 @@ routerConnection.put(
 
 routerConnection.delete(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
   (req, res) => {
     const data = {};
     run(res, () =>

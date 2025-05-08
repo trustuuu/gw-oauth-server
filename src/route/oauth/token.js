@@ -2,8 +2,8 @@ import * as R from "ramda";
 //const { default: R } = await import("ramda");
 import {
   decodeClientCredentials,
-  generateAccessToken,
-  generateCodeChallenge,
+  generateCodeAccessToken,
+  generateServiceAccessToken,
   generateIdToken,
   verifyCodeChallenge,
   //getJwtExpire,
@@ -12,7 +12,6 @@ import { getClient } from "./auth_service.js";
 import apiService from "../../service/api-service.js";
 import tokenService from "../../service/token-service.js";
 import codeService from "../../service/code-service.js";
-import userService from "../../service/user-service.js";
 import randomstring from "randomstring";
 
 async function token(req, res, routerAuth) {
@@ -20,6 +19,7 @@ async function token(req, res, routerAuth) {
   const apiId = "api";
 
   const auth = req.headers["authorization"];
+  console.log("req.headers in token", req.headers);
   let clientId = "";
   let clientSecret = "";
   if (auth) {
@@ -92,15 +92,15 @@ async function token(req, res, routerAuth) {
       date.getUTCSeconds()
     );
     const expires_in = Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
-    console.log("api", api);
-    const access_token = generateAccessToken(
+    const access_token = await generateServiceAccessToken(
       api[0].issuer, //process.env.OAUTH_ISSUER,
       client.client_name,
-      api[0].identifier,
+      api[0].audience,
       Math.floor(now_utc / 1000),
       expires_in,
       client.scope,
-      ["admins", "support"]
+      //["admins", "support"],
+      api[0]
     );
 
     // const id_token = generateIdToken(
@@ -166,23 +166,17 @@ async function token(req, res, routerAuth) {
           return res.status(400).send("Invalid code_verifier");
         }
         console.log("authorization_code api", api, code.user);
-        const userPermissionRaw = await userService.getUserPermissionScopes(
-          code.user.companyId,
-          code.user.domainId,
-          code.user.id
-        );
-        const userPermissions = userPermissionRaw.map((p) => {
-          return { id: p.id.split("#")[0], permission: p.permission };
-        });
-        console.log("userPermission", userPermissionRaw, userPermissions);
-        const access_token = generateAccessToken(
+
+        const access_token = await generateCodeAccessToken(
           api[0].issuer, //process.env.OAUTH_ISSUER,
-          client.client_name,
-          api[0].identifier,
+          code.user.id, //client.client_name,
+          api[0].audience,
           Math.floor(now_utc / 1000),
           expires_in,
-          client.scope,
-          ["admins", "support"]
+          //client.scope,
+          //appRoles ? appRoles.map((r) => r.role) : [],
+          api[0],
+          code.user
         );
 
         const id_token = generateIdToken(

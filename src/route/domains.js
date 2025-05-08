@@ -1,94 +1,130 @@
 import express from "express";
 //const { default: express } = await import("express");
 import domainService from "../service/domain-service.js";
-import { DOMAIN_COLL, generateId } from "../service/remote-path-service.js";
+import { DOMAIN_COLL } from "../service/remote-path-service.js";
+import { GuardLeast } from "../../igwGuard.js";
 
 const routerDomain = express.Router();
 export default routerDomain;
 
-routerDomain.get(`/:id/${DOMAIN_COLL}/primary`, (req, res) => {
-  run(res, () => domainService.getPrimaryDomain(req.params.id));
-});
-
-routerDomain.get(`/:id/${DOMAIN_COLL}/:domainId`, (req, res) => {
-  run(res, () =>
-    domainService.getDomainInfo(req.params.id, req.params.domainId)
-  );
-});
-
-routerDomain.get(`/:id/${DOMAIN_COLL}`, (req, res) => {
-  run(res, () => domainService.getData(req.params.id));
-});
-
-routerDomain.post(`/:id/${DOMAIN_COLL}`, async (req, res) => {
-  const data = {
-    ...req.body,
-    id: req.body.name,
-    whenCreated: new Date(),
-    status: "New",
-  };
-  const domain = await domainService.getDomainByName(req.params.id, data.name);
-  if (domain.length > 0) {
-    return res.status(409).send("Item exists");
+routerDomain.get(
+  `/:id/${DOMAIN_COLL}/primary`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  (req, res) => {
+    run(res, () => domainService.getPrimaryDomain(req.params.id));
   }
-  run(
-    res,
-    () =>
-      domainService.setData.apply(
+);
+
+routerDomain.get(
+  `/:id/${DOMAIN_COLL}/:domainId`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  (req, res) => {
+    run(res, () =>
+      domainService.getDomainInfo(req.params.id, req.params.domainId)
+    );
+  }
+);
+
+routerDomain.get(
+  `/:id/${DOMAIN_COLL}`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  (req, res) => {
+    run(res, () => domainService.getData(req.params.id));
+  }
+);
+
+routerDomain.post(
+  `/:id/${DOMAIN_COLL}`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  async (req, res) => {
+    const data = {
+      ...req.body,
+      id: req.body.name,
+      whenCreated: new Date(),
+      status: "New",
+    };
+    const domain = await domainService.getDomainByName(
+      req.params.id,
+      data.name
+    );
+    if (domain.length > 0) {
+      return res.status(409).send("Item exists");
+    }
+    run(
+      res,
+      () =>
+        domainService.setData.apply(
+          domainService,
+          [data].concat([req.params.id, data.id])
+        ),
+      undefined,
+      undefined,
+      data
+    );
+  }
+);
+
+routerDomain.put(
+  `/:id/${DOMAIN_COLL}/:domainId`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  (req, res) => {
+    const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
+    run(res, () =>
+      domainService.updateData.apply(
         domainService,
-        [data].concat([req.params.id, data.id])
-      ),
-    undefined,
-    undefined,
-    data
-  );
-});
-
-routerDomain.put(`/:id/${DOMAIN_COLL}/:domainId`, (req, res) => {
-  const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
-  run(res, () =>
-    domainService.updateData.apply(
-      domainService,
-      [data].concat([req.params.id, req.params.domainId])
-    )
-  );
-});
-
-routerDomain.put(`/:id/${DOMAIN_COLL}`, (req, res) => {
-  const data = req.body;
-  const allDomains = data.map((item) => {
-    return domainService.updateData.apply(
-      domainService,
-      [{ ...item, whenUpdated: new Date(), status: "Updated" }].concat([
-        req.params.id,
-        item.id,
-      ])
+        [data].concat([req.params.id, req.params.domainId])
+      )
     );
-  });
+  }
+);
 
-  run(res, () => Promise.all(allDomains));
-});
+routerDomain.put(
+  `/:id/${DOMAIN_COLL}`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  (req, res) => {
+    const data = req.body;
+    const allDomains = data.map((item) => {
+      return domainService.updateData.apply(
+        domainService,
+        [{ ...item, whenUpdated: new Date(), status: "Updated" }].concat([
+          req.params.id,
+          item.id,
+        ])
+      );
+    });
 
-routerDomain.delete(`/:id/${DOMAIN_COLL}/:domainId`, (req, res) => {
-  const data = {};
-  run(res, () =>
-    domainService.deleteData.apply(
-      domainService,
-      [data].concat([req.params.id, req.params.domainId])
-    )
-  );
-});
+    run(res, () => Promise.all(allDomains));
+  }
+);
 
-routerDomain.delete(`/:id/${DOMAIN_COLL}`, (req, res) => {
-  const data = [...req.body];
-  const allDeletes = data.map((item) => {
-    return domainService.deleteData.apply(
-      domainService,
-      [null].concat([req.params.id, item.id])
+routerDomain.delete(
+  `/:id/${DOMAIN_COLL}/:domainId`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  (req, res) => {
+    const data = {};
+    run(res, () =>
+      domainService.deleteData.apply(
+        domainService,
+        [data].concat([req.params.id, req.params.domainId])
+      )
     );
-  });
-  run(res, () => Promise.all(allDeletes));
-});
+  }
+);
+
+routerDomain.delete(
+  `/:id/${DOMAIN_COLL}`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  (req, res) => {
+    const data = [...req.body];
+    const allDeletes = data.map((item) => {
+      return domainService.deleteData.apply(
+        domainService,
+        [null].concat([req.params.id, item.id])
+      );
+    });
+    run(res, () => Promise.all(allDeletes));
+  }
+);
 
 // common functions
 function run(response, fn, success, error, data) {

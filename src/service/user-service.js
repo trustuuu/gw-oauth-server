@@ -13,8 +13,10 @@ const getUserByEmail = (companyId, domainId, email) =>
   getDoc(userPath(companyId, domainId), ["email", "==", email]);
 const getUsersWhere = (companyId, domainId, condition) =>
   getDoc(userPath(companyId, domainId), condition);
-const getUserPermissionScopes = (companyId, domainId, userId) =>
-  getDoc(userPath(companyId, domainId, userId, "PermissionScopes"), null);
+const getUserPermissionScopes = (companyId, domainId, userId, conditoin) =>
+  getDoc(userPath(companyId, domainId, userId, "PermissionScopes"), conditoin);
+const getUserAppRoles = (companyId, domainId, userId, condition) =>
+  getDoc(userPath(companyId, domainId, userId, "AppRoles"), condition);
 const getUserRef = (email) => getUserFromRef(email);
 const createAuthUser = (companyId, domainId, userId) =>
   addUserToAuth(userPath(companyId, domainId, userId));
@@ -24,6 +26,7 @@ export default {
   getUserByEmail,
   getUsersWhere,
   getUserPermissionScopes,
+  getUserAppRoles,
   getUserRef,
   createAuthUser,
 };

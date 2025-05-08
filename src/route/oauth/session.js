@@ -1,6 +1,9 @@
 import { getUserById } from "./auth_service.js";
 
 async function getSession(req, res, routerAuth) {
+  if (!req.cookies.user)
+    return res.status(404).json({ error: "Token not found" });
+
   const { companyId, domainId, userId, sessionId } = JSON.parse(
     req.cookies.user
   );

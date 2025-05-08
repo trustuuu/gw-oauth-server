@@ -1,6 +1,6 @@
 import { apiPath } from "./remote-path-service.js";
 import { createService } from "./service-factory.js";
-import { getDoc } from "../firebase/firebase-service.js";
+import { getDoc, getDocByPath } from "../firebase/firebase-service.js";
 
 const getApiByIdentifier = (authId, identifier) =>
   getDoc(`${apiPath(authId, "")}`, ["identifier", "==", identifier]);
@@ -25,6 +25,12 @@ const getApisWhere = (apiPartialPath, companyId, domainId, condition) => {
 };
 const getApiPermissionScopes = (apiPartialPath, apiId) =>
   getDoc(apiPath(apiPartialPath, apiId, "PermissionScopes"), null);
+const getApiAppRoles = (apiPartialPath, apiId) =>
+  getDoc(apiPath(apiPartialPath, apiId, "AppRoles"), null);
+const getApiUsersAndGroups = (apiPartialPath, apiId) =>
+  getDoc(apiPath(apiPartialPath, apiId, "UsersAndGroups"), null);
+const getApiUsersAndGroupsRoleRef = (apiPartialPath, apiId, roleId) =>
+  getDocByPath(apiPath(apiPartialPath, apiId, "UsersAndGroups", roleId), null);
 
 export default {
   ...createService(apiPath),
@@ -32,4 +38,7 @@ export default {
   getApisWhere,
   getApiPermissionScopes,
   getApiByIdentifier,
+  getApiAppRoles,
+  getApiUsersAndGroups,
+  getApiUsersAndGroupsRoleRef,
 };
