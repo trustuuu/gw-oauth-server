@@ -23,10 +23,13 @@ const getApplicationsWhere = (appPath, companyId, domainId, condition) => {
     : condition;
   return getDoc(applicationPath(appPath), fullCondition);
 };
+const getApplicationPermissionScopes = (appPath, appId) =>
+  getDoc(applicationPath(appPath, appId, "PermissionScopes"), null);
 
 export default {
   ...createService(applicationPath),
   getRedirectURIs,
   getApplications,
   getApplicationsWhere,
+  getApplicationPermissionScopes,
 };

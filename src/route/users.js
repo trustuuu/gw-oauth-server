@@ -48,6 +48,46 @@ routerUser.get(
 );
 
 routerUser.post(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:email/verifyPassword`,
+  (req, res) => {
+    run(res, () =>
+      userService.userVerification(
+        req.params.id,
+        req.params.domainId,
+        req.params.email
+      )
+    );
+  }
+);
+
+routerUser.put(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:email/resetPassword`,
+  async (req, res) => {
+    const { id: companyId, domainId, email } = req.params;
+
+    const users = await userService.getUserByEmail(companyId, domainId, email);
+    const user = users ? users[0] : null;
+    if (!user) {
+      console.log("user is not found", req.params.email);
+      return res.status(401).send("user or password is not found");
+    }
+
+    if (user.authVerification !== md5(req.body.password)) {
+      console.log("user password is wrong", req.params.email);
+      return res.status(401).send("user or password is not found");
+    }
+
+    run(res, () => {
+      const data = { authVerification: md5(req.body.newPassword) };
+      return userService.updateData.apply(
+        userService,
+        [data].concat([companyId, domainId, user.id])
+      );
+    });
+  }
+);
+
+routerUser.post(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`,
   async (req, res) => {
     const data = {
@@ -93,8 +133,8 @@ routerUser.post(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/PermissionScopes`,
   async (req, res) => {
     if (Array.isArray(req.body)) {
-      const data = [...req.body];
-      const allAdds = data.map((data) => {
+      const datum = [...req.body];
+      const allAdds = datum.map((data) => {
         return userService.setData.apply(
           userService,
           [data].concat([

@@ -180,7 +180,6 @@ export const corsOptionsDelegate = function (req, callback) {
 
   const origin = req.get("Origin");
   const isAllowed = whitelist.includes(origin);
-  console.log("origin", isAllowed, origin);
 
   const corsInnerOptions = {
     origin: isAllowed ? true : false, // only allow if in whitelist

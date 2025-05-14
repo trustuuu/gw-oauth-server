@@ -20,6 +20,8 @@ const getUserAppRoles = (companyId, domainId, userId, condition) =>
 const getUserRef = (email) => getUserFromRef(email);
 const createAuthUser = (companyId, domainId, userId) =>
   addUserToAuth(userPath(companyId, domainId, userId));
+// const userResetPassword = (companyId, domainId, email, password, newPassword) =>
+//   verifyUser(userPath(companyId, domainId), password, ["email", "==", email]);
 export default {
   ...createService(userPath),
   userVerification,
@@ -29,4 +31,5 @@ export default {
   getUserAppRoles,
   getUserRef,
   createAuthUser,
+  // userResetPassword
 };

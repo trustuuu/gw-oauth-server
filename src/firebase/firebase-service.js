@@ -176,7 +176,6 @@ export async function verifyUser(path, password, whereArgs) {
 
   if (users.length == 1) {
     const user = users[0];
-
     if (user.authVerification == md5(password)) return true;
   }
   return false;

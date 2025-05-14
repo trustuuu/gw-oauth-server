@@ -67,10 +67,13 @@ export const computerPath = (companyId, domainId, computerId) =>
 export const accountPath = (email) => concat(ACCOUNT_COLL, email);
 
 export const authPath = (authId) => concat(AUTH_COLL, authId);
+
 export const apiPath = (authId, apiId, scopePath, scopeId) =>
   concat(authPath(authId), API_COLL, apiId, scopePath, scopeId);
-export const applicationPath = (authId, appId) =>
-  concat(authPath(authId), APPLICATION_COLL, appId);
+
+export const applicationPath = (authId, appId, scopePath, scopeId) =>
+  concat(authPath(authId), APPLICATION_COLL, appId, scopePath, scopeId);
+
 export const authCodePath = (authId, codeId) =>
   concat(authPath(authId), CODE_COLL, codeId);
 export const authReqIdPath = (authId, reqId) =>
