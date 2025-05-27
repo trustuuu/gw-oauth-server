@@ -150,11 +150,16 @@ routerApplication.put(
   GuardLeast.check(undefined, [["Ops:Admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
-    run(res, () =>
-      applicationService.updateData.apply(
-        applicationService,
-        [data].concat([appPath, data.id])
-      )
+    run(
+      res,
+      () =>
+        applicationService.updateData.apply(
+          applicationService,
+          [data].concat([appPath, data.id])
+        ),
+      null,
+      null,
+      data
     );
   }
 );
@@ -164,11 +169,16 @@ routerApplication.put(
   GuardLeast.check(undefined, [["Ops:Admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
-    run(res, () =>
-      applicationService.updateData.apply(
-        applicationService,
-        [data].concat([appPath, req.params.id])
-      )
+    run(
+      res,
+      () =>
+        applicationService.updateData.apply(
+          applicationService,
+          [data].concat([appPath, req.params.id])
+        ),
+      null,
+      null,
+      data
     );
   }
 );

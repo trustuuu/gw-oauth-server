@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+//import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { parseQuery, decryptText } from "./ExParams";
+//import { parseQuery, decryptText } from "./ExParams";
 import logo from "../assets/igw_logo.png";
 // import { generateCodeChallenge, generateCodeVerifier } from "./Utils";
 
 export default function Login() {
   const [searchParams] = useSearchParams();
-  const [decryptJson, setDecryptJson] = useState({});
-  const data = parseQuery(searchParams);
+  const params = Object.fromEntries(searchParams.entries());
+  //const [decryptJson, setDecryptJson] = useState({});
+  //const data = parseQuery(searchParams);
   const {
     client_id,
     redirect_uri,
@@ -15,7 +16,8 @@ export default function Login() {
     state,
     code_challenge,
     code_challenge_method,
-  } = decryptJson;
+  } = params;
+
   // const [codeChallenge, setCodeChallenge] = useState("");
   // const [codeVerifier, setCodeVerifier] = useState("");
 
@@ -29,15 +31,16 @@ export default function Login() {
   //   });
   // }, []);
 
-  useEffect(() => {
-    (async () => {
-      const decryptString = await decryptText(
-        data,
-        import.meta.env.VITE_ENCRIPTION_PASSWORD
-      );
-      setDecryptJson(JSON.parse(decryptString));
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     // const decryptString = await decryptText()
+  //     //   data,
+  //     //   import.meta.env.VITE_ENCRIPTION_PASSWORD
+  //     // );
+  //     // setDecryptJson(JSON.parse(decryptString));
+  //     setDecryptJson(JSON.parse(data));
+  //   })();
+  // }, []);
 
   return (
     <div className="h-screen flex flex-col gap-2 w-md max-w-xl mx-auto *:text-neutral-800 dark:*:text-white m-10">

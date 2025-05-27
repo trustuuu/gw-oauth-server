@@ -20,11 +20,10 @@ export default routerCompany;
 
 routerCompany.get(
   `/`,
-  GuardLeast.check(undefined, [
-    ["tenant:admin"],
+  GuardLeast.check(
     ["company:admin"],
-    ["Ops:Admin"],
-  ]),
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     run(res, () => companyService.getData(req.params.id));
   }
@@ -32,11 +31,10 @@ routerCompany.get(
 
 routerCompany.get(
   `/:id`,
-  GuardLeast.check(undefined, [
-    ["tenant:admin"],
+  GuardLeast.check(
     ["company:admin"],
-    ["Ops:Admin"],
-  ]),
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     run(res, () => companyService.getData(req.params.id));
   }
@@ -44,11 +42,10 @@ routerCompany.get(
 
 routerCompany.get(
   `/:id/childCompanys`,
-  GuardLeast.check(undefined, [
-    ["tenant:admin"],
+  GuardLeast.check(
     ["company:admin"],
-    ["Ops:Admin"],
-  ]),
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     run(res, () => companyService.getChildCompanys(req.params.id));
   }
@@ -60,7 +57,7 @@ routerCompany.post(
   async (req, res) => {
     const data = {
       ...req.body,
-      id: req.body.name,
+      id: `${crypto.randomUUID()}-${req.body.name}`,
       whenCreated: new Date(),
       status: "New",
     };

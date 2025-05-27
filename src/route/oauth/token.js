@@ -29,6 +29,7 @@ async function token(req, res, routerAuth) {
     clientId = clientCredentials.id;
     clientSecret = clientCredentials.secret;
   }
+  console.log("req.body in token", req.body);
   // otherwise, check the post body
   if (req.body.client_id) {
     if (clientId) {
@@ -52,16 +53,6 @@ async function token(req, res, routerAuth) {
     return;
   }
 
-  if (client.client_secret != clientSecret) {
-    console.log(
-      "Mismatched client secret, expected %s got %s",
-      client.client_secret,
-      clientSecret
-    );
-    res.status(401).json({ error: "invalid_client" });
-    return;
-  }
-
   if (!R.includes(req.body.grant_type, client.grant_types)) {
     console.log(
       "Mismatched grant_type %s does not exist in %s",
@@ -72,6 +63,15 @@ async function token(req, res, routerAuth) {
     return;
   }
   if (req.body.grant_type == "client_credentials") {
+    if (client.client_secret != clientSecret) {
+      console.log(
+        "Mismatched client secret, expected %s got %s",
+        client.client_secret,
+        clientSecret
+      );
+      res.status(401).json({ error: "invalid_client" });
+      return;
+    }
     const api = await apiService.getApiByIdentifier(apiId, client.audience);
     if (api.length < 1) {
       console.log(
@@ -98,7 +98,7 @@ async function token(req, res, routerAuth) {
       api[0].audience,
       Math.floor(now_utc / 1000),
       expires_in,
-      client.scope,
+      client.PermissionScopes,
       //["admins", "support"],
       api[0]
     );
@@ -121,7 +121,7 @@ async function token(req, res, routerAuth) {
       client: tokenClient,
       scope: client.scope,
     };
-
+    console.log("token_response", token_response);
     res.status(200).json(token_response);
     //console.log("client_credentials Issued tokens for code %s", req.body);
 

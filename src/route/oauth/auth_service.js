@@ -11,6 +11,7 @@ export const authData = async () => {
 
 export const getUserRef = async (email) => {
   const user = await userService.getUserRef(email);
+  if (user.session) delete user.session;
   return user;
 };
 
@@ -23,6 +24,7 @@ export const getUser = async (companyId, domainName, email) => {
   let user = null;
   if (users.length == 1) {
     user = users[0];
+    if (user.session) delete user.session;
   }
 
   return user;
@@ -75,7 +77,11 @@ export const verifyUser = async (companyId, domainName, email, password) => {
 
 export const getClient = async (clientId) => {
   let appData = await applicationService.getData(appId, clientId);
-
+  let appPermissionData =
+    await applicationService.getApplicationPermissionScopes(appId, clientId);
+  console.log("appPermissionData", appPermissionData);
+  appData.PermissionScopes = appPermissionData.map((p) => p.permission);
+  console.log("appData", appData);
   if (appData.client_id == undefined) return null;
 
   return appData;

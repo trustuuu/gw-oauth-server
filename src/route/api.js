@@ -304,6 +304,21 @@ routerApi.delete(
 );
 
 routerApi.delete(
+  `/${apiPath}`,
+  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  (req, res) => {
+    const data = [...req.body];
+    const allDeletes = data.map((item) => {
+      return apiService.deleteData.apply(
+        apiService,
+        [null].concat([apiPath, item.id])
+      );
+    });
+    run(res, () => Promise.all(allDeletes));
+  }
+);
+
+routerApi.delete(
   `/${apiPath}/:id/${PermissionScopes}/:scopeId`,
   GuardLeast.check(undefined, [["Ops:Admin"]]),
   (req, res) => {

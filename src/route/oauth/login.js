@@ -1,11 +1,12 @@
-import { buildQueryUrl } from "../../helper/secure.js";
+//import { buildQueryUrl } from "../../helper/secure.js";
+import { buildUrl } from "../../helper/utils.js";
 
 async function login(req, res, routerAuth) {
   const authorizationEndpoint =
     process.env.NODE_ENV === "dev"
       ? routerAuth.locals.authorizationEndpointDev
       : routerAuth.locals.authorizationEndpoint;
-  const authorizeUrl = await buildQueryUrl(authorizationEndpoint, {
+  const authorizeUrl = await buildUrl(authorizationEndpoint, {
     response_type: "code",
     email: req.body.email,
     password: req.body.password,

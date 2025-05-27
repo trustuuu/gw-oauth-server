@@ -13,24 +13,38 @@ export default routerUser;
 
 routerUser.get(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
   if (req.query.condition) {
-    run(res, () =>
-      userService.getUsersWhere(
+    run(res, async () => {
+      const users = await userService.getUsersWhere(
         req.params.id,
         req.params.domainId,
         req.query.condition
-      )
-    );
+      );
+      return users.map(({ session, ...rest }) => rest);
+    });
   } else {
-    run(res, () => userService.getData(req.params.id, req.params.domainId));
+    run(res, async () => {
+      const users = await userService.getData(
+        req.params.id,
+        req.params.domainId
+      );
+      return users.map(({ session, ...rest }) => rest);
+    });
   }
 });
 
 routerUser.get(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId`,
   (req, res) => {
-    run(res, () =>
-      userService.getData(req.params.id, req.params.domainId, req.params.userId)
-    );
+    run(res, async () => {
+      const user = await userService.getData(
+        req.params.id,
+        req.params.domainId,
+        req.params.userId
+      );
+
+      if (user && user.session) delete user.session;
+      return user;
+    });
   }
 );
 

@@ -156,22 +156,34 @@ export function generateCodeChallenge(codeVerifier) {
     return base64urlEncode(hash);
   }
   
-  function base64urlEncode(buffer) {
-    // buffer: Uint8Array (브라우저) 또는 Buffer (Node.js)
+  // function base64urlEncode(buffer) {
+  //   // buffer: Uint8Array (브라우저) 또는 Buffer (Node.js)
   
-    const base64String = Buffer.from(buffer).toString('base64');
+  //   const base64String = Buffer.from(buffer).toString('base64');
   
-    // base64 → base64url 변환
-    return base64String
-      .replace(/\+/g, '-') // + -> -
-      .replace(/\//g, '_') // / -> _
-      .replace(/=+$/, ''); // padding 제거
-  }
+  //   // base64 → base64url 변환
+  //   return base64String
+  //     .replace(/\+/g, '-') // + -> -
+  //     .replace(/\//g, '_') // / -> _
+  //     .replace(/=+$/, ''); // padding 제거
+  // }
+
+  function base64urlEncode(sha256) {
+  //const base64 = Buffer.from(buffer).toString('base64');
+   const base64 = sha256.toString('base64');
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
 
 export function verifyCodeChallenge(code_verifier, original_code_challenge) {
+    console.log("code_verifier, original_code_challenge", code_verifier, original_code_challenge)
     const digest = crypto.createHash('sha256').update(code_verifier).digest();
 
     const computed_challenge = base64urlEncode(digest);
+    console.log("computed_challenge", computed_challenge)
     return computed_challenge === original_code_challenge;
   }
   

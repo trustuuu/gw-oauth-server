@@ -11,12 +11,18 @@ import { generateCodeUrlBuild } from "./auth_shared.js";
 async function authorize(req, res, routerAuth) {
   let client = null;
   const authId = "authorization";
-  const reqParams = parseQuery(req.query);
-  const decryptString = await decryptText(
-    reqParams,
-    process.env.ENCRIPTION_PASSWORD
-  );
-  const reqQuery = JSON.parse(decryptString);
+  const reqQuery = req.query;
+  // const reqParams = parseQuery(req.query);
+  // const decryptString = await decryptText(
+  //   reqParams,
+  //   process.env.ENCRIPTION_PASSWORD
+  // );
+  // if (!decryptString) {
+  //   res.status(401).json({ error: "Authentication failed!" });
+  //   return;
+  // }
+  // const reqQuery = JSON.parse(decryptString);
+
   if (R.includes("openId", reqQuery.scope.split(" "))) {
     if (!reqQuery.email && !reqQuery.password) {
       const params = {
@@ -27,15 +33,16 @@ async function authorize(req, res, routerAuth) {
         code_challenge: reqQuery.code_challenge,
         code_challenge_method: reqQuery.code_challenge_method,
       };
-
-      const redirectURL = await buildQueryUrl("../../login", params);
+      
+      const redirectURL = await buildUrl("../../login", params);
       res.redirect(redirectURL);
 
       return;
     } else {
       client = await getClient(reqQuery.client_id);
-      console.log("client", client);
+      
       const user = await getUserRef(reqQuery.email);
+      
       let isVerified = false;
       if (user) {
         isVerified = await verifyUser(
@@ -54,7 +61,7 @@ async function authorize(req, res, routerAuth) {
           code_challenge: reqQuery.code_challenge,
           code_challenge_method: reqQuery.code_challenge_method,
         };
-        const redirectURL = await buildQueryUrl("../../login", params);
+        const redirectURL = await buildUrl("../../login", params);
         res.redirect(redirectURL);
 
         return;
@@ -96,6 +103,7 @@ async function authorize(req, res, routerAuth) {
         reqQuery.code_challenge,
         reqQuery.code_challenge_method
       );
+      console.log("redirectURL", redirectURL);
       res.redirect(redirectURL);
 
       return;

@@ -148,17 +148,17 @@ try {
       } else if (req.body.client_id) {
         clientId = req.body.client_id;
       }
-      console.log("clientId", clientId);
+
       if (!clientId) {
         return true;
       }
 
       const allowedOrigins = allowedOriginsCache.get(clientId);
-      console.log(
-        "allowedOriginsCache, allowedOrigins",
-        allowedOriginsCache,
-        allowedOrigins
-      );
+      // console.log(
+      //   "allowedOriginsCache, allowedOrigins",
+      //   allowedOriginsCache,
+      //   allowedOrigins
+      // );
       if (
         allowedOrigins &&
         allowedOrigins.some((o) => o === origin || o === "*")
@@ -168,6 +168,7 @@ try {
 
       const client = await getClient(clientId);
       if (!client) return false;
+
       console.log("client.allowed_web_orgins", client.allowed_web_orgins);
       if (!client.allowed_web_orgins || !client.allowed_web_orgins[0]) {
         allowedOriginsCache.set(client.client_id, ["*"]);
@@ -213,12 +214,12 @@ try {
       }
 
       if (!isAllowed) {
-        res.sendStatus(401);
+        return res.sendStatus(401);
       }
-      next();
+      return next();
     } catch (error) {
       console.log(`origin checking error: ${error}`);
-      next();
+      return next();
     }
   });
 
@@ -275,6 +276,11 @@ try {
 
 app.use(express.static(oauth_server_path));
 
+app.use((err, req, res, next) => {
+  console.error("Global error handler:", err);
+  res.status(500).json({ error: "Internal Server Error" });
+});
+
 app.get("*", (req, res) => {
   res.sendFile(path.join(oauth_server_path, "index.html"));
 });
@@ -291,6 +297,16 @@ const server = app.listen(port || 8080, hostheader, () => {
     host,
     port
   );
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+  // Optionally shut down gracefully
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1); // or trigger graceful shutdown
 });
 
 /*

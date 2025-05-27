@@ -8,6 +8,7 @@ function arrayBufferToHex(buffer) {
 }
 
 function hexToArrayBuffer(hex) {
+  if (!hex) return null;
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < hex.length; i += 2) {
     bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
@@ -64,6 +65,7 @@ export async function encryptText(text, password) {
 
 export async function decryptText(encryptedData, password) {
   const { cipherText, iv, salt } = encryptedData;
+  if (!salt) return null;
   const key = await deriveKey(password, hexToArrayBuffer(salt));
 
   const decrypted = await crypto.subtle.decrypt(
