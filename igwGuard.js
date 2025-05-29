@@ -89,13 +89,13 @@ export const GuardLeast = {
       const roles = Array.isArray(auth.roles) ? auth.roles : [];
       // 스코프 OR 로 체크
       //      const scopesAuthorized = !requiredScopes
-      console.log(
-        "requiredScopes, requiredRoles, permissions, roles",
-        requiredScopes,
-        requiredRoles,
-        permissions,
-        roles
-      );
+      // console.log(
+      //   "requiredScopes, requiredRoles, permissions, roles",
+      //   requiredScopes,
+      //   requiredRoles,
+      //   permissions,
+      //   roles
+      // );
       const scopesAuthorized =
         requiredScopes === undefined
           ? requiredScopes

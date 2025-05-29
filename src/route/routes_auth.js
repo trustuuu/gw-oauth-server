@@ -8,6 +8,7 @@ import approve from "./oauth/approve.js";
 import token from "./oauth/token.js";
 import callback from "./oauth/callback.js";
 import getSession from "./oauth/session.js";
+import signup from "./oauth/signup.js";
 
 const routerAuth = express.Router();
 export default routerAuth;
@@ -32,6 +33,11 @@ routerAuth.get(
 routerAuth.post(
   "/login",
   async (req, res) => await login(req, res, routerAuth)
+);
+
+routerAuth.post(
+  "/signup",
+  async (req, res) => await signup(req, res, routerAuth)
 );
 
 routerAuth.post(

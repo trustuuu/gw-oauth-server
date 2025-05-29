@@ -35,7 +35,7 @@ routerDomain.get(
 
 routerDomain.post(
   `/:id/${DOMAIN_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"]]),
   async (req, res) => {
     const data = {
       ...req.body,

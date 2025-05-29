@@ -191,9 +191,9 @@ try {
   app.use(async (req, res, next) => {
     try {
       const origin = req.headers.origin;
-
       if (!origin) return next();
       if (req.path.replace(/\/$/, "") !== "/oauth/v1/token") return next();
+      if (req.path.replace(/\/$/, "") !== "/oauth/v1/signup") return next();
 
       const isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
       if (isAllowed) {

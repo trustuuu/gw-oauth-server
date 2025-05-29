@@ -53,11 +53,11 @@ routerCompany.get(
 
 routerCompany.post(
   "/",
-  GuardLeast.check(["company:write"], [["tenant:admin"], ["company:admin"]]),
+  //GuardLeast.check(["company:write"], [["tenant:admin"], ["company:admin"]]),
   async (req, res) => {
     const data = {
       ...req.body,
-      id: `${crypto.randomUUID()}-${req.body.name}`,
+      id: `${req.body.name}-${crypto.randomUUID()}`,
       whenCreated: new Date(),
       status: "New",
     };

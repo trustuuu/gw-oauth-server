@@ -98,8 +98,9 @@ export async function getUserFromRef(email) {
 
 export async function addUserToAuth(path) {
   if (path) {
-    const userRef = getDocByPath(path);
+    const userRef = await getDocByPath(path);
     const user = await userRef.get();
+    console.log("path, user", path, user.data());
     if ("email" in user.data()) {
       return await setDoc(`accounts/${user.data().email}`, {
         ref: userRef,

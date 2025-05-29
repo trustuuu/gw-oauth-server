@@ -33,16 +33,16 @@ async function authorize(req, res, routerAuth) {
         code_challenge: reqQuery.code_challenge,
         code_challenge_method: reqQuery.code_challenge_method,
       };
-      
+
       const redirectURL = await buildUrl("../../login", params);
       res.redirect(redirectURL);
 
       return;
     } else {
       client = await getClient(reqQuery.client_id);
-      
+
       const user = await getUserRef(reqQuery.email);
-      
+
       let isVerified = false;
       if (user) {
         isVerified = await verifyUser(
@@ -103,7 +103,6 @@ async function authorize(req, res, routerAuth) {
         reqQuery.code_challenge,
         reqQuery.code_challenge_method
       );
-      console.log("redirectURL", redirectURL);
       res.redirect(redirectURL);
 
       return;

@@ -19,17 +19,14 @@ async function token(req, res, routerAuth) {
   const apiId = "api";
 
   const auth = req.headers["authorization"];
-  console.log("req.headers in token", req.headers);
   let clientId = "";
   let clientSecret = "";
   if (auth) {
     // check the auth header
     const clientCredentials = decodeClientCredentials(auth);
-    //let { id: clientId, secret: clientSecret } = clientCredentials;
     clientId = clientCredentials.id;
     clientSecret = clientCredentials.secret;
   }
-  console.log("req.body in token", req.body);
   // otherwise, check the post body
   if (req.body.client_id) {
     if (clientId) {
@@ -93,13 +90,12 @@ async function token(req, res, routerAuth) {
     );
     const expires_in = Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
     const access_token = await generateServiceAccessToken(
-      api[0].issuer, //process.env.OAUTH_ISSUER,
+      api[0].issuer,
       client.client_name,
       api[0].audience,
       Math.floor(now_utc / 1000),
       expires_in,
       client.PermissionScopes,
-      //["admins", "support"],
       api[0]
     );
 
@@ -109,7 +105,6 @@ async function token(req, res, routerAuth) {
     //   clientId
     // );
 
-    //console.log("client_credentials Issuing access token %s", access_token);
     const tokenClient = {
       client_id: clientId,
       companyId: client.companyId,
@@ -121,10 +116,7 @@ async function token(req, res, routerAuth) {
       client: tokenClient,
       scope: client.scope,
     };
-    console.log("token_response", token_response);
     res.status(200).json(token_response);
-    //console.log("client_credentials Issued tokens for code %s", req.body);
-
     return;
   } else if (req.body.grant_type == "authorization_code") {
     const code = await codeService.getData(authId, req.body.code);
@@ -165,8 +157,6 @@ async function token(req, res, routerAuth) {
         ) {
           return res.status(400).send("Invalid code_verifier");
         }
-        console.log("authorization_code api", api, code.user);
-
         const access_token = await generateCodeAccessToken(
           api[0].issuer, //process.env.OAUTH_ISSUER,
           code.user.id, //client.client_name,
