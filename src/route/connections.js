@@ -13,7 +13,7 @@ export default routerConnection;
 
 routerConnection.get(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       connectionService.getData(
@@ -27,7 +27,7 @@ routerConnection.get(
 
 routerConnection.get(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       connectionService.getData(req.params.id, req.params.provisioningId)
@@ -37,7 +37,7 @@ routerConnection.get(
 
 routerConnection.post(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   async (req, res) => {
     const data = {
       ...req.body,
@@ -73,7 +73,7 @@ routerConnection.post(
 
 routerConnection.put(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = {
       ...req.body,
@@ -96,7 +96,7 @@ routerConnection.put(
 
 routerConnection.delete(
   `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = {};
     run(res, () =>

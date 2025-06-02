@@ -11,7 +11,7 @@ const PermissionScopes = "PermissionScopes";
 
 routerApplication.get(
   `/${appPath}/`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (req.query.condition) {
       run(res, () =>
@@ -30,7 +30,7 @@ routerApplication.get(
 
 routerApplication.get(
   `/${appPath}/:id`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => applicationService.getData(appPath, req.params.id));
   }
@@ -38,7 +38,7 @@ routerApplication.get(
 
 routerApplication.get(
   `/${appPath}/:id/${PermissionScopes}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       applicationService.getApplicationPermissionScopes(appPath, req.params.id)
@@ -48,7 +48,7 @@ routerApplication.get(
 
 routerApplication.get(
   `/:companyId/application`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (req.query.condition) {
       run(res, () =>
@@ -69,7 +69,7 @@ routerApplication.get(
 
 routerApplication.get(
   `/:companyId/:domainId/application`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (req.query.condition) {
       run(res, () =>
@@ -94,7 +94,7 @@ routerApplication.get(
 
 routerApplication.post(
   `/${appPath}/`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = {
       ...req.body,
@@ -117,7 +117,7 @@ routerApplication.post(
 
 routerApplication.post(
   `/${appPath}/:id/${PermissionScopes}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (Array.isArray(req.body)) {
       const datum = [...req.body];
@@ -147,7 +147,7 @@ routerApplication.post(
 
 routerApplication.put(
   `/${appPath}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(
@@ -166,7 +166,7 @@ routerApplication.put(
 
 routerApplication.put(
   `/${appPath}/:id`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(
@@ -185,7 +185,7 @@ routerApplication.put(
 
 routerApplication.put(
   `/${appPath}/:id/${PermissionScopes}/:scopeId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -204,7 +204,7 @@ routerApplication.put(
 
 routerApplication.delete(
   `/${appPath}/:id`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = {};
     run(res, () =>
@@ -218,7 +218,7 @@ routerApplication.delete(
 
 routerApplication.delete(
   `/${appPath}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
@@ -233,7 +233,7 @@ routerApplication.delete(
 
 routerApplication.delete(
   `/${appPath}/:id/${PermissionScopes}/:scopeId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       applicationService.deleteData.apply(
@@ -251,7 +251,7 @@ routerApplication.delete(
 
 routerApplication.delete(
   `/${appPath}/:id/${PermissionScopes}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {

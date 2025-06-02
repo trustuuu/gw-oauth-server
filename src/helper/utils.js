@@ -47,7 +47,10 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
     );
     roles = appRoles ? appRoles.map((r) => r.role) : [];
   }
-
+if(user){
+  roles = user.root ? [...roles, "tenant:admin"] : roles;
+  console.log("roles", roles)
+}
     var header = { 'typ': 'JWT', 'alg': selectedRasKey.alg, 'kid': selectedRasKey.kid };
     var payload = {
         iss: iss,

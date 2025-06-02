@@ -12,7 +12,7 @@ export default routerProvisioning;
 
 routerProvisioning.get(
   `/:id/${PROVISIONING_COLL}/:provisioningId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       provisioningService.getData(req.params.id, req.params.provisioningId)
@@ -22,7 +22,7 @@ routerProvisioning.get(
 
 routerProvisioning.get(
   `/:id/${PROVISIONING_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => provisioningService.getData(req.params.id));
   }
@@ -30,7 +30,7 @@ routerProvisioning.get(
 
 routerProvisioning.post(
   `/:id/${PROVISIONING_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   async (req, res) => {
     const data = {
       ...req.body,
@@ -64,7 +64,7 @@ routerProvisioning.post(
 
 routerProvisioning.put(
   `/:id/${PROVISIONING_COLL}/:provisioningId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -78,7 +78,7 @@ routerProvisioning.put(
 
 routerProvisioning.delete(
   `/:id/${PROVISIONING_COLL}/:provisioningId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = {};
     run(res, () =>

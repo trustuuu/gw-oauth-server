@@ -15,7 +15,8 @@ export const authData = async () => {
 
 export const getUserRef = async (email) => {
   const user = await userService.getUserRef(email);
-  if (user.session) {
+  console.log("user", user, email);
+  if (user && user.session) {
     delete user.session;
   }
   return user;

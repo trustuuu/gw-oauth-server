@@ -20,10 +20,11 @@ export default routerCompany;
 
 routerCompany.get(
   `/`,
-  GuardLeast.check(
+  GuardLeast.check(undefined, [
+    ["tenant:admin"],
     ["company:admin"],
-    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
-  ),
+    ["Ops:Admin"],
+  ]),
   (req, res) => {
     run(res, () => companyService.getData(req.params.id));
   }
@@ -31,10 +32,11 @@ routerCompany.get(
 
 routerCompany.get(
   `/:id`,
-  GuardLeast.check(
+  GuardLeast.check(undefined, [
+    ["tenant:admin"],
     ["company:admin"],
-    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
-  ),
+    ["Ops:Admin"],
+  ]),
   (req, res) => {
     run(res, () => companyService.getData(req.params.id));
   }
@@ -42,10 +44,11 @@ routerCompany.get(
 
 routerCompany.get(
   `/:id/childCompanys`,
-  GuardLeast.check(
+  GuardLeast.check(undefined, [
+    ["tenant:admin"],
     ["company:admin"],
-    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
-  ),
+    ["Ops:Admin"],
+  ]),
   (req, res) => {
     run(res, () => companyService.getChildCompanys(req.params.id));
   }
@@ -81,7 +84,7 @@ routerCompany.post(
 
 routerCompany.put(
   "/:id",
-  GuardLeast.check(["company:write"], [["tenant:admin"], ["company:admin"]]),
+  GuardLeast.check(undefined, [["tenant:admin"], ["company:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -95,7 +98,7 @@ routerCompany.put(
 
 routerCompany.delete(
   `/:id`,
-  GuardLeast.check(["company:delete"], [["tenant:admin"], ["company:admin"]]),
+  GuardLeast.check(undefined, [["tenant:admin"], ["company:admin"]]),
   (req, res) => {
     const data = {};
     //run(res, () => companyService.deleteData(req.params.id));
@@ -110,7 +113,7 @@ routerCompany.delete(
 
 routerCompany.delete(
   `/`,
-  GuardLeast.check(["company:delete"], [["tenant:admin"], ["company:admin"]]),
+  GuardLeast.check(undefined, [["tenant:admin"], ["company:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {

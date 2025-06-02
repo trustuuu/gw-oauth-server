@@ -15,7 +15,7 @@ const UsersAndGroups = "UsersAndGroups";
 
 routerApi.get(
   `/${apiPath}/`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (req.query.condition) {
       run(res, () =>
@@ -29,7 +29,7 @@ routerApi.get(
 
 routerApi.get(
   `/${apiPath}/:id`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => apiService.getData(apiPath, req.params.id));
   }
@@ -37,7 +37,7 @@ routerApi.get(
 
 routerApi.get(
   `/${apiPath}/:id/${PermissionScopes}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => apiService.getApiPermissionScopes(apiPath, req.params.id));
   }
@@ -45,7 +45,7 @@ routerApi.get(
 
 routerApi.get(
   `/${apiPath}/:id/${AppRoles}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => apiService.getApiAppRoles(apiPath, req.params.id));
   }
@@ -53,7 +53,7 @@ routerApi.get(
 
 routerApi.get(
   `/${apiPath}/:id/${UsersAndGroups}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => apiService.getApiUsersAndGroups(apiPath, req.params.id));
   }
@@ -61,7 +61,7 @@ routerApi.get(
 
 routerApi.get(
   `/:companyId/api`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => apiService.getApis(apiPath, req.params.companyId));
     if (req.query.condition) {
@@ -81,7 +81,7 @@ routerApi.get(
 
 routerApi.get(
   `/:companyId/:domainId/api`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (req.query.condition) {
       run(res, () =>
@@ -102,7 +102,7 @@ routerApi.get(
 
 routerApi.post(
   `/${apiPath}/`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenCreated: new Date(), status: "New" };
     run(
@@ -118,7 +118,7 @@ routerApi.post(
 
 routerApi.post(
   `/${apiPath}/:id/${PermissionScopes}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenCreated: new Date(), status: "New" };
     run(
@@ -137,7 +137,7 @@ routerApi.post(
 
 routerApi.post(
   `/${apiPath}/:id/${AppRoles}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenCreated: new Date(), status: "New" };
     run(
@@ -171,7 +171,7 @@ routerApi.post(
 
 routerApi.post(
   `/${apiPath}/:id/${UsersAndGroups}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (Array.isArray(req.body)) {
       const data = [...req.body];
@@ -214,7 +214,7 @@ routerApi.post(
 
 routerApi.put(
   `/${apiPath}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -225,7 +225,7 @@ routerApi.put(
 
 routerApi.put(
   `/${apiPath}/:id`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -239,7 +239,7 @@ routerApi.put(
 
 routerApi.put(
   `/${apiPath}/:id/${PermissionScopes}/:scopeId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -258,7 +258,7 @@ routerApi.put(
 
 routerApi.put(
   `/${apiPath}/:id/${AppRoles}/:roleId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -272,7 +272,7 @@ routerApi.put(
 
 routerApi.put(
   `/${apiPath}/:id/${UsersAndGroups}/:roleId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -291,7 +291,7 @@ routerApi.put(
 
 routerApi.delete(
   `/${apiPath}/:id`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = {};
     run(res, () =>
@@ -305,7 +305,7 @@ routerApi.delete(
 
 routerApi.delete(
   `/${apiPath}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
@@ -320,7 +320,7 @@ routerApi.delete(
 
 routerApi.delete(
   `/${apiPath}/:id/${PermissionScopes}/:scopeId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       apiService.deleteData.apply(
@@ -338,7 +338,7 @@ routerApi.delete(
 
 routerApi.delete(
   `/${apiPath}/:id/${AppRoles}/:roleId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => {
       apiService.deleteData.apply(
@@ -351,7 +351,7 @@ routerApi.delete(
 
 routerApi.delete(
   `/${apiPath}/:id/${UsersAndGroups}/:usersGroupsId`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       apiService.deleteData.apply(
@@ -369,7 +369,7 @@ routerApi.delete(
 
 routerApi.delete(
   `/${apiPath}/:id/${PermissionScopes}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
@@ -384,7 +384,7 @@ routerApi.delete(
 
 routerApi.delete(
   `/${apiPath}/:id/${AppRoles}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
@@ -399,7 +399,7 @@ routerApi.delete(
 
 routerApi.delete(
   `/${apiPath}/:id/${UsersAndGroups}`,
-  GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allRefDeletes = data.map((item) => {
