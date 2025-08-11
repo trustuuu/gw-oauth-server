@@ -12,6 +12,7 @@ const routerUser = express.Router();
 export default routerUser;
 
 routerUser.get(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
+  console.log("req.query", req.query);
   if (req.query.condition) {
     run(res, async () => {
       const users = await userService.getUsersWhere(
@@ -19,6 +20,7 @@ routerUser.get(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
         req.params.domainId,
         req.query.condition
       );
+      console.log("users", users);
       return users.map(({ session, ...rest }) => rest);
     });
   } else {
@@ -41,7 +43,6 @@ routerUser.get(
         req.params.domainId,
         req.params.userId
       );
-
       if (user && user.session) delete user.session;
       return user;
     });
@@ -104,13 +105,24 @@ routerUser.put(
 routerUser.post(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`,
   async (req, res) => {
-    const data = {
+    const userName = req.body.userName
+      ? req.body.userName
+      : req.body.UserName
+      ? req.body.UserName
+      : req.body.username;
+    const id = generateId(userName);
+    let data = {
       ...req.body,
-      id: generateId(req.body.username),
+      id,
+      //Identifier: id,
+      userName,
       authVerification: md5(req.body.authVerification),
       whenCreated: new Date(),
       status: "new",
     };
+
+    if (data.UserName) delete data.UserName;
+    console.log("req.body in user post", req.body, data);
 
     const user = await userService.getUserByEmail(
       req.params.id,
@@ -118,16 +130,13 @@ routerUser.post(
       data.email
     );
     if (user.length > 0) {
-      console.log("user exist", user);
       return res.status(409).send("Item exists");
     }
-
     let postFn = null;
     if ("root" in data) {
       postFn = () =>
         userService.createAuthUser(req.params.id, req.params.domainId, data.id);
     }
-
     run(
       res,
       () =>

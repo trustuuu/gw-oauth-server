@@ -38,7 +38,7 @@ routerUser.post(
   async (req, res) => {
     const data = {
       ...req.body,
-      id: generateId(req.body.username),
+      id: generateId(req.body.userName),
       whenCreated: new Date(),
       status: "new",
     };

@@ -4,9 +4,10 @@ import groupService from "../service/group-service.js";
 import {
   DOMAIN_COLL,
   GROUP_COLL,
+  USER_COLL,
   generateId,
 } from "../service/remote-path-service.js";
-import { GuardLeast } from "../../igwGuard.js";
+//import { GuardLeast } from "../../igwGuard.js";
 
 const routerGroup = express.Router();
 const memberPath = "members";
@@ -15,7 +16,7 @@ export default routerGroup;
 
 routerGroup.get(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (req.query.condition) {
       run(res, () =>
@@ -33,7 +34,7 @@ routerGroup.get(
 
 routerGroup.get(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       groupService.getData(
@@ -47,7 +48,7 @@ routerGroup.get(
 
 routerGroup.get(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId/${memberPath}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       groupService.getGroupMembers(
@@ -61,11 +62,16 @@ routerGroup.get(
 
 routerGroup.post(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  ////GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   async (req, res) => {
+    console.log("req.body", req.body);
+    const id = generateId(
+      req.body.name ?? req.body.displayName.replace(/\s+/g, "")
+    );
     const data = {
       ...req.body,
-      id: generateId(req.body.name),
+      id,
+      //Identifier: req.body.Identifier ?? id,
       whenCreated: new Date(),
       status: "New",
     };
@@ -96,14 +102,17 @@ routerGroup.post(
 
 routerGroup.post(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId/${memberPath}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  ////GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   async (req, res) => {
     if (Array.isArray(req.body)) {
       const data = [...req.body];
       const allAdds = data.map((itemTemp) => {
         const item = {
           ...itemTemp,
-          id: generateId(itemTemp.id),
+          id: itemTemp.value,
+          $ref: `/${req.params.id}/${DOMAIN_COLL}/${req.params.domainId}/${
+            itemTemp.type == "user" ? USER_COLL : GROUP_COLL
+          }/${itemTemp.value}`,
           whenCreated: new Date(),
         };
         return groupService.setData.apply(
@@ -121,7 +130,10 @@ routerGroup.post(
     } else {
       const data = {
         ...req.body,
-        id: generateId(req.body.name),
+        id: req.body.value,
+        $ref: `/${req.params.id}/${DOMAIN_COLL}/${req.params.domainId}/${
+          req.body.type == "user" ? USER_COLL : GROUP_COLL
+        }/${req.body.value}`,
         whenCreated: new Date(),
       };
       run(
@@ -147,7 +159,7 @@ routerGroup.post(
 
 routerGroup.put(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date() };
     run(res, () =>
@@ -161,7 +173,7 @@ routerGroup.put(
 
 routerGroup.put(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allUpdates = data.map((item) => {
@@ -180,7 +192,7 @@ routerGroup.put(
 
 routerGroup.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId/${memberPath}/:memberId`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       groupService.deleteData.apply(
@@ -199,7 +211,7 @@ routerGroup.delete(
 
 routerGroup.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId/${memberPath}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
@@ -220,7 +232,7 @@ routerGroup.delete(
 
 routerGroup.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body };
     run(res, () =>
@@ -234,7 +246,7 @@ routerGroup.delete(
 
 routerGroup.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {

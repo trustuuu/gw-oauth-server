@@ -15,7 +15,6 @@ export const authData = async () => {
 
 export const getUserRef = async (email) => {
   const user = await userService.getUserRef(email);
-  console.log("user", user, email);
   if (user && user.session) {
     delete user.session;
   }
@@ -140,7 +139,7 @@ export const SignUpDomain = async (companyId, domainData) => {
 export const SignUpUser = async (companyId, domainId, userData) => {
   const data = {
     ...userData,
-    id: generateId(userData.username),
+    id: generateId(userData.userName),
     authVerification: md5(userData.authVerification),
     whenCreated: new Date(),
     status: "new",

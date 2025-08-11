@@ -87,7 +87,6 @@ function extractCompanyAndDomain(path) {
 export async function getUserFromRef(email) {
   if (email) {
     const userRef = await getDoc(`accounts/${email}`);
-    console.log("ref in userRef", "ref" in userRef);
     if ("ref" in userRef) {
       const parent = extractCompanyAndDomain(userRef.ref.path);
       return { ...toObject(await userRef.ref.get()), ...parent };
@@ -101,7 +100,6 @@ export async function addUserToAuth(path) {
   if (path) {
     const userRef = await getDocByPath(path);
     const user = await userRef.get();
-    console.log("path, user", path, user.data());
     if ("email" in user.data()) {
       return await setDoc(`accounts/${user.data().email}`, {
         ref: userRef,
@@ -148,6 +146,10 @@ export async function getStorageRef(path) {
 }
 
 export function setDoc(path, data) {
+  if (data.$ref) {
+    data = { ...data, $ref: getDocByPath(data.$ref) };
+  }
+  console.log("setDoc", data);
   return db().doc(path).set(data);
 }
 
@@ -204,6 +206,7 @@ function isEven(num) {
 // }
 
 function toObject(fbReturn) {
+  console.log("fbReturn.data()", fbReturn.data());
   return { id: fbReturn.id, ...fbReturn.data() };
 }
 
