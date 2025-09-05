@@ -5,6 +5,7 @@ import admin from "firebase-admin";
 import "firebase/functions";
 import md5 from "blueimp-md5";
 import serviceAccount from "./firebase-account.js";
+import { ntlmV1HashHex } from "../helper/secureWin.js";
 
 export function init() {
   firebase.initializeApp({
@@ -149,7 +150,6 @@ export function setDoc(path, data) {
   if (data.$ref) {
     data = { ...data, $ref: getDocByPath(data.$ref) };
   }
-  console.log("setDoc", data);
   return db().doc(path).set(data);
 }
 
@@ -180,7 +180,12 @@ export async function verifyUser(path, password, whereArgs) {
 
   if (users.length == 1) {
     const user = users[0];
-    if (user.authVerification == md5(password)) return true;
+    if (user.authVerification.startsWith("NTLM")) {
+      if (user.authVerification.slice(4) == ntlmV1HashHex(password))
+        return true;
+    } else {
+      if (user.authVerification == md5(password)) return true;
+    }
   }
   return false;
 }

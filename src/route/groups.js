@@ -50,13 +50,21 @@ routerGroup.get(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId/${memberPath}`,
   //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
-    run(res, () =>
-      groupService.getGroupMembers(
+    run(res, async () => {
+      const group = await groupService.getData(
         req.params.id,
         req.params.domainId,
         req.params.groupId
-      )
-    );
+      );
+      return group.members;
+      // const group = groupService.getGroupMembers(
+      //   req.params.id,
+      //   req.params.domainId,
+      //   req.params.groupId
+      // );
+      // console.log("group.member", group);
+      // return group;
+    });
   }
 );
 
@@ -64,12 +72,24 @@ routerGroup.post(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}`,
   ////GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   async (req, res) => {
-    console.log("req.body", req.body);
     const id = generateId(
       req.body.name ?? req.body.displayName.replace(/\s+/g, "")
     );
+
+    const members = !req.body.members
+      ? []
+      : req.body.members.map((m) => ({
+          type: m.type,
+          value: m.value,
+          $ref: `/${req.params.id}/${DOMAIN_COLL}/${req.params.domainId}/${
+            m.type == "user" ? USER_COLL : GROUP_COLL
+          }/${m.value}`,
+          whenUpdated: new Date(),
+        }));
+
     const data = {
       ...req.body,
+      members,
       id,
       //Identifier: req.body.Identifier ?? id,
       whenCreated: new Date(),
@@ -108,45 +128,57 @@ routerGroup.post(
       const data = [...req.body];
       const allAdds = data.map((itemTemp) => {
         const item = {
-          ...itemTemp,
-          id: itemTemp.value,
+          type: itemTemp.type,
+          value: itemTemp.id ?? itemTemp.value,
+          //id: itemTemp.value,
           $ref: `/${req.params.id}/${DOMAIN_COLL}/${req.params.domainId}/${
             itemTemp.type == "user" ? USER_COLL : GROUP_COLL
-          }/${itemTemp.value}`,
-          whenCreated: new Date(),
+          }/${itemTemp.id ?? itemTemp.value}`,
+          whenUpdated: new Date(),
         };
-        return groupService.setData.apply(
-          groupService,
-          [{ ...item, whenCreated: new Date() }].concat([
-            req.params.id,
-            req.params.domainId,
-            req.params.groupId,
-            memberPath,
-            item.id,
-          ])
-        );
+        return item;
       });
-      run(res, () => Promise.all(allAdds));
+      run(
+        res,
+        () =>
+          groupService.updateData.apply(
+            groupService,
+            [{ members: allAdds }].concat([
+              req.params.id,
+              req.params.domainId,
+              req.params.groupId,
+            ])
+          ),
+        undefined,
+        undefined,
+        { members: allAdds }
+      );
     } else {
       const data = {
-        ...req.body,
-        id: req.body.value,
-        $ref: `/${req.params.id}/${DOMAIN_COLL}/${req.params.domainId}/${
-          req.body.type == "user" ? USER_COLL : GROUP_COLL
-        }/${req.body.value}`,
-        whenCreated: new Date(),
+        members: [
+          {
+            //...req.body,
+            //id: req.body.value,
+            type: req.body.type,
+            value: req.body.id ?? req.body.value,
+            $ref: `/${req.params.id}/${DOMAIN_COLL}/${req.params.domainId}/${
+              req.body.type == "user" ? USER_COLL : GROUP_COLL
+            }/${req.body.id}`,
+            whenUpdated: new Date(),
+          },
+        ],
       };
       run(
         res,
         () =>
-          groupService.setData.apply(
+          groupService.updateData.apply(
             groupService,
             [data].concat([
               req.params.id,
               req.params.domainId,
               req.params.groupId,
-              memberPath,
-              data.id,
+              // memberPath,
+              // data.id,
             ])
           ),
         undefined,
@@ -161,7 +193,16 @@ routerGroup.put(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId`,
   //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
-    const data = { ...req.body, whenUpdated: new Date() };
+    const members = req.body.members.map((m) => ({
+      type: m.type,
+      value: m.value,
+      $ref: `/${req.params.id}/${DOMAIN_COLL}/${req.params.domainId}/${
+        m.type == "user" ? USER_COLL : GROUP_COLL
+      }/${m.value}`,
+      whenUpdated: new Date(),
+    }));
+
+    const data = { ...req.body, members, whenUpdated: new Date() };
     run(res, () =>
       groupService.updateData.apply(
         groupService,
@@ -177,9 +218,18 @@ routerGroup.put(
   (req, res) => {
     const data = [...req.body];
     const allUpdates = data.map((item) => {
+      const members = item.members.map((m) => ({
+        type: m.type,
+        value: m.value,
+        $ref: `/${req.params.id}/${DOMAIN_COLL}/${req.params.domainId}/${
+          m.type == "user" ? USER_COLL : GROUP_COLL
+        }/${m.value}`,
+        whenUpdated: new Date(),
+      }));
+
       return groupService.updateData.apply(
         groupService,
-        [{ ...item, whenUpdated: new Date() }].concat([
+        [{ ...item, members, whenUpdated: new Date() }].concat([
           req.params.id,
           req.params.domainId,
           item.id,
@@ -212,33 +262,55 @@ routerGroup.delete(
 routerGroup.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId/${memberPath}`,
   //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
-  (req, res) => {
-    const data = [...req.body];
-    const allDeletes = data.map((item) => {
-      return groupService.deleteData.apply(
+  async (req, res) => {
+    const excludes = [...req.body];
+
+    const group = await groupService.getData(
+      req.params.id,
+      req.params.domainId,
+      req.params.groupId
+    );
+
+    const members = group.members.filter(
+      (item) => !excludes.map((e) => e.value).includes(item.value)
+    );
+
+    run(res, () =>
+      groupService.updateData.apply(
         groupService,
-        [null].concat([
+        [{ members, whenUpdated: new Date() }].concat([
           req.params.id,
           req.params.domainId,
           req.params.groupId,
-          memberPath,
-          item.id,
         ])
-      );
-    });
-    run(res, () => Promise.all(allDeletes));
+      )
+    );
   }
 );
 
 routerGroup.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${GROUP_COLL}/:groupId`,
   //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
-  (req, res) => {
-    const data = { ...req.body };
+  async (req, res) => {
+    const excludes = [{ ...req.body }];
+    const group = await groupService.getData(
+      req.params.id,
+      req.params.domainId,
+      req.params.groupId
+    );
+
+    const members = group.members.filter(
+      (item) => !excludes.map((e) => e.value).includes(item.value)
+    );
+
     run(res, () =>
-      groupService.deleteData.apply(
+      groupService.updateData.apply(
         groupService,
-        [data].concat([req.params.id, req.params.domainId, req.params.groupId])
+        [{ members, whenUpdated: new Date() }].concat([
+          req.params.id,
+          req.params.domainId,
+          req.params.groupId,
+        ])
       )
     );
   }

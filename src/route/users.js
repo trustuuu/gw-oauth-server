@@ -7,12 +7,12 @@ import {
   generateId,
 } from "../service/remote-path-service.js";
 import md5 from "blueimp-md5";
+import { ntlmV1HashHex, convertPassword } from "../helper/secureWin.js";
 
 const routerUser = express.Router();
 export default routerUser;
 
 routerUser.get(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
-  console.log("req.query", req.query);
   if (req.query.condition) {
     run(res, async () => {
       const users = await userService.getUsersWhere(
@@ -20,7 +20,6 @@ routerUser.get(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
         req.params.domainId,
         req.query.condition
       );
-      console.log("users", users);
       return users.map(({ session, ...rest }) => rest);
     });
   } else {
@@ -87,9 +86,20 @@ routerUser.put(
       return res.status(401).send("user or password is not found");
     }
 
-    if (user.authVerification !== md5(req.body.password)) {
-      console.log("user password is wrong", req.params.email);
-      return res.status(401).send("user or password is not found");
+    // if (user.authVerification !== md5(req.body.password)) {
+    //   console.log("user password is wrong", req.params.email);
+    //   return res.status(401).send("user or password is not found");
+    // }
+    if (user.authVerification.startsWith("NTLM")) {
+      if (user.authVerification.slice(4) != ntlmV1HashHex(req.body.password)) {
+        console.log("user password is wrong", req.params.email);
+        return res.status(401).send("user or password is not found");
+      }
+    } else {
+      if (user.authVerification != md5(req.body.password)) {
+        console.log("user password is wrong", req.params.email);
+        return res.status(401).send("user or password is not found");
+      }
     }
 
     run(res, () => {
@@ -111,18 +121,20 @@ routerUser.post(
       ? req.body.UserName
       : req.body.username;
     const id = generateId(userName);
+    const authVerification = convertPassword(req.body);
+
     let data = {
       ...req.body,
       id,
       //Identifier: id,
       userName,
-      authVerification: md5(req.body.authVerification),
+      authVerification,
       whenCreated: new Date(),
       status: "new",
     };
 
     if (data.UserName) delete data.UserName;
-    console.log("req.body in user post", req.body, data);
+    if (data.password) delete data.password;
 
     const user = await userService.getUserByEmail(
       req.params.id,
@@ -196,7 +208,10 @@ routerUser.post(
 routerUser.put(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId`,
   (req, res) => {
-    const data = { ...req.body, whenUpdated: new Date() };
+    const authVerification = convertPassword(req.body);
+
+    let data = { ...req.body, authVerification, whenUpdated: new Date() };
+    if (data.password) delete data.password;
     run(res, () =>
       userService.updateData.apply(
         userService,
@@ -209,13 +224,13 @@ routerUser.put(
 routerUser.put(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
   const data = [...req.body];
   const allUpdates = data.map((item) => {
+    const authVerification = convertPassword(req.body);
+    let itemData = { ...item, authVerification, whenUpdated: new Date() };
+    if (itemData.password) delete itemData.password;
+
     return userService.updateData.apply(
       userService,
-      [{ ...item, whenUpdated: new Date() }].concat([
-        req.params.id,
-        req.params.domainId,
-        item.id,
-      ])
+      [itemData].concat([req.params.id, req.params.domainId, item.id])
     );
   });
   run(res, () => Promise.all(allUpdates));

@@ -182,11 +182,9 @@ export function generateCodeChallenge(codeVerifier) {
 
 
 export function verifyCodeChallenge(code_verifier, original_code_challenge) {
-    console.log("code_verifier, original_code_challenge", code_verifier, original_code_challenge)
     const digest = crypto.createHash('sha256').update(code_verifier).digest();
 
     const computed_challenge = base64urlEncode(digest);
-    console.log("computed_challenge", computed_challenge)
     return computed_challenge === original_code_challenge;
   }
   
