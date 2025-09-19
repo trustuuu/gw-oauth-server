@@ -45,6 +45,7 @@ async function approve(req, res, routerAuth) {
         res.redirect(urlParsed);
         return;
       }
+
       const urlParsed = await generateCodeUrlBuild(
         { ...query, password: null },
         req.body.email,

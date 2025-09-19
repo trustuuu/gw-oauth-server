@@ -1,75 +1,40 @@
 import * as R from "ramda";
 //const { default: R } = await import("ramda");
-import { getClient, verifyUser, getUserRef } from "./auth_service.js";
+import { getClient } from "./auth_service.js";
 import randomstring from "randomstring";
 import { buildUrl } from "../../helper/utils.js";
-import { buildQueryUrl, parseQuery, decryptText } from "../../helper/secure.js";
+import { buildQueryUrl } from "../../helper/secure.js";
 import reqIdService from "../../service/reqid-service.js";
 import apiService from "../../service/api-service.js";
 import { generateCodeUrlBuild } from "./auth_shared.js";
+
+async function redirectToLogin(reqQuery, res) {
+  const params = {
+    client_id: reqQuery.client_id,
+    redirect_uri: reqQuery.redirect_uri,
+    scope: reqQuery.scope,
+    state: reqQuery.state,
+    code_challenge: reqQuery.code_challenge,
+    code_challenge_method: reqQuery.code_challenge_method,
+  };
+
+  const redirectURL = await buildUrl("../../login", params);
+  res.redirect(redirectURL);
+}
 
 async function authorize(req, res, routerAuth) {
   let client = null;
   const authId = "authorization";
   const reqQuery = req.query;
-  // const reqParams = parseQuery(req.query);
-  // const decryptString = await decryptText(
-  //   reqParams,
-  //   process.env.ENCRIPTION_PASSWORD
-  // );
-  // if (!decryptString) {
-  //   res.status(401).json({ error: "Authentication failed!" });
-  //   return;
-  // }
-  // const reqQuery = JSON.parse(decryptString);
 
   if (R.includes("openId", reqQuery.scope.split(" "))) {
-    if (!reqQuery.email && !reqQuery.password) {
-      const params = {
-        client_id: reqQuery.client_id,
-        redirect_uri: reqQuery.redirect_uri,
-        scope: reqQuery.scope,
-        state: reqQuery.state,
-        code_challenge: reqQuery.code_challenge,
-        code_challenge_method: reqQuery.code_challenge_method,
-      };
-
-      const redirectURL = await buildUrl("../../login", params);
-      res.redirect(redirectURL);
-
+    if (!reqQuery.email && !reqQuery.password && reqQuery.stage != "mfa") {
+      redirectToLogin(reqQuery, res);
       return;
-    } else {
-      client = await getClient(reqQuery.client_id);
-
-      const user = await getUserRef(reqQuery.email);
-
-      let isVerified = false;
-      if (user) {
-        isVerified = await verifyUser(
-          user.companyId,
-          user.domainId,
-          reqQuery.email,
-          reqQuery.password
-        );
-      }
-      if (!isVerified) {
-        const params = {
-          client_id: reqQuery.client_id,
-          redirect_uri: reqQuery.redirect_uri,
-          scope: reqQuery.scope,
-          state: reqQuery.state,
-          code_challenge: reqQuery.code_challenge,
-          code_challenge_method: reqQuery.code_challenge_method,
-        };
-        const redirectURL = await buildUrl("../../login", params);
-        res.redirect(redirectURL);
-
-        return;
-      }
     }
-  } else {
-    client = await getClient(reqQuery.client_id);
   }
+
+  client = await getClient(reqQuery.client_id);
 
   if (!client) {
     console.log("Unknown client %s", reqQuery.client_id);
@@ -95,6 +60,7 @@ async function authorize(req, res, routerAuth) {
     }
 
     const userConsent = await allowUserConsentSkip(res, client);
+
     if (userConsent) {
       const redirectURL = await generateCodeUrlBuild(
         { ...reqQuery, password: null },

@@ -169,7 +169,6 @@ try {
       const client = await getClient(clientId);
       if (!client) return false;
 
-      console.log("client.allowed_web_orgins", client.allowed_web_orgins);
       if (!client.allowed_web_orgins || !client.allowed_web_orgins[0]) {
         allowedOriginsCache.set(client.client_id, ["*"]);
         return true;
@@ -177,7 +176,6 @@ try {
 
       if (client.allowed_web_orgins.some((o) => o === origin)) {
         allowedOriginsCache.set(client.client_id, client.allowed_web_orgins);
-        console.log("allowedOriginsCache added", allowedOriginsCache);
         return true;
       } else {
         return false;
@@ -243,15 +241,8 @@ try {
       ["Ops:Admin"],
     ]),
     (req, res) => {
-      console.log(
-        "companyId, domainId",
-        req.params.companyId,
-        req.params.domainId
-      );
       if (req.body.client_id) {
-        console.log("allowedOriginsCache before", allowedOriginsCache);
         allowedOriginsCache.delete(req.body.client_id);
-        console.log("allowedOriginsCache after", allowedOriginsCache);
       }
       res
         .status(200)

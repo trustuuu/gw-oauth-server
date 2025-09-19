@@ -8,6 +8,7 @@ import {
 } from "../service/remote-path-service.js";
 import md5 from "blueimp-md5";
 import { ntlmV1HashHex, convertPassword } from "../helper/secureWin.js";
+import { getQRCodeImageUrl } from "../helper/otp.js";
 
 const routerUser = express.Router();
 export default routerUser;
@@ -45,6 +46,47 @@ routerUser.get(
       if (user && user.session) delete user.session;
       return user;
     });
+  }
+);
+
+routerUser.get(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/otp`,
+  (req, res) => {
+    run(res, async () => {
+      const user = await userService.getData(
+        req.params.id,
+        req.params.domainId,
+        req.params.userId
+      );
+      if (user && user.session) delete user.session;
+      // const qrImageUrl = getQRCodeImageUrl(req.params.domainId, user.email, "JBSWY3DPEHPK3PXP");
+      return user;
+    });
+  }
+);
+
+routerUser.get(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/qrImage`,
+  async (req, res) => {
+    const user = await userService.getData(
+      req.params.id,
+      req.params.domainId,
+      req.params.userId
+    );
+
+    // const qrImageUrl = await getQRCodeImageUrl(
+    //   req.params.domainId,
+    //   user.email,
+    //   req.params.userId, //"JBSWY3DPEHPK3PXP"
+    // );
+
+    run(res, () =>
+      getQRCodeImageUrl(
+        req.params.domainId,
+        user.email,
+        req.params.userId //"JBSWY3DPEHPK3PXP"
+      )
+    );
   }
 );
 
@@ -208,9 +250,11 @@ routerUser.post(
 routerUser.put(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId`,
   (req, res) => {
-    const authVerification = convertPassword(req.body);
-
-    let data = { ...req.body, authVerification, whenUpdated: new Date() };
+    let data = { ...req.body, whenUpdated: new Date() };
+    if (req.body.password) {
+      const authVerification = convertPassword(req.body);
+      data = { ...req.body, authVerification, whenUpdated: new Date() };
+    }
     if (data.password) delete data.password;
     run(res, () =>
       userService.updateData.apply(
@@ -224,10 +268,12 @@ routerUser.put(
 routerUser.put(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
   const data = [...req.body];
   const allUpdates = data.map((item) => {
-    const authVerification = convertPassword(req.body);
-    let itemData = { ...item, authVerification, whenUpdated: new Date() };
+    let itemData = { ...req.body, whenUpdated: new Date() };
+    if (item.password) {
+      const authVerification = convertPassword(req.body);
+      itemData = { ...item, authVerification, whenUpdated: new Date() };
+    }
     if (itemData.password) delete itemData.password;
-
     return userService.updateData.apply(
       userService,
       [itemData].concat([req.params.id, req.params.domainId, item.id])

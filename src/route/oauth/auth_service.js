@@ -71,14 +71,14 @@ export const getUserById = async (companyId, domainName, userId) => {
 };
 
 export const verifyUser = async (companyId, domainName, email, password) => {
-  const isVerified = await userService.userVerification(
+  const userVerified = await userService.userVerification(
     companyId,
     domainName,
     email,
     password
   );
 
-  return isVerified;
+  return userVerified;
 };
 
 export const getClient = async (clientId) => {
@@ -119,6 +119,7 @@ export const SignUpCompany = async (comapnyData) => {
   await companyService.setData.apply(companyService, [data].concat([data.id]));
   return data;
 };
+
 export const SignUpDomain = async (companyId, domainData) => {
   const data = {
     ...domainData,

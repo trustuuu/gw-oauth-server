@@ -11,6 +11,7 @@ export const generateCodeUrlBuild = async (
   code_challenge_method
 ) => {
   const user = await getUserRef(email);
+  //if (user.fbReturn) delete user.fbReturn;
 
   const code = randomstring.generate(8);
   const data = {
@@ -22,9 +23,9 @@ export const generateCodeUrlBuild = async (
     whenCreated: new Date(),
     status: "issued",
   };
+
   const authId = "authorization";
   await codeService.setData.apply(codeService, [data].concat([authId, code]));
-
   const urlParsed = buildUrl(request.redirect_uri, {
     code: code,
     state: request.state,

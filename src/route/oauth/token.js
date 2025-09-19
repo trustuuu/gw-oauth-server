@@ -13,6 +13,7 @@ import apiService from "../../service/api-service.js";
 import tokenService from "../../service/token-service.js";
 import codeService from "../../service/code-service.js";
 import randomstring from "randomstring";
+import reqidService from "../../service/reqid-service.js";
 
 async function token(req, res, routerAuth) {
   const authId = "authorization";
@@ -125,6 +126,14 @@ async function token(req, res, routerAuth) {
         codeService,
         [{}].concat([authId, req.body.code])
       );
+
+      if (code.request.id) {
+        await reqidService.deleteData.apply(
+          reqidService,
+          [{}].concat([authId, code.request.id])
+        );
+      }
+
       //const api = await apiService.getApiByIdentifier.apply(apiService, [{}].concat([apiId, client.audience]));
       const api = await apiService.getApiByIdentifier(apiId, client.audience);
       if (api.length < 1) {
@@ -190,7 +199,6 @@ async function token(req, res, routerAuth) {
         };
 
         res.status(200).json(token_response);
-        //console.log("Issued tokens for code %s", req.body.code);
 
         return;
       } else {

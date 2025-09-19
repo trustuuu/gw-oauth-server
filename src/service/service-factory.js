@@ -11,7 +11,6 @@ import {
 } from "../firebase/firebase-service.js";
 
 export const createService = (pathFn) => {
-  console.log("pathFn", pathFn, pathFn());
   return {
     getPath: pathFn,
     getData: R.compose(getDoc, pathFn),

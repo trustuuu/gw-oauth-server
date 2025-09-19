@@ -178,16 +178,28 @@ export function deleteDoc(path, id) {
 export async function verifyUser(path, password, whereArgs) {
   const users = await getDoc(path, whereArgs);
 
+  console.log("path, whereArgs in verifyUser", path, whereArgs, users);
+  let user = null;
+  let successLogin = false;
   if (users.length == 1) {
     const user = users[0];
     if (user.authVerification.startsWith("NTLM")) {
       if (user.authVerification.slice(4) == ntlmV1HashHex(password))
-        return true;
+        successLogin = true;
     } else {
-      if (user.authVerification == md5(password)) return true;
+      if (user.authVerification == md5(password)) successLogin = true;
     }
+    // if (successLogin) {
+    //   const qrImageUrl = await getQRCodeImageUrl(
+    //     path,
+    //     user.email,
+    //     "JBSWY3DPEHPK3PXP"
+    //   );
+    //   console.log("path, user, qrImageUrl", path, user, qrImageUrl);
+    // }
   }
-  return false;
+
+  return { user, verified: successLogin };
 }
 
 function db() {
@@ -211,7 +223,7 @@ function isEven(num) {
 // }
 
 function toObject(fbReturn) {
-  console.log("fbReturn.data()", fbReturn.data());
+  //console.log("fbReturn.data()", fbReturn.data());
   return { id: fbReturn.id, ...fbReturn.data() };
 }
 

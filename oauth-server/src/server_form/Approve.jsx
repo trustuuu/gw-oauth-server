@@ -7,8 +7,15 @@ export default function Approve() {
   const [searchParams] = useSearchParams();
   const [decryptJson, setDecryptJson] = useState({});
   const data = parseQuery(searchParams);
-  const { reqid, scope, client, email, code_challenge, code_challenge_method } =
-    decryptJson;
+  const {
+    reqid,
+    txId,
+    scope,
+    client,
+    email,
+    code_challenge,
+    code_challenge_method,
+  } = decryptJson;
   const [isAgree, setIsAgree] = useState(false);
 
   useEffect(() => {
@@ -80,6 +87,7 @@ export default function Approve() {
               </label>
             </div>
             <input type="hidden" name="reqid" value={reqid} />
+            <input type="hidden" name="txId" value={txId} />
             <input type="hidden" name="email" value={email} />
             <input type="hidden" name="code_challenge" value={code_challenge} />
 

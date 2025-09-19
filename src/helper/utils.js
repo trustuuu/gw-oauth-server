@@ -49,7 +49,6 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
   }
 if(user){
   roles = user.root ? [...roles, "tenant:admin"] : roles;
-  console.log("roles", roles)
 }
     var header = { 'typ': 'JWT', 'alg': selectedRasKey.alg, 'kid': selectedRasKey.kid };
     var payload = {
@@ -202,3 +201,63 @@ export const corsOptionsDelegate = function (req, callback) {
 
   callback(null, corsInnerOptions);
 };
+
+// url-safe base64 helpers
+const b64u = {
+  enc: (buf) => Buffer.from(buf).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/,""),
+  dec: (str) => Buffer.from(str.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((str.length + 3) % 4), "base64"),
+};
+
+// derive a 32-byte key from your app secret
+function keyFromSecret(secret) {
+  return crypto.createHash("sha256").update(secret).digest(); // 32 bytes
+}
+
+export function encryptPayload(payloadObj, secret) {
+  const key = keyFromSecret(secret);
+  const iv = crypto.randomBytes(12); // GCM nonce
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  const plaintext = Buffer.from(JSON.stringify(payloadObj), "utf8");
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  // token = iv.tag.ciphertext (all base64url, dot-separated)
+  return [b64u.enc(iv), b64u.enc(tag), b64u.enc(ciphertext)].join(".");
+}
+
+export function decryptPayload(token, secret) {
+  const [ivB64, tagB64, ctB64] = token.split(".");
+  if (!ivB64 || !tagB64 || !ctB64) throw new Error("bad_token_format");
+  const key = keyFromSecret(secret);
+  const iv = b64u.dec(ivB64);
+  const tag = b64u.dec(tagB64);
+  const ct = b64u.dec(ctB64);
+  const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(tag);
+  const pt = Buffer.concat([decipher.update(ct), decipher.final()]);
+  return JSON.parse(pt.toString("utf8"));
+}
+
+export function toBase32(input) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = 0;
+  let value = 0;
+  let output = "";
+
+  const bytes = typeof input === "string" ? new TextEncoder().encode(input) : input;
+
+  for (let i = 0; i < bytes.length; i++) {
+    value = (value << 8) | bytes[i];
+    bits += 8;
+
+    while (bits >= 5) {
+      output += alphabet[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+
+  if (bits > 0) {
+    output += alphabet[(value << (5 - bits)) & 31];
+  }
+
+  return output; // no padding "=" to match TOTP usage
+}

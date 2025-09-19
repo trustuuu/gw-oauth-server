@@ -3,6 +3,14 @@ import express from "express";
 import { init } from "../firebase/firebase-service.js";
 import { authData } from "./oauth/auth_service.js";
 import authorize from "./oauth/authorize.js";
+import {
+  getDecryptMfaLink,
+  mfaGet,
+  mfaImage,
+  mfaPost,
+  mfaQuery,
+  mfaVerify,
+} from "./oauth/mfa.js";
 import login from "./oauth/login.js";
 import approve from "./oauth/approve.js";
 import token from "./oauth/token.js";
@@ -58,4 +66,27 @@ routerAuth.post(
 routerAuth.post(
   "/session",
   async (req, res) => await getSession(req, res, routerAuth)
+);
+
+routerAuth.get(`/mfa`, async (req, res) => await mfaGet(req, res, routerAuth));
+routerAuth.get(
+  `/mfalink`,
+  async (req, res) => await mfaQuery(req, res, routerAuth)
+);
+routerAuth.get(
+  `/mfaImage`,
+  async (req, res) => await mfaImage(req, res, routerAuth)
+);
+
+routerAuth.post(
+  `/mfa`,
+  async (req, res) => await mfaPost(req, res, routerAuth)
+);
+routerAuth.post(
+  `/verifyTotp`,
+  async (req, res) => await mfaVerify(req, res, routerAuth)
+);
+routerAuth.post(
+  `/mfaLinkValue`,
+  async (req, res) => await getDecryptMfaLink(req, res, routerAuth)
 );
