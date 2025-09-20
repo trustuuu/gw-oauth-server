@@ -125,7 +125,9 @@ export const mfaPost = async (req, res, routerAuth) => {
 
   const { totp } = req.body;
   const ok = await verifyTotp(
-    process.env.TOTP_SECRET, //`${tx.userId}iGoodWorksInc`.replace(/[^a-zA-Z0-9]/g, "").toUpperCase(),
+    `${tx.userId}${process.env.TOTP_SECRET}`
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .toUpperCase(),
     totp
   ); // your TOTP/WebAuthn verification
   if (!ok) return res.status(401).send("Invalid code");
@@ -177,7 +179,11 @@ export const mfaImage = async (req, res, routerAuth) => {
     d,
     e,
     //process.env.TOTP_SECRET
-    toBase32(`${u}iGoodWorksInc`.replace(/[^a-zA-Z0-9]/g, "").toUpperCase())
+    toBase32(
+      `${u}${process.env.TOTP_SECRET}`
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .toUpperCase()
+    )
   );
   return res.status(200).json(codeImage);
 };
@@ -198,7 +204,9 @@ export const mfaVerify = async (req, res, routerAuth) => {
     const ok = await verifyTotp(
       //process.env.TOTP_SECRET,
       toBase32(
-        `${user}iGoodWorksInc`.replace(/[^a-zA-Z0-9]/g, "").toUpperCase()
+        `${user}${process.env.TOTP_SECRET}`
+          .replace(/[^a-zA-Z0-9]/g, "")
+          .toUpperCase()
       ),
       totp
     );
