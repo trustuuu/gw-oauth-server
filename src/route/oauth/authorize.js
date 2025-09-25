@@ -27,14 +27,13 @@ async function authorize(req, res, routerAuth) {
   const authId = "authorization";
   const reqQuery = req.query;
 
-  if (R.includes("openId", reqQuery.scope.split(" "))) {
+  client = await getClient(reqQuery.client_id);
+  if (R.includes("authorization_code", client.grant_types)) {
     if (!reqQuery.email && !reqQuery.password && reqQuery.stage != "mfa") {
       redirectToLogin(reqQuery, res);
       return;
     }
   }
-
-  client = await getClient(reqQuery.client_id);
 
   if (!client) {
     console.log("Unknown client %s", reqQuery.client_id);
