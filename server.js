@@ -265,11 +265,29 @@ try {
   console.log("authentication retuns error:", error);
 }
 
-app.use(
-  cors({
-    origin: "*", // or specify allowed origins: ['http://localhost:3000']
-  })
-);
+// app.use(
+//   cors({
+//     origin: "*", // or specify allowed origins: ['http://localhost:3000']
+//   })
+// );
+app.use(async (req, res, next) => {
+  try {
+    const origin = req.headers.origin;
+    console.log("origin before static", origin);
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200); // preflight
+    }
+
+    return next();
+  } catch (error) {
+    console.log(`static origin checking error: ${error}`);
+    return next();
+  }
+});
+
 app.use(express.static(oauth_server_path));
 
 app.use((err, req, res, next) => {
