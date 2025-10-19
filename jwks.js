@@ -71,3 +71,20 @@ export function authenticate(req, res, next) {
     return res.status(401).send("Unknown issuer");
   }
 }
+
+export function checkTenantAccess(req, res, next) {
+  const tokenTenant = req.auth?.tenant_id;
+  //const routeTenant = req.params?.id;
+
+  if (!tokenTenant) {
+    return res.status(401).json({ error: "Missing tenant_id in token" });
+  }
+
+  // if (tokenTenant !== routeTenant) {
+  //   return res
+  //     .status(403)
+  //     .json({ error: `Access denied for tenant '${routeTenant}'` });
+  // }
+
+  next();
+}

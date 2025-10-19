@@ -89,6 +89,7 @@ export default function Approve() {
             <input type="hidden" name="reqid" value={reqid} />
             <input type="hidden" name="txId" value={txId} />
             <input type="hidden" name="email" value={email} />
+            <input type="hidden" name="scope" value={scope.join(" ")} />
             <input type="hidden" name="code_challenge" value={code_challenge} />
 
             <input

@@ -9,30 +9,35 @@ import {
 import md5 from "blueimp-md5";
 import { ntlmV1HashHex, convertPassword } from "../helper/secureWin.js";
 import { getQRCodeImageUrl } from "../helper/otp.js";
+import { GuardLeast } from "../../igwGuard.js";
 
 const routerUser = express.Router();
 export default routerUser;
 
-routerUser.get(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
-  if (req.query.condition) {
-    run(res, async () => {
-      const users = await userService.getUsersWhere(
-        req.params.id,
-        req.params.domainId,
-        req.query.condition
-      );
-      return users.map(({ session, ...rest }) => rest);
-    });
-  } else {
-    run(res, async () => {
-      const users = await userService.getData(
-        req.params.id,
-        req.params.domainId
-      );
-      return users.map(({ session, ...rest }) => rest);
-    });
+routerUser.get(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`,
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    if (req.query.condition) {
+      run(res, async () => {
+        const users = await userService.getUsersWhere(
+          req.params.id,
+          req.params.domainId,
+          req.query.condition
+        );
+        return users.map(({ session, ...rest }) => rest);
+      });
+    } else {
+      run(res, async () => {
+        const users = await userService.getData(
+          req.params.id,
+          req.params.domainId
+        );
+        return users.map(({ session, ...rest }) => rest);
+      });
+    }
   }
-});
+);
 
 routerUser.get(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId`,
@@ -95,6 +100,19 @@ routerUser.get(
   (req, res) => {
     run(res, () =>
       userService.getUserPermissionScopes(
+        req.params.id,
+        req.params.domainId,
+        req.params.userId
+      )
+    );
+  }
+);
+
+routerUser.get(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/AppRoles`,
+  (req, res) => {
+    run(res, () =>
+      userService.getUserAppRoles(
         req.params.id,
         req.params.domainId,
         req.params.userId

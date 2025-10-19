@@ -17,7 +17,7 @@ routerDomain.get(
 
 routerDomain.get(
   `/:id/${DOMAIN_COLL}/:domainId`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       domainService.getDomainInfo(req.params.id, req.params.domainId)
@@ -27,7 +27,7 @@ routerDomain.get(
 
 routerDomain.get(
   `/:id/${DOMAIN_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => domainService.getData(req.params.id));
   }

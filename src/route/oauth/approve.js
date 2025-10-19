@@ -29,7 +29,7 @@ async function approve(req, res, routerAuth) {
     if (query.response_type == "code") {
       // user approved access
 
-      const rscope = getScopesFromForm(req.body);
+      const rscope = req.body.scope ? req.body.scope.split(" ") : []; //getScopesFromForm(req.body);
       const client = await getClient(query.client_id);
       //const user = await getUserRef(req.body.email);
       // const user = await getUser(

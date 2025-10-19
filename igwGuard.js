@@ -31,7 +31,7 @@ export const Guard = {
       const auth = req.auth;
       const permissions =
         auth && Array.isArray(auth.permissions) ? auth.permissions : [];
-
+      console.log("permissions", permissions);
       const authorized = requiredScopes.some(function (scopeGroup) {
         if (Array.isArray(scopeGroup)) {
           // AND 모드: 그룹 안 모든 스코프를 permissions에 포함해야 함
@@ -56,7 +56,7 @@ export const Guard = {
     return function (req, res, next) {
       const auth = req.auth;
       const roles = auth && Array.isArray(auth.roles) ? auth.roles : [];
-
+      console.log("roles", roles);
       const authorized = requiredRoles.some(function (roleGroup) {
         if (Array.isArray(roleGroup)) {
           // AND 모드: 그룹 안 모든 롤을 roles에 포함해야 함
@@ -83,19 +83,30 @@ export const GuardLeast = {
     return function (req, res, next) {
       const auth = req.auth || {};
 
+      //Tenant Checking
+      const tokenTenant = auth?.tenant_id;
+      const routeTenant = req.params.id ? req.params.id : req.params.companyId;
+
+      if (!tokenTenant) {
+        return res.status(401).json({ error: "Missing tenant_id in token" });
+      }
+
+      if (req.originalUrl.includes("/oauthapi")) {
+        console.log(`Tenant checking has been passed for ${req.originalUrl}`);
+      } else if (tokenTenant !== routeTenant) {
+        return res
+          .status(403)
+          .json({ error: `Access denied for tenant '${routeTenant}'` });
+      }
+
+      //Permission checking
       const permissions = Array.isArray(auth.permissions)
         ? auth.permissions
         : [];
+      //Roles checking
       const roles = Array.isArray(auth.roles) ? auth.roles : [];
-      // 스코프 OR 로 체크
-      //      const scopesAuthorized = !requiredScopes
-      // console.log(
-      //   "requiredScopes, requiredRoles, permissions, roles",
-      //   requiredScopes,
-      //   requiredRoles,
-      //   permissions,
-      //   roles
-      // );
+
+      // Scope OR Role checking
       const scopesAuthorized =
         requiredScopes === undefined
           ? requiredScopes
@@ -103,17 +114,23 @@ export const GuardLeast = {
           ? true
           : requiredScopes.some(function (scopeGroup) {
               if (Array.isArray(scopeGroup)) {
-                // AND 모드: 그룹 안 모든 스코프를 permissions에 포함해야 함
+                // AND Mode: all scopes in group should includes permissions
                 return scopeGroup.every(function (scope) {
+                  console.log(
+                    `permissions => ${permissions} inclues scope => ${scope}`
+                  );
                   return permissions.includes(scope);
                 });
               } else {
-                // OR 모드: 하나라도 permissions에 있으면 통과
+                // OR Mode: one of permissions included in scope.
+                console.log(
+                  `permissions => ${permissions} inclues scopeGroup => ${scopeGroup}`
+                );
                 return permissions.includes(scopeGroup);
               }
             });
 
-      // 롤 OR 로 체크
+      // Role OR checking
       //const rolesAuthorized = !requiredRoles
       const rolesAuthorized =
         requiredRoles === undefined
@@ -122,12 +139,16 @@ export const GuardLeast = {
           ? true
           : requiredRoles.some(function (roleGroup) {
               if (Array.isArray(roleGroup)) {
-                // AND 모드: 그룹 안 모든 롤을 roles에 포함해야 함
+                // AND mode: all roles should be included in groups.
+                console.log(
+                  `roleGroup => ${roleGroup} inclues roles => ${roles}`
+                );
                 return roleGroup.every(function (role) {
                   return roles.includes(role);
                 });
               } else {
-                // OR 모드: 하나라도 roles에 있으면 통과
+                // OR mode: any roles inclued
+                console.log(`roles => ${roles} inclues roles => ${roleGroup}`);
                 return roles.includes(roleGroup);
               }
             });

@@ -13,8 +13,8 @@ const getUserByEmail = (companyId, domainId, email) =>
   getDoc(userPath(companyId, domainId), ["email", "==", email]);
 const getUsersWhere = (companyId, domainId, condition) =>
   getDoc(userPath(companyId, domainId), condition);
-const getUserPermissionScopes = (companyId, domainId, userId, conditoin) =>
-  getDoc(userPath(companyId, domainId, userId, "PermissionScopes"), conditoin);
+const getUserPermissionScopes = (companyId, domainId, userId, condition) =>
+  getDoc(userPath(companyId, domainId, userId, "PermissionScopes"), condition);
 const getUserAppRoles = (companyId, domainId, userId, condition) =>
   getDoc(userPath(companyId, domainId, userId, "AppRoles"), condition);
 const getUserRef = (email) => getUserFromRef(email);

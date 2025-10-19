@@ -96,7 +96,7 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 
-//app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(logger("dev"));
 
 app.use(bodyParser.urlencoded({ extended: true })); // support form-encoded bodies (for the token endpoint)
@@ -168,7 +168,6 @@ try {
 
       const client = await getClient(clientId);
       if (!client) return false;
-
       if (!client.allowed_web_orgins || !client.allowed_web_orgins[0]) {
         allowedOriginsCache.set(client.client_id, ["*"]);
         return true;
@@ -189,9 +188,10 @@ try {
   app.use(async (req, res, next) => {
     try {
       const origin = req.headers.origin;
+      console.log("origin", origin);
       if (!origin) return next();
-      if (req.path.replace(/\/$/, "") !== "/oauth/v1/token") return next();
-      if (req.path.replace(/\/$/, "") !== "/oauth/v1/signup") return next();
+      if (req.path.replace(/\/$/, "") == "/oauth/v1/token") return next();
+      if (req.path.replace(/\/$/, "") == "/oauth/v1/signup") return next();
 
       const isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
       if (isAllowed) {
@@ -265,6 +265,11 @@ try {
   console.log("authentication retuns error:", error);
 }
 
+// app.use(
+//   cors({
+//     origin: "*", // or specify allowed origins: ['http://localhost:3000']
+//   })
+// );
 app.use(express.static(oauth_server_path));
 
 app.use((err, req, res, next) => {
@@ -276,7 +281,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(oauth_server_path, "index.html"));
 });
 
-const hostheader = isProduction ? "" : "localhost";
+const hostheader = isProduction ? "" : "0.0.0.0";
 const port = isProduction ? process.env.SERVER_PORT : 80;
 const server = app.listen(port || 8080, hostheader, () => {
   const host = server.address().address;

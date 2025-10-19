@@ -6,18 +6,25 @@ import {
   generateServiceAccessToken,
   generateIdToken,
   verifyCodeChallenge,
+  generateRefreshAccessToken,
   //getJwtExpire,
 } from "../../helper/utils.js";
 import { getClient } from "./auth_service.js";
 import apiService from "../../service/api-service.js";
 import tokenService from "../../service/token-service.js";
 import codeService from "../../service/code-service.js";
-import randomstring from "randomstring";
 import reqidService from "../../service/reqid-service.js";
+import { handleTokenExchange } from "../../helper/handleTokenExchange.js";
 
 async function token(req, res, routerAuth) {
   const authId = "authorization";
   const apiId = "api";
+
+  if (
+    req.body.grant_type === "urn:ietf:params:oauth:grant-type:token-exchange"
+  ) {
+    return handleTokenExchange(req, res);
+  }
 
   const auth = req.headers["authorization"];
   let clientId = "";
@@ -45,6 +52,7 @@ async function token(req, res, routerAuth) {
   }
 
   const client = await getClient(clientId);
+
   if (!client) {
     console.log("Unknown client %s", clientId);
     res.status(401).json({ error: "invalid_client" });
@@ -96,9 +104,20 @@ async function token(req, res, routerAuth) {
       api[0].audience,
       Math.floor(now_utc / 1000),
       expires_in,
-      client.PermissionScopes,
+      client,
       api[0]
     );
+
+    // const deviceId = req.headers["x-device-id"];
+    // const refresh_expires_in =
+    //   Math.floor(now_utc / 1000) + api[0].tokenExpiration * 600;
+    // const refresh_token = generateRefreshAccessToken(
+    //   null,
+    //   api[0].audience,
+    //   refresh_expires_in,
+    //   client,
+    //   deviceId
+    // );
 
     // const id_token = generateIdToken(
     //   process.env.OAUTH_ISSUER,
@@ -112,8 +131,10 @@ async function token(req, res, routerAuth) {
       domain: client.domain,
     };
     const token_response = {
-      access_token: access_token,
-      expires_in: expires_in,
+      access_token,
+      //refresh_token,
+      expires_in,
+      token_type: "Bearer",
       client: tokenClient,
       scope: client.scope,
     };
@@ -172,16 +193,24 @@ async function token(req, res, routerAuth) {
           api[0].audience,
           Math.floor(now_utc / 1000),
           expires_in,
+          client,
           //client.scope,
           //appRoles ? appRoles.map((r) => r.role) : [],
           api[0],
           code.user
         );
 
-        const id_token = generateIdToken(
-          api[0].issuer, //process.env.OAUTH_ISSUER,
+        const deviceId = req.headers["x-device-id"];
+        const refresh_expires_in =
+          Math.floor(now_utc / 1000) + api[0].tokenExpiration * 600;
+        const refresh_token = await generateRefreshAccessToken(
+          null,
+          api[0].audience,
+          refresh_expires_in,
+          client,
+          deviceId,
           code.user,
-          clientId
+          code.scope
         );
         const tokenClient = {
           client_id: clientId,
@@ -189,15 +218,28 @@ async function token(req, res, routerAuth) {
           domain: code.user.domainId,
         };
 
-        const token_response = {
-          access_token: access_token,
-          id_token: id_token,
-          expires_in: expires_in,
+        let token_response = {
+          access_token,
+          refresh_token,
+          expires_in,
+          token_type: "Bearer",
           client: tokenClient,
-          scope: code.scope,
-          user: code.user,
+          //scope: code.scope,
+          //user: code.user,
         };
+        console.log("code.scope", code.scope);
+        if (code.scope.includes("openId")) {
+          const id_token = generateIdToken(
+            api[0].issuer, //process.env.OAUTH_ISSUER,
+            Math.floor(now_utc / 1000),
+            code.user,
+            clientId,
+            code.scope
+          );
+          token_response = { ...token_response, id_token };
+        }
 
+        console.log("token_response", token_response);
         res.status(200).json(token_response);
 
         return;
@@ -227,23 +269,87 @@ async function token(req, res, routerAuth) {
           tokenService,
           [{}].concat([authId, req.body.refresh_token])
         );
-        //nosql.remove().make(function(builder) { builder.where('refresh_token', req.body.refresh_token); });
+
+        return res.status(400).json({ error: "invalid_grant" });
+      }
+
+      const deviceId = req.headers["x-device-id"];
+      const expectedDevice = token.device_id;
+      if (deviceId !== expectedDevice) {
+        return res.status(401).json({ error: "device_mismatch" });
+      }
+
+      ///////////////////////////////////////////////////////////
+      const api = await apiService.getApiByIdentifier(apiId, client.audience);
+      if (api.length < 1) {
+        console.log(
+          "Authence has not been found, expected %s got %s",
+          clientId,
+          client.audience
+        );
         res.status(400).json({ error: "invalid_grant" });
         return;
       }
-      const access_token = randomstring.generate();
-      // token_data = {
-      //   access_token: access_token,
-      //   client_id: clientId,
-      //   whenCreated: new Date(),
-      //   type: "access_token",
-      // };
+      const date = new Date();
+      const now_utc = Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        date.getUTCHours(),
+        date.getUTCMinutes(),
+        date.getUTCSeconds()
+      );
+      const expires_in =
+        Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
 
-      const token_response = {
-        access_token: access_token,
-        token_type: "Bearer",
-        refresh_token: token.refresh_token,
+      const access_token = await generateCodeAccessToken(
+        api[0].issuer, //process.env.OAUTH_ISSUER,
+        token.user.id, //client.client_name,
+        api[0].audience,
+        Math.floor(now_utc / 1000),
+        expires_in,
+        client,
+        api[0],
+        token.user
+      );
+
+      const refresh_expires_in =
+        Math.floor(now_utc / 1000) + api[0].tokenExpiration * 600;
+      const refresh_token = generateRefreshAccessToken(
+        null,
+        api[0].audience,
+        refresh_expires_in,
+        client,
+        deviceId
+      );
+      const tokenClient = {
+        client_id: clientId,
+        companyId: client.companyId,
+        domain: client.domain,
       };
+      let token_response = {
+        access_token,
+        refresh_token,
+        expires_in,
+        token_type: "Bearer",
+        client: tokenClient,
+        scope: token.scope,
+        user: token.user,
+      };
+
+      if (token.scope.includes("openId")) {
+        const id_token = generateIdToken(
+          api[0].issuer, //process.env.OAUTH_ISSUER,
+          Math.floor(now_utc / 1000),
+          token.user,
+          clientId,
+          token.scope
+        );
+        token_response = { ...token_response, id_token };
+      }
+
+      ///////////////////////////////////////////////////////////
+
       res.status(200).json(token_response);
       return;
     } else {

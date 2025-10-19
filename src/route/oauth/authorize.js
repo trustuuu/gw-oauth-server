@@ -34,7 +34,7 @@ async function authorize(req, res, routerAuth) {
       return;
     }
   }
-
+  let rscope = [];
   if (!client) {
     console.log("Unknown client %s", reqQuery.client_id);
     res.render("error", { error: "Unknown client" });
@@ -48,7 +48,7 @@ async function authorize(req, res, routerAuth) {
     res.render("error", { error: "Invalid redirect URI" });
     return;
   } else {
-    const rscope = reqQuery.scope ? reqQuery.scope.split(" ") : undefined;
+    rscope = reqQuery.scope ? reqQuery.scope.split(" ") : undefined;
 
     if (R.difference(rscope, client.scope).length > 0) {
       const urlParsed = buildUrl(reqQuery.redirect_uri, {
@@ -57,43 +57,44 @@ async function authorize(req, res, routerAuth) {
       res.redirect(urlParsed);
       return;
     }
+  }
 
-    const userConsent = await allowUserConsentSkip(res, client);
+  const userConsent = await allowUserConsentSkip(res, client);
 
-    if (userConsent) {
-      const redirectURL = await generateCodeUrlBuild(
-        { ...reqQuery, password: null },
-        reqQuery.email,
-        reqQuery.scope.split(" "),
-        reqQuery.code_challenge,
-        reqQuery.code_challenge_method
-      );
-      res.redirect(redirectURL);
+  if (userConsent) {
+    const redirectURL = await generateCodeUrlBuild(
+      { ...reqQuery, password: null },
+      reqQuery.email,
+      reqQuery.scope.split(" "),
+      reqQuery.code_challenge,
+      reqQuery.code_challenge_method
+    );
+    res.redirect(redirectURL);
 
-      return;
-    } else {
-      const reqid = randomstring.generate(8);
+    return;
+  } else {
+    const reqid = randomstring.generate(8);
 
-      //const requests = [{reqid:reqQuery}];
-      //routerAuth.locals.requests[reqid] = reqQuery;
-      await reqIdService.setData.apply(
-        reqIdService,
-        [reqQuery].concat([authId, reqid])
-      );
+    //const requests = [{reqid:reqQuery}];
+    //routerAuth.locals.requests[reqid] = reqQuery;
+    await reqIdService.setData.apply(
+      reqIdService,
+      [reqQuery].concat([authId, reqid])
+    );
 
-      const params = {
-        client: client,
-        reqid: reqid,
-        scope: rscope,
-        email: reqQuery.email,
-        code_challenge: reqQuery.code_challenge,
-        code_challenge_method: reqQuery.code_challenge_method,
-      };
-      const redirectURL = await buildQueryUrl("../../approve", params);
-      res.redirect(redirectURL);
+    const params = {
+      client: client,
+      reqid: reqid,
+      scope: rscope,
+      email: reqQuery.email,
+      code_challenge: reqQuery.code_challenge,
+      code_challenge_method: reqQuery.code_challenge_method,
+    };
+    console.log("params", params);
+    const redirectURL = await buildQueryUrl("../../approve", params);
+    res.redirect(redirectURL);
 
-      return;
-    }
+    return;
   }
 }
 

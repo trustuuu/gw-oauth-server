@@ -50,7 +50,7 @@ async function login(req, res, routerAuth) {
         reqQuery.email,
         reqQuery.password
       );
-      console.log("userVerified", userVerified, user);
+
       if (!userVerified.verified) {
         redirectToLogin(reqQuery, res);
         return;

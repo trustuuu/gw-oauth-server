@@ -10,19 +10,45 @@ import userService from '../service/user-service.js';
 import rsaKey from '../route/rsaKey.json' with { type: "json" };
 import rsaKeyService from '../route/rsaKeyService.json' with { type: "json" };
 
-export const generateCodeAccessToken = async (iss, sub, aud, iat, exp, api, user) => {
-    const access_token = await generateAccessTokenCommon(rsaKey, iss, sub, aud, iat, exp, null, api, user);
+export const generateCodeAccessToken = async (iss, sub, aud, iat, exp, client, api, user) => {
+    const access_token = await generateAccessTokenCommon(rsaKey, iss, sub, aud, iat, exp, client, api, user);
     return access_token;
 }
-export const generateServiceAccessToken = async (iss, sub, aud, iat, exp, permission, api) => {
-    const access_token = await generateAccessTokenCommon(rsaKeyService, iss, sub, aud, iat, exp, permission, api);
+export const generateServiceAccessToken = async (iss, sub, aud, iat, exp, client, api) => {
+    const access_token = await generateAccessTokenCommon(rsaKeyService, iss, sub, aud, iat, exp, client, api);
     return access_token;
+}
+export const generateRefreshAccessToken = async (aud, exp, client, deviceId, user, scope) => {
+  let tenant_id = null;
+  let client_id = null;
+  if (client){
+    tenant_id = client.companyId;
+    client_id = client.Id;
+  }
 
+  const header = { 'typ': 'JWT', 'alg': rsaKeyService.alg, 'kid': rsaKeyService.kid };
+  const payload = {
+      aud: aud,
+      exp: exp,
+      jti: randomstring.generate(8),
+      tenant_id,
+      client_id,
+      deviceId,
+      token_use: "refresh"
+  };
+  const payload_server = {...payload, user, scope};
+  const privateKey = jose.KEYUTIL.getKey(rsaKeyService);
+  const access_token = jose.jws.JWS.sign(header.alg,
+      JSON.stringify(header),
+      JSON.stringify(payload),
+      privateKey);
+  return access_token;
 }
 
-export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, iat, exp, permission, api, user) => {
+export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, iat, exp, client, api, user) => {
   let userPermissions = null
   let roles = null
+  let tenant_id = null;
   if (api.addPermissionAccessToken && user){
     const userPermissionRaw = await userService.getUserPermissionScopes(
       user.companyId,
@@ -47,50 +73,72 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
     );
     roles = appRoles ? appRoles.map((r) => r.role) : [];
   }
-if(user){
-  roles = user.root ? [...roles, "tenant:admin"] : roles;
-}
-    var header = { 'typ': 'JWT', 'alg': selectedRasKey.alg, 'kid': selectedRasKey.kid };
-    var payload = {
-        iss: iss,
-        sub: sub,
-        aud: aud,
-        iat: iat,
-        exp: exp,
-        jti: randomstring.generate(8),
-        permissions: permission? permission : userPermissions?userPermissions:[],
-        roles: roles?roles:[]
-    };
-   
-    var privateKey = jose.KEYUTIL.getKey(selectedRasKey);
-    var access_token = jose.jws.JWS.sign(header.alg,
-        JSON.stringify(header),
-        JSON.stringify(payload),
-        privateKey);
+  if(user){
+    roles = user.root ? [...roles, "tenant:admin"] : roles;
+    tenant_id = user.companyId;
+  }
 
-    return access_token;
+  if(client.companyId && !tenant_id) tenant_id = client.companyId;
+
+  var header = { 'typ': 'JWT', 'alg': selectedRasKey.alg, 'kid': selectedRasKey.kid };
+  var payload = {
+      iss: iss,
+      sub: sub,
+      aud: aud,
+      iat: iat,
+      exp: exp,
+      jti: randomstring.generate(8),
+      permissions: client.PermissionScopes? client.PermissionScopes : userPermissions?userPermissions:[],
+      roles: roles?roles:[],
+      tenant_id,
+      client_id:client.id,
+      companyId:client.companyId,
+      domainId:client.domain,
+      token_use: "access"
+  };
+
+  var privateKey = jose.KEYUTIL.getKey(selectedRasKey);
+  var access_token = jose.jws.JWS.sign(header.alg,
+      JSON.stringify(header),
+      JSON.stringify(payload),
+      privateKey);
+  return access_token;
 }
 
-export const generateIdToken = (iss, user, clientId, nonce) => {
-    const access_token = generateIdTokenCommon(rsaKey, iss, user, clientId, nonce);
+export const generateIdToken = (iss, iat, user, clientId, scopes, nonce) => {
+    const access_token = generateIdTokenCommon(iss, iat, user, clientId, scopes, nonce);
     return access_token;
 }
 export const generateServiceIdToken = (iss, user, clientId, nonce) => {
     const access_token = generateIdTokenCommon(rsaKeyService, iss, user, clientId, nonce);
     return access_token;
-
 }
 
-export const generateIdTokenCommon = (iss, user, clientId, nonce) => {
+export const generateIdTokenCommon = (iss, iat, user, clientId, scopes, nonce) => {
     var header = { 'typ': 'JWT', 'alg': rsaKey.alg, 'kid': rsaKey.kid };
-    const payload = {
+    let payload = {
       sub: user.id,               // 사용자 ID
-      name: user.name,            // 사용자 이름
-      email: user.email,          // 사용자 이메일
       aud: clientId,              // 클라이언트 앱 ID
-      iss: iss,
+      iss,
+      iat,
       nonce: nonce,               // OpenID Connect 보안용
     };
+    if(scopes.includes("profile")){
+      payload = {...payload,
+        id: user.id,
+        root: true, //user.root,
+        name:  user.name,// 사용자 이름
+        displayName: user.displayName,
+        companyId: user.companyId,
+        domainId: user.domainId
+      }
+    }
+    if(scopes.includes("email")){
+      payload = {...payload,
+        email:  user.email,// 사용자 이름
+        email_verified: user.email_verified
+      }
+    }
 
     var privateKey = jose.KEYUTIL.getKey(rsaKey);
     var id_token = jose.jws.JWS.sign(header.alg,
@@ -132,16 +180,38 @@ export const buildUrl = (base, options, hash) => {
 	return url.format(newUrl);
 };
 
+function decodeJwtPayload(token) {
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    throw new Error("Invalid JWT");
+  }
+
+  const base64 = parts[1]
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  const payload = Buffer.from(base64, 'base64').toString('utf-8');
+  return JSON.parse(payload);
+}
+
 export const decodeClientCredentials = function(auth) {
-	var clientCredentials = Buffer.from(auth.slice('basic '.length), 'base64').toString().split(':');
-	var clientId = querystring.unescape(clientCredentials[0]);
-	var clientSecret = querystring.unescape(clientCredentials[1]);	
-	return { id: clientId, secret: clientSecret };
+  if (auth.startsWith("Bearer ")) {
+    const token = auth.slice(7); // remove "Bearer "
+    const payload = decodeJwtPayload(token);
+    return { id: payload.client_id};
+  } else if (auth.startsWith("Basic ")) {
+    var clientCredentials = Buffer.from(auth.slice('basic '.length), 'base64').toString().split(':');
+    var clientId = querystring.unescape(clientCredentials[0]);
+    //var clientSecret = querystring.unescape(clientCredentials[1]);	
+    return { id: clientId };
+  } else {
+    return null;
+  }
 };
 
 export const getScopesFromForm = function(body) {
-	return __.filter(__.keys(body), function(s) { return __string.startsWith(s, 'scope_'); })
-				.map(function(s) { return s.slice('scope_'.length); });
+  return body.scope?body.scope.split(" "):[]
+	// return __.filter(__.keys(body), function(s) { return __string.startsWith(s, 'scope_'); })
+	// 			.map(function(s) { return s.slice('scope_'.length); });
 };
 
 // 1. code_verifier 생성
@@ -157,21 +227,8 @@ export function generateCodeChallenge(codeVerifier) {
   
     return base64urlEncode(hash);
   }
-  
-  // function base64urlEncode(buffer) {
-  //   // buffer: Uint8Array (브라우저) 또는 Buffer (Node.js)
-  
-  //   const base64String = Buffer.from(buffer).toString('base64');
-  
-  //   // base64 → base64url 변환
-  //   return base64String
-  //     .replace(/\+/g, '-') // + -> -
-  //     .replace(/\//g, '_') // / -> _
-  //     .replace(/=+$/, ''); // padding 제거
-  // }
 
   function base64urlEncode(sha256) {
-  //const base64 = Buffer.from(buffer).toString('base64');
    const base64 = sha256.toString('base64');
   return base64
     .replace(/\+/g, '-')
