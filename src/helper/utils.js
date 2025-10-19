@@ -126,7 +126,7 @@ export const generateIdTokenCommon = (iss, iat, user, clientId, scopes, nonce) =
     if(scopes.includes("profile")){
       payload = {...payload,
         id: user.id,
-        root: true, //user.root,
+        root: user.root,
         name:  user.name,// 사용자 이름
         displayName: user.displayName,
         companyId: user.companyId,
