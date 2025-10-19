@@ -270,22 +270,22 @@ try {
 //     origin: "*", // or specify allowed origins: ['http://localhost:3000']
 //   })
 // );
-app.use(async (req, res, next) => {
-  try {
-    const origin = req.headers.origin;
-    console.log("origin before static", origin);
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    if (req.method === "OPTIONS") {
-      return res.sendStatus(200); // preflight
-    }
 
-    return next();
-  } catch (error) {
-    console.log(`static origin checking error: ${error}`);
-    return next();
+// 1. CORS middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log("CORS check for:", origin);
+
+  // Allow specific origin or all (for now *)
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200); // preflight handled here
   }
+
+  next(); // MUST call next() for GET requests
 });
 
 app.use(express.static(oauth_server_path));
