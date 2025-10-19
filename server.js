@@ -272,29 +272,29 @@ try {
 // );
 
 // 1. CORS middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  console.log("CORS check for:", origin);
+// app.use((req, res, next) => {
+//   const origin = req.headers.origin;
+//   console.log("CORS check for:", origin);
 
-  // Allow specific origin or all (for now *)
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+//   // Allow specific origin or all (for now *)
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // preflight handled here
-  }
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200); // preflight handled here
+//   }
 
-  next(); // MUST call next() for GET requests
-});
-// Explicit JWKS route (ensures headers applied)
-app.get("/jwks.json", (req, res) => {
-  const jwksPath = path.join(oauth_server_path, "jwks.json");
-  console.log("CORS fored added for:", jwksPath);
-  res.sendFile(jwksPath, {
-    headers: { "Access-Control-Allow-Origin": "*" },
-  });
-});
+//   next(); // MUST call next() for GET requests
+// });
+// // Explicit JWKS route (ensures headers applied)
+// app.get("/jwks.json", (req, res) => {
+//   const jwksPath = path.join(oauth_server_path, "jwks.json");
+//   console.log("CORS fored added for:", jwksPath);
+//   res.sendFile(jwksPath, {
+//     headers: { "Access-Control-Allow-Origin": "*" },
+//   });
+// });
 app.use(express.static(oauth_server_path));
 
 app.use((err, req, res, next) => {
