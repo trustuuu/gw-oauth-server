@@ -287,7 +287,14 @@ app.use((req, res, next) => {
 
   next(); // MUST call next() for GET requests
 });
-
+// Explicit JWKS route (ensures headers applied)
+app.get("/jwks.json", (req, res) => {
+  const jwksPath = path.join(oauth_server_path, "jwks.json");
+  console.log("CORS fored added for:", jwksPath);
+  res.sendFile(jwksPath, {
+    headers: { "Access-Control-Allow-Origin": "*" },
+  });
+});
 app.use(express.static(oauth_server_path));
 
 app.use((err, req, res, next) => {
