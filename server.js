@@ -185,24 +185,24 @@ try {
     }
   }
 
-  app.get("/jwks.json", (req, res) => {
-    const jwksPath = path.join(oauth_server_path, "jwks.json");
+  // app.get("/jwks.json", (req, res) => {
+  //   const jwksPath = path.join(oauth_server_path, "jwks.json");
 
-    // Force CORS headers explicitly
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
+  //   // Force CORS headers explicitly
+  //   res.setHeader("Access-Control-Allow-Origin", "*");
+  //   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  //   res.setHeader(
+  //     "Access-Control-Allow-Headers",
+  //     "Content-Type, Authorization"
+  //   );
 
-    if (req.method === "OPTIONS") {
-      return res.sendStatus(200);
-    }
+  //   if (req.method === "OPTIONS") {
+  //     return res.sendStatus(200);
+  //   }
 
-    console.log("Serving JWKS with CORS headers:", jwksPath);
-    return res.sendFile(jwksPath);
-  });
+  //   console.log("Serving JWKS with CORS headers:", jwksPath);
+  //   return res.sendFile(jwksPath);
+  // });
 
   app.use(async (req, res, next) => {
     try {
@@ -211,7 +211,12 @@ try {
       if (!origin) return next();
       if (req.path.replace(/\/$/, "") == "/oauth/v1/token") return next();
       if (req.path.replace(/\/$/, "") == "/oauth/v1/signup") return next();
-      const isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
+      let isAllowed = false;
+      if (req.path.replace(/\/$/, "") == "/jwks.json") {
+        isAllowed = true;
+      } else {
+        isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
+      }
       console.log("origin isAllowed", isAllowed);
 
       if (isAllowed) {
