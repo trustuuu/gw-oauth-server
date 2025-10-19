@@ -211,12 +211,13 @@ try {
       if (!origin) return next();
       if (req.path.replace(/\/$/, "") == "/oauth/v1/token") return next();
       if (req.path.replace(/\/$/, "") == "/oauth/v1/signup") return next();
-      let isAllowed = false;
-      if (req.path.replace(/\/$/, "") == "/jwks.json") {
-        isAllowed = true;
-      } else {
-        isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
-      }
+      // let isAllowed = false;
+      // if (req.path.replace(/\/$/, "") == "/jwks.json") {
+      //   isAllowed = true;
+      // } else {
+      //   isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
+      // }
+      const isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
       console.log("origin isAllowed", isAllowed);
 
       if (isAllowed) {
@@ -295,6 +296,30 @@ try {
 //     origin: "*", // or specify allowed origins: ['http://localhost:3000']
 //   })
 // );
+app.get("/jwks.json", (req, res) => {
+  const jwksPath = path.join(oauth_server_path, "jwks.json");
+  const origin = req.headers.origin;
+  console.log("Serving JWKS for origin:", origin);
+
+  res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  // ensure these headers persist through sendFile
+  return res.sendFile(jwksPath, {
+    headers: {
+      "Access-Control-Allow-Origin": origin || "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Credentials": "true",
+    },
+  });
+});
 
 app.use(express.static(oauth_server_path));
 
