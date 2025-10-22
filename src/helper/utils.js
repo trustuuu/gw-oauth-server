@@ -36,7 +36,7 @@ export const generateRefreshAccessToken = async (aud, exp, client, deviceId, use
       deviceId,
       token_use: "refresh"
   };
-  const payload_server = {...payload, user, scope};
+  //const payload_server = {...payload, user, scope};
   const privateKey = jose.KEYUTIL.getKey(rsaKeyService);
   const access_token = jose.jws.JWS.sign(header.alg,
       JSON.stringify(header),
@@ -49,6 +49,8 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
   let userPermissions = null
   let roles = null
   let tenant_id = null;
+  let company_id = null;
+  let domain_id = null;
   if (api.addPermissionAccessToken && user){
     const userPermissionRaw = await userService.getUserPermissionScopes(
       user.companyId,
@@ -76,6 +78,8 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
   if(user){
     roles = user.root ? [...roles, "tenant:admin"] : roles;
     tenant_id = user.companyId;
+    company_id = user.companyId,
+    domain_id = user.domainId
   }
 
   if(client.companyId && !tenant_id) tenant_id = client.companyId;
@@ -90,10 +94,10 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
       jti: randomstring.generate(8),
       permissions: client.PermissionScopes? client.PermissionScopes : userPermissions?userPermissions:[],
       roles: roles?roles:[],
-      tenant_id,
+      tenant_id: tenant_id?tenant_id:client.companyId,
       client_id:client.id,
-      companyId:client.companyId,
-      domainId:client.domain,
+      companyId:company_id?company_id:client.companyId,
+      domainId:domain_id?domain_id:client.domain,
       token_use: "access"
   };
 
