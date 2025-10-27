@@ -92,14 +92,28 @@ export const getClient = async (clientId) => {
 };
 
 export const saveTokenToDB = async (data) => {
-  const { companyId, domainId, accessToken, userId, sessionId } = data;
+  const {
+    companyId,
+    domainId,
+    accessToken,
+    userId,
+    sessionId,
+    refreshToken,
+    idToken,
+  } = data;
   await userService.updateData.apply(
     userService,
-    [{ session: { sessionId, accessToken } }].concat([
-      companyId,
-      domainId,
-      userId,
-    ])
+    [
+      {
+        session: {
+          sessionId,
+          accessToken,
+          refreshToken,
+          idToken,
+          whenUpdated: new Date(),
+        },
+      },
+    ].concat([companyId, domainId, userId])
   );
 };
 

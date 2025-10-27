@@ -1,5 +1,6 @@
 import jwks from "jwks-rsa";
 import { expressjwt } from "express-jwt";
+import jose from "jsrsasign";
 
 export const jwtCheck = expressjwt({
   secret: jwks.expressJwtSecret({
@@ -70,6 +71,48 @@ export function authenticate(req, res, next) {
   } else {
     return res.status(401).send("Unknown issuer");
   }
+}
+
+const { KJUR, b64utoutf8 } = jose;
+
+const client = jwks({
+  jwksUri: process.env.JWKS_URL,
+  cache: true,
+  rateLimit: true,
+  jwksRequestsPerMinute: 10,
+});
+
+/**
+ * Decode JWT header without verification (to extract `kid`)
+ */
+function decodeHeader(token) {
+  const [headerB64] = token.split(".");
+  return KJUR.jws.JWS.readSafeJSONString(b64utoutf8(headerB64));
+}
+
+/**
+ * Decode payload without verification (unsafe)
+ */
+export function decodePayload(token) {
+  const [, payloadB64] = token.split(".");
+  return KJUR.jws.JWS.readSafeJSONString(b64utoutf8(payloadB64));
+}
+
+/**
+ * Verify JWT using jsrsasign with key fetched by jwks-rsa
+ */
+export async function getVerifyJwtWithJwks(token) {
+  const header = decodeHeader(token);
+  const kid = header.kid;
+  if (!kid) throw new Error("Missing kid in token");
+
+  const key = await client.getSigningKey(kid);
+  const publicKey = key.getPublicKey(); // PEM format
+
+  const isValid = KJUR.jws.JWS.verify(token, publicKey, ["RS256"]);
+  if (!isValid) throw new Error("JWT signature verification failed");
+
+  return decodePayload(token);
 }
 
 export function checkTenantAccess(req, res, next) {

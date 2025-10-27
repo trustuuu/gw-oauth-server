@@ -11,7 +11,11 @@ async function getSession(req, res, routerAuth) {
   const user = await getUserById(companyId, domainId, userId);
   if (user) {
     if (user.session.sessionId === sessionId) {
-      res.json({ accessToken: user.session.accessToken });
+      res.json({
+        accessToken: user.session.accessToken,
+        refreshToken: user.session.refreshToken,
+        idToken: user.session.idToken,
+      });
     } else {
       return res.status(404).json({ error: "Token not found" });
     }

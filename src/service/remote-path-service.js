@@ -8,7 +8,7 @@ export const APPLICATION_COLL = "registers";
 export const CODE_COLL = "codes";
 export const REQID_COLL = "reqids";
 export const TOKEN_COLL = "tokens";
-
+export const REFRESH_TOKEN_COLL = "refresh_tokens";
 export const COMPANY_COLL = "companys";
 export const DOMAIN_COLL = "domainNames";
 export const GROUP_COLL = "groups";
@@ -79,8 +79,11 @@ export const authCodePath = (authId, codeId) =>
 export const authReqIdPath = (authId, reqId) =>
   concat(authPath(authId), REQID_COLL, reqId);
 
-export const tokenPath = (authId, token) =>
-  concat(authPath(authId), TOKEN_COLL, token);
+export const tokenPath = (authId, deviceId) =>
+  concat(authPath(authId), TOKEN_COLL, deviceId);
+
+export const refreshTokenPath = (authId, deviceId) =>
+  concat(authPath(authId), REFRESH_TOKEN_COLL, deviceId);
 
 export const generateId = (id) => {
   const reg = new RegExp(`.{1,${id.length}}`);

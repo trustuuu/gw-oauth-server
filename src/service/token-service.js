@@ -2,7 +2,7 @@ import { tokenPath } from "./remote-path-service.js";
 import { createService } from "./service-factory.js";
 import { getDoc } from "../firebase/firebase-service.js";
 
-const getRefreshToken = (companyId, domainId, userId, condition) =>
-  getDoc(tokenPath(companyId, domainId, userId, "RefreshTokens"), condition);
+const getRevokedToken = (deviceId, token) =>
+  getDoc(tokenPath(deviceId, token), ["status", "==", "revoked"]);
 
-export default { ...createService(tokenPath), getRefreshToken };
+export default { ...createService(tokenPath), getRevokedToken };

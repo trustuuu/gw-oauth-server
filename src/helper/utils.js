@@ -9,6 +9,7 @@ import userService from '../service/user-service.js';
 
 import rsaKey from '../route/rsaKey.json' with { type: "json" };
 import rsaKeyService from '../route/rsaKeyService.json' with { type: "json" };
+import refreshTokenService from '../service/refresh-token-service.js';
 
 export const generateCodeAccessToken = async (iss, sub, aud, iat, exp, client, api, user) => {
     const access_token = await generateAccessTokenCommon(rsaKey, iss, sub, aud, iat, exp, client, api, user);
@@ -23,26 +24,52 @@ export const generateRefreshAccessToken = async (aud, exp, client, deviceId, use
   let client_id = null;
   if (client){
     tenant_id = client.companyId;
-    client_id = client.Id;
+    client_id = client.id;
   }
 
   const header = { 'typ': 'JWT', 'alg': rsaKeyService.alg, 'kid': rsaKeyService.kid };
   const payload = {
       aud: aud,
       exp: exp,
-      jti: randomstring.generate(8),
+      jti: randomstring.generate(16),
       tenant_id,
       client_id,
-      deviceId,
+      device_id: deviceId,
       token_use: "refresh"
   };
+
+  const date = new Date();
+        const now_utc = Date.UTC(
+          date.getUTCFullYear(),
+          date.getUTCMonth(),
+          date.getUTCDate(),
+          date.getUTCHours(),
+          date.getUTCMinutes(),
+          date.getUTCSeconds()
+        );
+
+  const refresh_token_save = {
+    "user_id": user.id,
+    "client_id": client_id,
+    "device_id": deviceId,
+    "refresh_token": payload.jti,
+    "issued_at": Math.floor(now_utc / 1000),
+    "expires_at": exp,
+    "revoked": false,
+    user,
+    scope
+  }
+  console.log('refresh_token_save',refresh_token_save)
+  const authId = "authorization";
+  await refreshTokenService.setData.apply(refreshTokenService, [refresh_token_save].concat(([authId, deviceId])));
+
   //const payload_server = {...payload, user, scope};
   const privateKey = jose.KEYUTIL.getKey(rsaKeyService);
-  const access_token = jose.jws.JWS.sign(header.alg,
+  const refresh_token = jose.jws.JWS.sign(header.alg,
       JSON.stringify(header),
       JSON.stringify(payload),
       privateKey);
-  return access_token;
+  return refresh_token;
 }
 
 export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, iat, exp, client, api, user) => {

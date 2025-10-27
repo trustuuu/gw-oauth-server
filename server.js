@@ -202,7 +202,7 @@ try {
       res.setHeader("Access-Control-Allow-Credentials", "true");
       res.setHeader(
         "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+        `Origin, X-Requested-With, Content-Type, Accept, Authorization, ${process.env.DEVICE_ID_HEADER}`
       );
       res.setHeader(
         "Access-Control-Allow-Methods",
@@ -279,7 +279,10 @@ app.get("/jwks.json", (req, res) => {
 
   res.setHeader("Access-Control-Allow-Origin", origin || "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`
+  );
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
@@ -291,7 +294,7 @@ app.get("/jwks.json", (req, res) => {
     headers: {
       "Access-Control-Allow-Origin": origin || "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Headers": `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`,
       "Access-Control-Allow-Credentials": "true",
     },
   });

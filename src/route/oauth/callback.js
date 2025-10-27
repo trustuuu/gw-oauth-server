@@ -1,7 +1,15 @@
 import { saveTokenToDB } from "./auth_service.js";
 
 async function callback(req, res, routerAuth) {
-  const { companyId, domainId, email, accessToken, userId } = req.body;
+  const {
+    companyId,
+    domainId,
+    email,
+    accessToken,
+    refreshToken,
+    idToken,
+    userId,
+  } = req.body;
   const sessionId = req.sessionID; // ✅ 여기가 세션 ID
   const user = {
     companyId,
@@ -25,6 +33,8 @@ async function callback(req, res, routerAuth) {
     domainId,
     email,
     accessToken,
+    refreshToken,
+    idToken,
     userId,
     sessionId,
   };
