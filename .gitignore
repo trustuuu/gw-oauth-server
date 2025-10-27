@@ -22,3 +22,7 @@ node_modules
 *.sw?
 .env
 .vercel
+
+.gitconfig
+.gitconfig-company
+.gitconfig-personal

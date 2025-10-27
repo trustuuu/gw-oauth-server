@@ -124,7 +124,7 @@ try {
   app.use(cookieParser()); // it should be before session
   app.use(
     session({
-      secret: "JesusfavorForiGoodWorksInc!",
+      secret: process.env.COOKIE_SECRET,
       resave: false,
       saveUninitialized: true,
       cookie: {
