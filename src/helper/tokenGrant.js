@@ -3,15 +3,14 @@ import {
   generateCodeAccessToken,
   generateIdToken,
   generateRefreshAccessToken,
+  getUTCNow,
   verifyCodeChallenge,
-} from "../helper/utils.js";
+} from "./utils.js";
 import { getClient } from "../route/oauth/auth_service.js";
-import apiService from "./api-service.js";
-import codeService from "./code-service.js";
-import reqidService from "./reqid-service.js";
-
-const authId = "authorization";
-const apiId = "api";
+import apiService from "../service/api-service.js";
+import codeService from "../service/code-service.js";
+import { API_PATH, AUTH_PATH } from "../service/remote-path-service.js";
+import reqidService from "../service/reqid-service.js";
 
 export const tokenGrant = async (req, res) => {
   const auth = req.headers["authorization"];
@@ -29,7 +28,7 @@ export const tokenGrant = async (req, res) => {
   }
   const client = await getClient(clientId);
 
-  const code = await codeService.getData(authId, req.body.code);
+  const code = await codeService.getData(AUTH_PATH, req.body.code);
   if (!code || !code.request) {
     console.log("Unknown code, %s", req.body.code);
     return res.status(400).json({ error: "invalid_grant" });
@@ -44,18 +43,18 @@ export const tokenGrant = async (req, res) => {
   }
   await codeService.deleteData.apply(
     codeService,
-    [{}].concat([authId, req.body.code])
+    [{}].concat([AUTH_PATH, req.body.code])
   );
 
   if (code.request.id) {
     await reqidService.deleteData.apply(
       reqidService,
-      [{}].concat([authId, code.request.id])
+      [{}].concat([AUTH_PATH, code.request.id])
     );
   }
 
-  //const api = await apiService.getApiByIdentifier.apply(apiService, [{}].concat([apiId, client.audience]));
-  const api = await apiService.getApiByIdentifier(apiId, client.audience);
+  //const api = await apiService.getApiByIdentifier.apply(apiService, [{}].concat([API_PATH, client.audience]));
+  const api = await apiService.getApiByAudience(API_PATH, client.audience);
   if (api.length < 1) {
     console.log(
       "Authence has not been found, expected %s got %s",
@@ -65,15 +64,7 @@ export const tokenGrant = async (req, res) => {
     return res.status(400).json({ error: "invalid_grant" });
   }
 
-  const date = new Date();
-  const now_utc = Date.UTC(
-    date.getUTCFullYear(),
-    date.getUTCMonth(),
-    date.getUTCDate(),
-    date.getUTCHours(),
-    date.getUTCMinutes(),
-    date.getUTCSeconds()
-  );
+  const now_utc = getUTCNow();
   const expires_in = Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
 
   if (
@@ -100,7 +91,8 @@ export const tokenGrant = async (req, res) => {
     client,
     deviceId,
     code.user,
-    code.scope
+    code.scope,
+    "refresh"
   );
   const tokenClient = {
     client_id: clientId,
@@ -115,7 +107,7 @@ export const tokenGrant = async (req, res) => {
     token_type: "Bearer",
     client: tokenClient,
   };
-  console.log("code.scope", code.scope);
+
   if (code.scope.includes("openId")) {
     const id_token = generateIdToken(
       api[0].issuer, //process.env.OAUTH_ISSUER,
@@ -127,6 +119,5 @@ export const tokenGrant = async (req, res) => {
     token_response = { ...token_response, id_token };
   }
 
-  console.log("token_response", token_response);
   return res.status(200).json(token_response);
 };

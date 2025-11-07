@@ -25,7 +25,7 @@ routerUser.get(
           req.params.domainId,
           req.query.condition
         );
-        return users.map(({ session, ...rest }) => rest);
+        return users.map(({ session, authVerification, ...rest }) => rest);
       });
     } else {
       run(res, async () => {
@@ -33,7 +33,7 @@ routerUser.get(
           req.params.id,
           req.params.domainId
         );
-        return users.map(({ session, ...rest }) => rest);
+        return users.map(({ session, authVerification, ...rest }) => rest);
       });
     }
   }
@@ -49,6 +49,8 @@ routerUser.get(
         req.params.userId
       );
       if (user && user.session) delete user.session;
+      if (user && user.authVerification) delete user.authVerification;
+
       return user;
     });
   }
@@ -64,6 +66,7 @@ routerUser.get(
         req.params.userId
       );
       if (user && user.session) delete user.session;
+      if (user && user.authVerification) delete user.authVerification;
       // const qrImageUrl = getQRCodeImageUrl(req.params.domainId, user.email, "JBSWY3DPEHPK3PXP");
       return user;
     });

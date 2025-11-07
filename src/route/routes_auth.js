@@ -17,6 +17,10 @@ import token from "./oauth/token.js";
 import callback from "./oauth/callback.js";
 import getSession from "./oauth/session.js";
 import signup from "./oauth/signup.js";
+import { logout } from "./oauth/logout.js";
+import { instrospect } from "./oauth/introspect.js";
+import { device_authorization } from "./oauth/device_authorization.js";
+import { activate } from "./oauth/activate.js";
 
 const routerAuth = express.Router();
 export default routerAuth;
@@ -41,6 +45,26 @@ routerAuth.get(
 routerAuth.post(
   "/login",
   async (req, res) => await login(req, res, routerAuth)
+);
+
+routerAuth.get(
+  "/logout",
+  async (req, res) => await logout(req, res, routerAuth)
+);
+
+routerAuth.post(
+  "/introspect",
+  async (req, res) => await instrospect(req, res, routerAuth)
+);
+
+routerAuth.post(
+  "/device_authorization",
+  async (req, res) => await device_authorization(req, res, routerAuth)
+);
+
+routerAuth.post(
+  "/activate",
+  async (req, res) => await activate(req, res, routerAuth)
 );
 
 routerAuth.post(
@@ -69,10 +93,12 @@ routerAuth.post(
 );
 
 routerAuth.get(`/mfa`, async (req, res) => await mfaGet(req, res, routerAuth));
+
 routerAuth.get(
   `/mfalink`,
   async (req, res) => await mfaQuery(req, res, routerAuth)
 );
+
 routerAuth.get(
   `/mfaImage`,
   async (req, res) => await mfaImage(req, res, routerAuth)
@@ -82,10 +108,12 @@ routerAuth.post(
   `/mfa`,
   async (req, res) => await mfaPost(req, res, routerAuth)
 );
+
 routerAuth.post(
   `/verifyTotp`,
   async (req, res) => await mfaVerify(req, res, routerAuth)
 );
+
 routerAuth.post(
   `/mfaLinkValue`,
   async (req, res) => await getDecryptMfaLink(req, res, routerAuth)

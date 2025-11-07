@@ -70,3 +70,17 @@
 | Persistent authentication after login         | `refresh_token`                |
 | Devices like CLI, Smart TV                    | `device_code`                  |
 | Backend without user (e.g., Google Service Account) | `jwt_bearer`              |
+
+# ✅ device_code `grant_type` test example
+curl -X POST http://oauth.igoodworks.com/oauth/v1/device_authorization \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=s2LEYzneNmvbuO8oggFEwbj45l9" \
+  -d "scope=openId profile email"
+
+
+curl -X POST http://oauth.igoodworks.com/oauth/v1/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=s2LEYzneNmvbuO8oggFEwbj45l9" \
+  -d "grant_type=urn:ietf:params:oauth:grant-type:device_code" \
+  -d "device_code=aDbsTLoNdRSdBobJeES06jieCGVcCGkS"
+  

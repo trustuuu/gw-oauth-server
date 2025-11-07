@@ -1,22 +1,21 @@
 import * as R from "ramda";
 //const { default: R } = await import("ramda");
-import { getClient, getUserRef } from "./auth_service.js";
-import codeService from "../../service/code-service.js";
+import { getClient } from "./auth_service.js";
 import reqIdService from "../../service/reqid-service.js";
-import { buildUrl, getScopesFromForm } from "../../helper/utils.js";
-import randomstring from "randomstring";
+import { buildUrl } from "../../helper/utils.js";
 import { generateCodeUrlBuild } from "./auth_shared.js";
+import { APP_PATH, AUTH_PATH } from "../../service/remote-path-service.js";
+import applicationService from "../../service/application-service.js";
 
 async function approve(req, res, routerAuth) {
-  const authId = "authorization";
   const reqid = req.body.reqid;
 
   //const query = routerAuth.locals.requests[reqid];
   delete routerAuth.locals.requests[reqid];
-  const query = await reqIdService.getData(authId, reqid);
+  const query = await reqIdService.getData(AUTH_PATH, reqid);
   await reqIdService.deleteData.apply(
     reqIdService,
-    [{}].concat([authId, reqid])
+    [{}].concat([AUTH_PATH, reqid])
   );
 
   if (!query) {
@@ -30,15 +29,28 @@ async function approve(req, res, routerAuth) {
       // user approved access
 
       const rscope = req.body.scope ? req.body.scope.split(" ") : []; //getScopesFromForm(req.body);
-      const client = await getClient(query.client_id);
+      //const client = await getClient(query.client_id);
       //const user = await getUserRef(req.body.email);
       // const user = await getUser(
       //   client.companyId,
       //   client.domain,
       //   req.body.email
       // );
+      let clientScopes =
+        await applicationService.getApplicationPermissionScopes(
+          APP_PATH,
+          query.client_id
+        );
+      if (Array.isArray(clientScopes)) {
+        clientScopes = clientScopes.map((s) => s.permission);
+      }
+      console.log("clientScopes", clientScopes);
+      if (!Array.isArray(clientScopes)) {
+        console.log("invalid_client_scope, %s", query.client_id);
+        return res.status(400).json({ error: "invalid_client_scope" });
+      }
 
-      if (R.difference(rscope, client.scope).length > 0) {
+      if (R.difference(rscope, clientScopes).length > 0) {
         const urlParsed = buildUrl(query.redirect_uri, {
           error: "invalid_scope",
         });

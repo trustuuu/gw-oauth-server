@@ -2,27 +2,21 @@ import * as R from "ramda";
 //const { default: R } = await import("ramda");
 import {
   decodeClientCredentials,
-  generateCodeAccessToken,
   generateServiceAccessToken,
-  generateIdToken,
-  verifyCodeChallenge,
-  generateRefreshAccessToken,
+  getUTCNow,
   //getJwtExpire,
 } from "../../helper/utils.js";
 import { getClient } from "./auth_service.js";
 import apiService from "../../service/api-service.js";
-import tokenService from "../../service/token-service.js";
-import codeService from "../../service/code-service.js";
-import reqidService from "../../service/reqid-service.js";
 import { handleTokenExchange } from "../../helper/handleTokenExchangeGrant.js";
-import refreshTokenService from "../../service/refresh-token-service.js";
 import { refreshTokenGrant } from "../../helper/refreshTokenGrant.js";
-import { tokenGrant } from "../../service/tokenGrant.js";
+import { tokenGrant } from "../../helper/tokenGrant.js";
+import { API_PATH, APP_PATH } from "../../service/remote-path-service.js";
+import { deviceCodeGrant } from "../../helper/deviceCodeGrant.js";
+import applicationService from "../../service/application-service.js";
 
 async function token(req, res, routerAuth) {
-  const authId = "authorization";
-  const apiId = "api";
-
+  console.log("req.body", req.body);
   if (
     req.body.grant_type === "urn:ietf:params:oauth:grant-type:token-exchange"
   ) {
@@ -30,7 +24,6 @@ async function token(req, res, routerAuth) {
   }
 
   const auth = req.headers["authorization"];
-  const deviceId = req.headers[process.env.DEVICE_ID_HEADER];
   let clientId = "";
   let clientSecret = "";
   if (auth) {
@@ -63,6 +56,16 @@ async function token(req, res, routerAuth) {
     return;
   }
 
+  let clientScopes = await applicationService.getApplicationPermissionScopes(
+    APP_PATH,
+    clientId
+  );
+  if (Array.isArray(clientScopes)) {
+    clientScopes = clientScopes.map((s) => s.permission);
+  } else {
+    clientScopes = [];
+  }
+
   if (!R.includes(req.body.grant_type, client.grant_types)) {
     console.log(
       "Mismatched grant_type %s does not exist in %s",
@@ -82,7 +85,7 @@ async function token(req, res, routerAuth) {
       res.status(401).json({ error: "invalid_client" });
       return;
     }
-    const api = await apiService.getApiByIdentifier(apiId, client.audience);
+    const api = await apiService.getApiByAudience(API_PATH, client.audience);
     if (api.length < 1) {
       console.log(
         "Authence has not been found, expected %s got %s",
@@ -92,15 +95,7 @@ async function token(req, res, routerAuth) {
       res.status(400).json({ error: "invalid_grant" });
       return;
     }
-    const date = new Date();
-    const now_utc = Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate(),
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds()
-    );
+    const now_utc = getUTCNow();
     const expires_in = Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
     const access_token = await generateServiceAccessToken(
       api[0].issuer,
@@ -139,7 +134,7 @@ async function token(req, res, routerAuth) {
       expires_in,
       token_type: "Bearer",
       client: tokenClient,
-      scope: client.scope,
+      scope: clientScopes,
     };
     res.status(200).json(token_response);
     return;
@@ -148,6 +143,11 @@ async function token(req, res, routerAuth) {
     return token_response;
   } else if (req.body.grant_type == "refresh_token") {
     const token_response = await refreshTokenGrant(req, res);
+    return token_response;
+  } else if (
+    req.body.grant_type == "urn:ietf:params:oauth:grant-type:device_code"
+  ) {
+    const token_response = await deviceCodeGrant(req, res);
     return token_response;
   } else {
     console.log("Unknown grant type %s", req.body.grant_type);

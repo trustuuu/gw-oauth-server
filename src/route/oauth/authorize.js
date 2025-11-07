@@ -7,6 +7,12 @@ import { buildQueryUrl } from "../../helper/secure.js";
 import reqIdService from "../../service/reqid-service.js";
 import apiService from "../../service/api-service.js";
 import { generateCodeUrlBuild } from "./auth_shared.js";
+import {
+  API_PATH,
+  APP_PATH,
+  AUTH_PATH,
+} from "../../service/remote-path-service.js";
+import applicationService from "../../service/application-service.js";
 
 async function redirectToLogin(reqQuery, res) {
   const params = {
@@ -24,7 +30,7 @@ async function redirectToLogin(reqQuery, res) {
 
 async function authorize(req, res, routerAuth) {
   let client = null;
-  const authId = "authorization";
+
   const reqQuery = req.query;
 
   client = await getClient(reqQuery.client_id);
@@ -50,7 +56,20 @@ async function authorize(req, res, routerAuth) {
   } else {
     rscope = reqQuery.scope ? reqQuery.scope.split(" ") : undefined;
 
-    if (R.difference(rscope, client.scope).length > 0) {
+    let clientScopes = await applicationService.getApplicationPermissionScopes(
+      APP_PATH,
+      reqQuery.client_id
+    );
+    if (Array.isArray(clientScopes)) {
+      clientScopes = clientScopes.map((s) => s.permission);
+    }
+    console.log("clientScopes", clientScopes);
+    if (!Array.isArray(clientScopes)) {
+      console.log("invalid_client_scope, %s", reqQuery.client_id);
+      return res.status(400).json({ error: "invalid_client_scope" });
+    }
+
+    if (R.difference(rscope, clientScopes).length > 0) {
       const urlParsed = buildUrl(reqQuery.redirect_uri, {
         error: "invalid_scope",
       });
@@ -79,7 +98,7 @@ async function authorize(req, res, routerAuth) {
     //routerAuth.locals.requests[reqid] = reqQuery;
     await reqIdService.setData.apply(
       reqIdService,
-      [reqQuery].concat([authId, reqid])
+      [reqQuery].concat([AUTH_PATH, reqid])
     );
 
     const params = {
@@ -99,8 +118,7 @@ async function authorize(req, res, routerAuth) {
 }
 
 const allowUserConsentSkip = async (res, client) => {
-  const apiId = "api";
-  const api = await apiService.getApiByIdentifier(apiId, client.audience);
+  const api = await apiService.getApiByAudience(API_PATH, client.audience);
   if (api.length < 1) {
     console.log(
       "Authence has not been found, expected %s got %s",

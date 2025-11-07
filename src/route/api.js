@@ -4,58 +4,58 @@ import express from "express";
 import apiService from "../service/api-service.js";
 import { getDocByPath, setDoc } from "../firebase/firebase-service.js";
 import { GuardLeast } from "../../igwGuard.js";
+import { API_PATH } from "../service/remote-path-service.js";
 
 const routerApi = express.Router();
 export default routerApi;
 
-const apiPath = "api";
 const PermissionScopes = "PermissionScopes";
 const AppRoles = "AppRoles";
 const UsersAndGroups = "UsersAndGroups";
 
 routerApi.get(
-  `/${apiPath}/`,
+  `/${API_PATH}/`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (req.query.condition) {
       run(res, () =>
-        apiService.getApisWhere(apiPath, null, null, req.query.condition)
+        apiService.getApisWhere(API_PATH, null, null, req.query.condition)
       );
     } else {
-      run(res, () => apiService.getData(apiPath));
+      run(res, () => apiService.getData(API_PATH));
     }
   }
 );
 
 routerApi.get(
-  `/${apiPath}/:id`,
+  `/${API_PATH}/:id`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
-    run(res, () => apiService.getData(apiPath, req.params.id));
+    run(res, () => apiService.getData(API_PATH, req.params.id));
   }
 );
 
 routerApi.get(
-  `/${apiPath}/:id/${PermissionScopes}`,
+  `/${API_PATH}/:id/${PermissionScopes}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
-    run(res, () => apiService.getApiPermissionScopes(apiPath, req.params.id));
+    run(res, () => apiService.getApiPermissionScopes(API_PATH, req.params.id));
   }
 );
 
 routerApi.get(
-  `/${apiPath}/:id/${AppRoles}`,
+  `/${API_PATH}/:id/${AppRoles}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
-    run(res, () => apiService.getApiAppRoles(apiPath, req.params.id));
+    run(res, () => apiService.getApiAppRoles(API_PATH, req.params.id));
   }
 );
 
 routerApi.get(
-  `/${apiPath}/:id/${UsersAndGroups}`,
+  `/${API_PATH}/:id/${UsersAndGroups}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
-    run(res, () => apiService.getApiUsersAndGroups(apiPath, req.params.id));
+    run(res, () => apiService.getApiUsersAndGroups(API_PATH, req.params.id));
   }
 );
 
@@ -63,18 +63,18 @@ routerApi.get(
   `/:companyId/api`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
-    run(res, () => apiService.getApis(apiPath, req.params.companyId));
+    run(res, () => apiService.getApis(API_PATH, req.params.companyId));
     if (req.query.condition) {
       run(res, () =>
         apiService.getApisWhere(
-          apiPath,
+          API_PATH,
           req.params.companyId,
           null,
           req.query.condition
         )
       );
     } else {
-      run(res, () => apiService.getApis(apiPath, req.params.companyId));
+      run(res, () => apiService.getApis(API_PATH, req.params.companyId));
     }
   }
 );
@@ -86,7 +86,7 @@ routerApi.get(
     if (req.query.condition) {
       run(res, () =>
         apiService.getApisWhere(
-          apiPath,
+          API_PATH,
           req.params.companyId,
           req.params.domainId,
           req.query.condition
@@ -94,30 +94,14 @@ routerApi.get(
       );
     } else {
       run(res, () =>
-        apiService.getApis(apiPath, req.params.companyId, req.params.domainId)
+        apiService.getApis(API_PATH, req.params.companyId, req.params.domainId)
       );
     }
   }
 );
 
 routerApi.post(
-  `/${apiPath}/`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
-  (req, res) => {
-    const data = { ...req.body, whenCreated: new Date(), status: "New" };
-    run(
-      res,
-      () =>
-        apiService.setData.apply(apiService, [data].concat([apiPath, data.id])),
-      undefined,
-      undefined,
-      data
-    );
-  }
-);
-
-routerApi.post(
-  `/${apiPath}/:id/${PermissionScopes}`,
+  `/${API_PATH}/`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenCreated: new Date(), status: "New" };
@@ -126,7 +110,7 @@ routerApi.post(
       () =>
         apiService.setData.apply(
           apiService,
-          [data].concat([apiPath, req.params.id, PermissionScopes, data.id])
+          [data].concat([API_PATH, data.id])
         ),
       undefined,
       undefined,
@@ -136,7 +120,7 @@ routerApi.post(
 );
 
 routerApi.post(
-  `/${apiPath}/:id/${AppRoles}`,
+  `/${API_PATH}/:id/${PermissionScopes}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenCreated: new Date(), status: "New" };
@@ -145,7 +129,7 @@ routerApi.post(
       () =>
         apiService.setData.apply(
           apiService,
-          [data].concat([apiPath, req.params.id, AppRoles, data.id])
+          [data].concat([API_PATH, req.params.id, PermissionScopes, data.id])
         ),
       undefined,
       undefined,
@@ -154,14 +138,33 @@ routerApi.post(
   }
 );
 
-// routerApi.post(`/${apiPath}/:id/${UsersAndGroups}`, (req, res) => {
+routerApi.post(
+  `/${API_PATH}/:id/${AppRoles}`,
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    const data = { ...req.body, whenCreated: new Date(), status: "New" };
+    run(
+      res,
+      () =>
+        apiService.setData.apply(
+          apiService,
+          [data].concat([API_PATH, req.params.id, AppRoles, data.id])
+        ),
+      undefined,
+      undefined,
+      data
+    );
+  }
+);
+
+// routerApi.post(`/${API_PATH}/:id/${UsersAndGroups}`, (req, res) => {
 //   const data = { ...req.body, whenCreated: new Date(), status: "New" };
 //   run(
 //     res,
 //     () =>
 //       apiService.setData.apply(
 //         apiService,
-//         [data].concat([apiPath, req.params.id, UsersAndGroups, data.id])
+//         [data].concat([API_PATH, req.params.id, UsersAndGroups, data.id])
 //       ),
 //     undefined,
 //     undefined,
@@ -170,7 +173,7 @@ routerApi.post(
 // });
 
 routerApi.post(
-  `/${apiPath}/:id/${UsersAndGroups}`,
+  `/${API_PATH}/:id/${UsersAndGroups}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (Array.isArray(req.body)) {
@@ -186,7 +189,7 @@ routerApi.post(
         return apiService.setData.apply(
           apiService,
           [{ ...item, whenCreated: new Date() }].concat([
-            apiPath,
+            API_PATH,
             req.params.id,
             UsersAndGroups,
             item.id,
@@ -202,7 +205,7 @@ routerApi.post(
         () =>
           apiService.setData.apply(
             apiService,
-            [data].concat([apiPath, req.params.id, UsersAndGroups, data.id])
+            [data].concat([API_PATH, req.params.id, UsersAndGroups, data.id])
           ),
         undefined,
         undefined,
@@ -213,32 +216,35 @@ routerApi.post(
 );
 
 routerApi.put(
-  `/${apiPath}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
-  (req, res) => {
-    const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
-    run(res, () =>
-      apiService.updateData.apply(apiService, [data].concat([apiPath, data.id]))
-    );
-  }
-);
-
-routerApi.put(
-  `/${apiPath}/:id`,
+  `/${API_PATH}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
       apiService.updateData.apply(
         apiService,
-        [data].concat([apiPath, req.params.id])
+        [data].concat([API_PATH, data.id])
       )
     );
   }
 );
 
 routerApi.put(
-  `/${apiPath}/:id/${PermissionScopes}/:scopeId`,
+  `/${API_PATH}/:id`,
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
+    run(res, () =>
+      apiService.updateData.apply(
+        apiService,
+        [data].concat([API_PATH, req.params.id])
+      )
+    );
+  }
+);
+
+routerApi.put(
+  `/${API_PATH}/:id/${PermissionScopes}/:scopeId`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
@@ -246,7 +252,7 @@ routerApi.put(
       apiService.updateData.apply(
         apiService,
         [data].concat([
-          apiPath,
+          API_PATH,
           req.params.id,
           PermissionScopes,
           req.params.scopeId,
@@ -257,21 +263,21 @@ routerApi.put(
 );
 
 routerApi.put(
-  `/${apiPath}/:id/${AppRoles}/:roleId`,
+  `/${API_PATH}/:id/${AppRoles}/:roleId`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
       apiService.updateData.apply(
         apiService,
-        [data].concat([apiPath, req.params.id, AppRoles, req.params.roleId])
+        [data].concat([API_PATH, req.params.id, AppRoles, req.params.roleId])
       )
     );
   }
 );
 
 routerApi.put(
-  `/${apiPath}/:id/${UsersAndGroups}/:roleId`,
+  `/${API_PATH}/:id/${UsersAndGroups}/:roleId`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
@@ -279,7 +285,7 @@ routerApi.put(
       apiService.updateData.apply(
         apiService,
         [data].concat([
-          apiPath,
+          API_PATH,
           req.params.id,
           UsersAndGroups,
           req.params.roleId,
@@ -290,28 +296,28 @@ routerApi.put(
 );
 
 routerApi.delete(
-  `/${apiPath}/:id`,
+  `/${API_PATH}/:id`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = {};
     run(res, () =>
       apiService.deleteData.apply(
         apiService,
-        [data].concat([apiPath, req.params.id])
+        [data].concat([API_PATH, req.params.id])
       )
     );
   }
 );
 
 routerApi.delete(
-  `/${apiPath}`,
+  `/${API_PATH}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
       return apiService.deleteData.apply(
         apiService,
-        [null].concat([apiPath, item.id])
+        [null].concat([API_PATH, item.id])
       );
     });
     run(res, () => Promise.all(allDeletes));
@@ -319,14 +325,14 @@ routerApi.delete(
 );
 
 routerApi.delete(
-  `/${apiPath}/:id/${PermissionScopes}/:scopeId`,
+  `/${API_PATH}/:id/${PermissionScopes}/:scopeId`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       apiService.deleteData.apply(
         apiService,
         [null].concat([
-          apiPath,
+          API_PATH,
           req.params.id,
           PermissionScopes,
           req.params.scopeId,
@@ -337,27 +343,27 @@ routerApi.delete(
 );
 
 routerApi.delete(
-  `/${apiPath}/:id/${AppRoles}/:roleId`,
+  `/${API_PATH}/:id/${AppRoles}/:roleId`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => {
       apiService.deleteData.apply(
         apiService,
-        [null].concat([apiPath, req.params.id, AppRoles, req.params.roleId])
+        [null].concat([API_PATH, req.params.id, AppRoles, req.params.roleId])
       );
     });
   }
 );
 
 routerApi.delete(
-  `/${apiPath}/:id/${UsersAndGroups}/:usersGroupsId`,
+  `/${API_PATH}/:id/${UsersAndGroups}/:usersGroupsId`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       apiService.deleteData.apply(
         apiService,
         [null].concat([
-          apiPath,
+          API_PATH,
           req.params.id,
           UsersAndGroups,
           req.params.usersGroupsId,
@@ -368,14 +374,14 @@ routerApi.delete(
 );
 
 routerApi.delete(
-  `/${apiPath}/:id/${PermissionScopes}`,
+  `/${API_PATH}/:id/${PermissionScopes}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
       return apiService.deleteData.apply(
         apiService,
-        [null].concat([apiPath, req.params.id, PermissionScopes, item.id])
+        [null].concat([API_PATH, req.params.id, PermissionScopes, item.id])
       );
     });
     run(res, () => Promise.all(allDeletes));
@@ -383,14 +389,14 @@ routerApi.delete(
 );
 
 routerApi.delete(
-  `/${apiPath}/:id/${AppRoles}`,
+  `/${API_PATH}/:id/${AppRoles}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
       return apiService.deleteData.apply(
         apiService,
-        [null].concat([apiPath, req.params.id, AppRoles, item.id])
+        [null].concat([API_PATH, req.params.id, AppRoles, item.id])
       );
     });
     run(res, () => Promise.all(allDeletes));
@@ -398,13 +404,13 @@ routerApi.delete(
 );
 
 routerApi.delete(
-  `/${apiPath}/:id/${UsersAndGroups}`,
+  `/${API_PATH}/:id/${UsersAndGroups}`,
   GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allRefDeletes = data.map((item) => {
       return apiService
-        .getApiUsersAndGroupsRoleRef(apiPath, req.params.id, item.id)
+        .getApiUsersAndGroupsRoleRef(API_PATH, req.params.id, item.id)
         .get()
         .then((role) => {
           if (role.exists) {
@@ -419,7 +425,7 @@ routerApi.delete(
         .then(() => {
           apiService.deleteData.apply(
             apiService,
-            [null].concat([apiPath, req.params.id, UsersAndGroups, item.id])
+            [null].concat([API_PATH, req.params.id, UsersAndGroups, item.id])
           );
         })
         .catch((error) => console.log(error));

@@ -6,13 +6,12 @@ import {
   encryptPayload,
   toBase32,
 } from "../../helper/utils.js";
+import { AUTH_PATH } from "../../service/remote-path-service.js";
 import reqidService from "../../service/reqid-service.js";
-
-const authId = "authorization";
 
 export const mfaGet = async (req, res, routerAuth) => {
   const txId = req.query.tx;
-  const tx = await reqidService.getData(authId, txId);
+  const tx = await reqidService.getData(AUTH_PATH, txId);
 
   if (!tx || tx.stage !== "mfa") return res.status(400).send("Invalid tx");
 
@@ -119,7 +118,7 @@ export const mfaGet = async (req, res, routerAuth) => {
 };
 
 export const mfaPost = async (req, res, routerAuth) => {
-  const tx = await reqidService.getData(authId, req.body.tx);
+  const tx = await reqidService.getData(AUTH_PATH, req.body.tx);
 
   if (!tx || tx.stage !== "mfa") return res.status(400).send("Invalid tx");
 
@@ -138,7 +137,7 @@ export const mfaPost = async (req, res, routerAuth) => {
 
   await reqidService.deleteData.apply(
     reqidService,
-    [{}].concat([authId, req.body.code])
+    [{}].concat([AUTH_PATH, req.body.code])
   );
 
   const redirectURL = await buildQueryUrl("../../approve", tx);
@@ -192,7 +191,7 @@ export const mfaVerify = async (req, res, routerAuth) => {
   const { totp, user, txId } = req.body;
   console.log("totp, user, txId in mfaVerify", totp, user, txId);
   if (txId) {
-    const tx = await reqidService.getData(authId, txId);
+    const tx = await reqidService.getData(AUTH_PATH, txId);
     const authorizationEndpoint =
       process.env.NODE_ENV === "dev"
         ? routerAuth.locals.authorizationEndpointDev

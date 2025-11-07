@@ -5,6 +5,9 @@ import { getDoc, getDocByPath } from "../firebase/firebase-service.js";
 const getApiByIdentifier = (authId, identifier) =>
   getDoc(`${apiPath(authId, "")}`, ["identifier", "==", identifier]);
 
+const getApiByAudience = (authId, audience) =>
+  getDoc(`${apiPath(authId, "")}`, ["audience", "==", audience]);
+
 const getApis = (apiPartialPath, companyId, domainId) =>
   getDoc(
     apiPath(apiPartialPath),
@@ -38,6 +41,7 @@ export default {
   getApisWhere,
   getApiPermissionScopes,
   getApiByIdentifier,
+  getApiByAudience,
   getApiAppRoles,
   getApiUsersAndGroups,
   getApiUsersAndGroupsRoleRef,

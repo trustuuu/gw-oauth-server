@@ -3,14 +3,13 @@ import companyService from "../../service/company-service.js";
 import applicationService from "../../service/application-service.js";
 import authService from "../../service/authorization-service.js";
 import md5 from "blueimp-md5";
-import { generateId } from "../../service/remote-path-service.js";
+import { AUTH_PATH, generateId } from "../../service/remote-path-service.js";
 import domainService from "../../service/domain-service.js";
 
-const authId = "authorization";
 const appId = "application";
 
 export const authData = async () => {
-  return await authService.getData(authId);
+  return await authService.getData(AUTH_PATH);
 };
 
 export const getUserRef = async (email) => {
@@ -82,10 +81,16 @@ export const verifyUser = async (companyId, domainName, email, password) => {
 };
 
 export const getClient = async (clientId) => {
+  console.log("appId, clientId", appId, clientId);
   let appData = await applicationService.getData(appId, clientId);
   let appPermissionData =
     await applicationService.getApplicationPermissionScopes(appId, clientId);
-  appData.PermissionScopes = appPermissionData.map((p) => p.permission);
+  console.log("appPermissionData", appPermissionData);
+  appData.PermissionScopes = appPermissionData
+    ? Array.isArray(appPermissionData)
+      ? appPermissionData.map((p) => p.permission)
+      : []
+    : [];
   if (appData.client_id == undefined) return null;
 
   return appData;

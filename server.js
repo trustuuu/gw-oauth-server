@@ -6,10 +6,9 @@ import bodyParser from "body-parser";
 import cons from "consolidate";
 import routerAuth from "./src/route/routes_auth.js";
 import logger from "morgan";
-//import { expressjwt } from "express-jwt";
-//import guard from "express-jwt-permissions";
-//import { Guard, GuardLeast } from "./igwGuard.js";
-//import jwks from "jwks-rsa";
+
+import expressOasGenerator from "express-oas-generator";
+
 import compression from "compression";
 import dotenv from "dotenv";
 dotenv.config();
@@ -55,39 +54,16 @@ app.use(
   })
 );
 
-// const Guard = guard({
-//   requestProperty: "auth",
-//   permissionsProperty: "permissions",
-// });
-
-// const jwtCheck = expressjwt({
-//   secret: jwks.expressJwtSecret({
-//     cache: true,
-//     rateLimit: true,
-//     jwksRequestsPerMinute: 5,
-//     jwksUri: "https://oauth.biocloud.pro/jwks.json",
-//   }),
-//   audience: "http://unidir.api.igoodworks.com/",
-//   issuer: "http://oauth.unidir.igoodworks.com/",
-//   algorithms: ["RS256"],
-// });
-
-// const jwtCheckService = expressjwt({
-//   secret: jwks.expressJwtSecret({
-//     cache: true,
-//     rateLimit: true,
-//     jwksRequestsPerMinute: 5,
-//     jwksUri:
-//       "https://gw-oauth-server-hcf3ceajdpg2gcbg.canadacentral-01.azurewebsites.net/jwks.json",
-//   }),
-//   audience: "http://service.unidir.api.igoodworks.com/",
-//   issuer: "http://service.oauth.unidir.igoodworks.com/",
-//   algorithms: ["RS256"],
-// });
-
 if (isProduction) {
   console.log("production");
   app.use(compression());
+} else {
+  // ⚡ initialize generator before routes
+  expressOasGenerator.handleResponses(app, {
+    alwaysServeDocs: true,
+    tags: ["default"],
+    specOutputPath: "./openapi.json",
+  });
 }
 
 const corsOptions = {
@@ -301,6 +277,9 @@ app.get("/jwks.json", (req, res) => {
 });
 
 app.use(express.static(oauth_server_path));
+if (!isProduction) {
+  expressOasGenerator.handleRequests();
+}
 
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err);

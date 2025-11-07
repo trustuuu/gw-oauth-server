@@ -178,7 +178,6 @@ export function deleteDoc(path, id) {
 export async function verifyUser(path, password, whereArgs) {
   const users = await getDoc(path, whereArgs);
 
-  console.log("path, whereArgs in verifyUser", path, whereArgs, users);
   let user = null;
   let successLogin = false;
   if (users.length == 1) {

@@ -3,13 +3,13 @@ import jose from 'jsrsasign';
 import randomstring from 'randomstring';
 import querystring from 'querystring';
 import * as __ from 'underscore';
-import __string from 'underscore.string';
 import crypto from 'crypto';
 import userService from '../service/user-service.js';
 
 import rsaKey from '../route/rsaKey.json' with { type: "json" };
 import rsaKeyService from '../route/rsaKeyService.json' with { type: "json" };
 import refreshTokenService from '../service/refresh-token-service.js';
+import { AUTH_PATH } from '../service/remote-path-service.js';
 
 export const generateCodeAccessToken = async (iss, sub, aud, iat, exp, client, api, user) => {
     const access_token = await generateAccessTokenCommon(rsaKey, iss, sub, aud, iat, exp, client, api, user);
@@ -19,7 +19,7 @@ export const generateServiceAccessToken = async (iss, sub, aud, iat, exp, client
     const access_token = await generateAccessTokenCommon(rsaKeyService, iss, sub, aud, iat, exp, client, api);
     return access_token;
 }
-export const generateRefreshAccessToken = async (aud, exp, client, deviceId, user, scope) => {
+export const generateRefreshAccessToken = async (aud, exp, client, deviceId, user, scope, token_use) => {
   let tenant_id = null;
   let client_id = null;
   if (client){
@@ -35,19 +35,10 @@ export const generateRefreshAccessToken = async (aud, exp, client, deviceId, use
       tenant_id,
       client_id,
       device_id: deviceId,
-      token_use: "refresh"
+      token_use //: "refresh"
   };
 
-  const date = new Date();
-        const now_utc = Date.UTC(
-          date.getUTCFullYear(),
-          date.getUTCMonth(),
-          date.getUTCDate(),
-          date.getUTCHours(),
-          date.getUTCMinutes(),
-          date.getUTCSeconds()
-        );
-
+  const now_utc = getUTCNow();
   const refresh_token_save = {
     "user_id": user.id,
     "client_id": client_id,
@@ -60,8 +51,7 @@ export const generateRefreshAccessToken = async (aud, exp, client, deviceId, use
     scope
   }
   console.log('refresh_token_save',refresh_token_save)
-  const authId = "authorization";
-  await refreshTokenService.setData.apply(refreshTokenService, [refresh_token_save].concat(([authId, deviceId])));
+  await refreshTokenService.setData.apply(refreshTokenService, [refresh_token_save].concat(([AUTH_PATH, deviceId])));
 
   //const payload_server = {...payload, user, scope};
   const privateKey = jose.KEYUTIL.getKey(rsaKeyService);
@@ -348,4 +338,35 @@ export function toBase32(input) {
   }
 
   return output; // no padding "=" to match TOTP usage
+}
+
+
+export function generateUserCode(format = "AAAAA-AAAAA") {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+
+  for (const ch of format) {
+    if (ch === "A") {
+      // Random capital letter or number
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    } else {
+      // Keep literal characters like "-" or " "
+      result += ch;
+    }
+  }
+
+  return result;
+}
+
+export function getUTCNow(){
+  const date = new Date();
+  const now_utc = Date.UTC(
+  date.getUTCFullYear(),
+  date.getUTCMonth(),
+  date.getUTCDate(),
+  date.getUTCHours(),
+  date.getUTCMinutes(),
+  date.getUTCSeconds()
+  );
+  return now_utc;
 }

@@ -14,7 +14,7 @@ async function signup(req, res, routerAuth) {
     const newCompany = await SignUpCompany(company);
     const newDomain = await SignUpDomain(newCompany.id, domain);
     await SignUpUser(newCompany.id, newDomain.id, user);
-    res.status(200).json("sucess");
+    res.status(200).json("success");
   } catch (err) {
     res.status(500).json({ error: err });
   }

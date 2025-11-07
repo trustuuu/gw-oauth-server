@@ -4,8 +4,7 @@ import * as R from "ramda";
 import { verifyUser, getUserRef } from "./auth_service.js";
 import randomstring from "randomstring";
 import reqidService from "../../service/reqid-service.js";
-
-const authId = "authorization";
+import { AUTH_PATH } from "../../service/remote-path-service.js";
 
 async function redirectToLogin(reqQuery, res) {
   const params = {
@@ -83,13 +82,13 @@ async function login(req, res, routerAuth) {
           tx.acr_values = "urn:mfa.required";
           await reqidService.setData.apply(
             reqidService,
-            [tx].concat([authId, txId])
+            [tx].concat([AUTH_PATH, txId])
           );
           return res.redirect(`/oauth/v1/mfa?tx=${tx.txId}`);
         } else {
           await reqidService.setData.apply(
             reqidService,
-            [tx].concat([authId, txId])
+            [tx].concat([AUTH_PATH, txId])
           );
           authorizequery = { ...authorizequery, txId };
         }

@@ -2,14 +2,15 @@ import * as R from "ramda";
 import { getClient, verifyUser, getUserRef } from "./auth_service.js";
 import randomstring from "randomstring";
 import { buildUrl } from "../../helper/utils.js";
-import { buildQueryUrl, parseQuery, decryptText } from "../../helper/secure.js";
+import { buildQueryUrl } from "../../helper/secure.js";
 import reqIdService from "../../service/reqid-service.js";
 import apiService from "../../service/api-service.js";
 import { generateCodeUrlBuild } from "./auth_shared.js";
+import { API_PATH, AUTH_PATH } from "../../service/remote-path-service.js";
 
 async function authorize(req, res, routerAuth) {
   let client = null;
-  const authId = "authorization";
+
   const reqQuery = req.query;
   let userVerified = { verified: false };
 
@@ -114,7 +115,7 @@ async function authorize(req, res, routerAuth) {
       //routerAuth.locals.requests[reqid] = reqQuery;
       await reqIdService.setData.apply(
         reqIdService,
-        [reqQuery].concat([authId, reqid])
+        [reqQuery].concat([AUTH_PATH, reqid])
       );
 
       const params = {
@@ -134,8 +135,7 @@ async function authorize(req, res, routerAuth) {
 }
 
 const allowUserConsentSkip = async (res, client) => {
-  const apiId = "api";
-  const api = await apiService.getApiByIdentifier(apiId, client.audience);
+  const api = await apiService.getApiByIdentifier(API_PATH, client.audience);
   if (api.length < 1) {
     console.log(
       "Authence has not been found, expected %s got %s",

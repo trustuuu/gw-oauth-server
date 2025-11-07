@@ -7,22 +7,16 @@ import {
   generateCodeAccessToken,
   generateIdToken,
   generateRefreshAccessToken,
+  getUTCNow,
 } from "./utils.js";
+import { API_PATH, AUTH_PATH } from "../service/remote-path-service.js";
 
-const apiId = "api";
-const authId = "authorization";
 export const refreshTokenGrant = async (req, res) => {
   const { companyId, domainId, userId, sessionId } = JSON.parse(
     req.cookies.user
   );
-  console.log(
-    "companyId, domainId, userId, sessionId",
-    companyId,
-    domainId,
-    userId,
-    sessionId
-  );
-  const deviceId = req.headers[process.env.DEVICE_ID_HEADER];
+
+  let deviceId = req.headers[process.env.DEVICE_ID_HEADER];
   const {
     client_id: clientId,
     refresh_token: refreshTokenBody,
@@ -30,15 +24,19 @@ export const refreshTokenGrant = async (req, res) => {
   } = req.body;
 
   const refreshTokenBodyPlain = await getVerifyJwtWithJwks(refreshTokenBody);
-  if (deviceId !== refreshTokenBodyPlain.device_id) {
-    console.log(
-      `device_mismatch ${deviceId}:${refreshTokenBodyPlain.device_id}`
-    );
-    return res.status(401).json({ error: "device_mismatch" });
+  if (refreshTokenBody.token_use === "refresh-device") {
+    deviceId = refreshTokenBody.device_id;
+  } else {
+    if (deviceId !== refreshTokenBodyPlain.device_id) {
+      console.log(
+        `device_mismatch ${deviceId}:${refreshTokenBodyPlain.device_id}`
+      );
+      return res.status(401).json({ error: "device_mismatch" });
+    }
   }
 
   const refreshTokenServer = await refreshTokenService.getData(
-    authId,
+    AUTH_PATH,
     deviceId
   );
   if (refreshTokenServer) {
@@ -73,7 +71,7 @@ export const refreshTokenGrant = async (req, res) => {
     }
 
     ///////////////////////////////////////////////////////////
-    const api = await apiService.getApiByIdentifier(apiId, client.audience);
+    const api = await apiService.getApiByAudience(API_PATH, client.audience);
 
     if (api.length < 1) {
       console.log(
@@ -83,15 +81,8 @@ export const refreshTokenGrant = async (req, res) => {
       );
       return res.status(400).json({ error: "invalid_grant" });
     }
-    const date = new Date();
-    const now_utc = Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate(),
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds()
-    );
+
+    const now_utc = getUTCNow();
     const expires_in = Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
 
     const access_token = await generateCodeAccessToken(
@@ -114,7 +105,8 @@ export const refreshTokenGrant = async (req, res) => {
       client,
       deviceId,
       refreshTokenServer.user,
-      refreshTokenServer.scope
+      refreshTokenServer.scope,
+      "refresh"
     );
     const tokenClient = {
       client_id: clientId,
@@ -153,7 +145,6 @@ export const refreshTokenGrant = async (req, res) => {
     }
     saveTokenToDB(sessionData);
 
-    console.log("token_response", token_response);
     ///////////////////////////////////////////////////////////
     return res.status(200).json(token_response);
   }

@@ -2,6 +2,7 @@ import randomstring from "randomstring";
 import { getUserRef } from "./auth_service.js";
 import codeService from "../../service/code-service.js";
 import { buildUrl } from "../../helper/utils.js";
+import { AUTH_PATH } from "../../service/remote-path-service.js";
 
 export const generateCodeUrlBuild = async (
   request,
@@ -24,8 +25,10 @@ export const generateCodeUrlBuild = async (
     status: "issued",
   };
 
-  const authId = "authorization";
-  await codeService.setData.apply(codeService, [data].concat([authId, code]));
+  await codeService.setData.apply(
+    codeService,
+    [data].concat([AUTH_PATH, code])
+  );
   const urlParsed = buildUrl(request.redirect_uri, {
     code: code,
     state: request.state,

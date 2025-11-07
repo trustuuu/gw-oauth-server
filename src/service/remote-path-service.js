@@ -8,12 +8,17 @@ export const APPLICATION_COLL = "registers";
 export const CODE_COLL = "codes";
 export const REQID_COLL = "reqids";
 export const TOKEN_COLL = "tokens";
+export const DEVICE_COLL = "devices";
 export const REFRESH_TOKEN_COLL = "refresh_tokens";
 export const COMPANY_COLL = "companys";
 export const DOMAIN_COLL = "domainNames";
 export const GROUP_COLL = "groups";
 export const USER_COLL = "users";
 export const PROVISIONING_COLL = "provisionings";
+
+export const AUTH_PATH = "authorization";
+export const API_PATH = "api";
+export const APP_PATH = "application";
 
 export const PRODUCT_COLL = "products";
 export const COMPUTER_COLL = "computers";
@@ -84,6 +89,9 @@ export const tokenPath = (authId, deviceId) =>
 
 export const refreshTokenPath = (authId, deviceId) =>
   concat(authPath(authId), REFRESH_TOKEN_COLL, deviceId);
+
+export const devicePath = (authId, deviceId) =>
+  concat(authPath(authId), DEVICE_COLL, deviceId);
 
 export const generateId = (id) => {
   const reg = new RegExp(`.{1,${id.length}}`);
