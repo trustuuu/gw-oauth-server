@@ -1,7 +1,7 @@
 //import { buildQueryUrl } from "../../helper/secure.js";
 import { buildUrl } from "../../helper/utils.js";
 import * as R from "ramda";
-import { verifyUser, getUserRef } from "./auth_service.js";
+import { verifyUser, getUserRef, getUser } from "./auth_service.js";
 import randomstring from "randomstring";
 import reqidService from "../../service/reqid-service.js";
 import { AUTH_PATH } from "../../service/remote-path-service.js";
@@ -36,12 +36,16 @@ async function login(req, res, routerAuth) {
   let userVerified = { user: null, verified: false };
 
   if (R.includes("openId", reqQuery.scope.split(" "))) {
-    if (!reqQuery.email && !reqQuery.password) {
+    if (!reqQuery.email || !reqQuery.password) {
       redirectToLogin(reqQuery, res);
       return;
     }
 
-    const user = await getUserRef(reqQuery.email);
+    let user = await getUserRef(reqQuery.email);
+    if (!user) {
+      user = await getUser();
+    }
+
     if (user) {
       userVerified = await verifyUser(
         user.companyId,
@@ -49,7 +53,7 @@ async function login(req, res, routerAuth) {
         reqQuery.email,
         reqQuery.password
       );
-
+      console.log("userVerified", userVerified);
       if (!userVerified.verified) {
         redirectToLogin(reqQuery, res);
         return;

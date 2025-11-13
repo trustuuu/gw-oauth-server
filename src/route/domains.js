@@ -9,7 +9,7 @@ export default routerDomain;
 
 routerDomain.get(
   `/:id/${DOMAIN_COLL}/primary`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["company:admin"]], [["tenant:admin"], ["Ops:Admin"]]),
   (req, res) => {
     run(res, () => domainService.getPrimaryDomain(req.params.id));
   }
@@ -35,7 +35,7 @@ routerDomain.get(
 
 routerDomain.post(
   `/:id/${DOMAIN_COLL}`,
-  //GuardLeast.check(undefined, [["Ops:Admin"]]),
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
   async (req, res) => {
     const data = {
       ...req.body,
@@ -66,7 +66,7 @@ routerDomain.post(
 
 routerDomain.put(
   `/:id/${DOMAIN_COLL}/:domainId`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -80,7 +80,7 @@ routerDomain.put(
 
 routerDomain.put(
   `/:id/${DOMAIN_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = req.body;
     const allDomains = data.map((item) => {
@@ -99,7 +99,7 @@ routerDomain.put(
 
 routerDomain.delete(
   `/:id/${DOMAIN_COLL}/:domainId`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = {};
     run(res, () =>
@@ -113,7 +113,7 @@ routerDomain.delete(
 
 routerDomain.delete(
   `/:id/${DOMAIN_COLL}`,
-  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {

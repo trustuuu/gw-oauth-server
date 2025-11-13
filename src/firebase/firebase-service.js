@@ -52,6 +52,7 @@ export function getAuthUser() {
 
 export async function getDoc(path, whereArgs) {
   const [collectionPath, docName] = getCollectionPathAndDocId(path);
+
   let ref = db().collection(collectionPath);
   if (docName) {
     return ref.doc(docName).get().then(toObject);
@@ -81,7 +82,6 @@ function extractCompanyAndDomain(path) {
 
   const companyId = segments[companyIdIndex];
   const domainId = segments[domainIdIndex];
-
   return { companyId, domainId };
 }
 

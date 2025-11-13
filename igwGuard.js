@@ -82,7 +82,12 @@ export const GuardLeast = {
   check: function (requiredScopes, requiredRoles) {
     return function (req, res, next) {
       const auth = req.auth || {};
-
+      console.log("req.auth", req.auth);
+      console.log(
+        "requiredScopes, requiredRoles",
+        requiredScopes,
+        requiredRoles
+      );
       //Tenant Checking
       const tokenTenant = auth?.tenant_id;
       const routeTenant = req.params.id ? req.params.id : req.params.companyId;
@@ -90,7 +95,7 @@ export const GuardLeast = {
       if (!tokenTenant) {
         return res.status(401).json({ error: "Missing tenant_id in token" });
       }
-
+      console.log("tokenTenant, routeTenant", tokenTenant, routeTenant);
       if (req.originalUrl.includes("/oauthapi")) {
         console.log(`Tenant checking has been passed for ${req.originalUrl}`);
       } else if (tokenTenant !== routeTenant) {
@@ -117,14 +122,14 @@ export const GuardLeast = {
                 // AND Mode: all scopes in group should includes permissions
                 return scopeGroup.every(function (scope) {
                   console.log(
-                    `permissions => ${permissions} inclues scope => ${scope}`
+                    `permissions => ${permissions} includes scope => ${scope}`
                   );
                   return permissions.includes(scope);
                 });
               } else {
                 // OR Mode: one of permissions included in scope.
                 console.log(
-                  `permissions => ${permissions} inclues scopeGroup => ${scopeGroup}`
+                  `permissions => ${permissions} includes scopeGroup => ${scopeGroup}`
                 );
                 return permissions.includes(scopeGroup);
               }
@@ -141,14 +146,14 @@ export const GuardLeast = {
               if (Array.isArray(roleGroup)) {
                 // AND mode: all roles should be included in groups.
                 console.log(
-                  `roleGroup => ${roleGroup} inclues roles => ${roles}`
+                  `roleGroup => ${roleGroup} includes roles => ${roles}`
                 );
                 return roleGroup.every(function (role) {
                   return roles.includes(role);
                 });
               } else {
                 // OR mode: any roles inclued
-                console.log(`roles => ${roles} inclues roles => ${roleGroup}`);
+                console.log(`roles => ${roles} includes roles => ${roleGroup}`);
                 return roles.includes(roleGroup);
               }
             });

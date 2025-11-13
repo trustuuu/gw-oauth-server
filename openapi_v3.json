@@ -82,32 +82,7 @@
     "/oauth/v1/session": {
       "post": {
         "summary": "/oauth/v1/session",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "accessToken": {
-                      "type": "string",
-                      "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6InZPbGxpMUhaV2dfaHh2cGwwVnlKeiJ9.eyJpc3MiOiJodHRwOi8vb2F1dGgudW5pZGlyLmlnb29kd29ya3MuY29tLyIsInN1YiI6ImphbWVzLmNoYW5nIiwiYXVkIjoiaHR0cDovL3VuaWRpci5hcGkuaWdvb2R3b3Jrcy5jb20vIiwiaWF0IjoxNzYyMzg0MTcxLCJleHAiOjE3NjI0NzA1NzEsImp0aSI6IjdSWElGMWFDIiwicGVybWlzc2lvbnMiOlsiY29tcGFueTphZG1pbiIsImNvbXBhbnk6ZGVsZXRlIiwiY29tcGFueTpyZWFkIiwiY29tcGFueTp3cml0ZSIsImVtYWlsIiwiZW1haWxfdmVyaWZpZWQiLCJncm91cDpyZWFkIiwib3BlbklkIiwicHJvZmlsZSIsInVzZXI6YWRtaW4iLCJ1c2VyOnJlYWQiLCJ1c2VybmFtZSJdLCJyb2xlcyI6WyJPcHM6QWRtaW4iLCJPcHM6U3VwcG9ydCJdLCJ0ZW5hbnRfaWQiOiJpZ29vZHdvcmtzIiwiY2xpZW50X2lkIjoic2llOEwyVm45Z1ZpWm1DQ2RSWXV3NzJiNEo5M201a0kiLCJjb21wYW55SWQiOiJpZ29vZHdvcmtzIiwiZG9tYWluSWQiOiJpZ29vZHdvcmtzLmNvbSIsInRva2VuX3VzZSI6ImFjY2VzcyJ9.KOgZ_DkZFI7C8QQ38VAwtK-U2Gu6ple9oSIxMU7whIFF-AEhIK5JiDr249Mfu2GDIi5aIdxB-gp-uhWMcRxwIpKOihlMQ-tXo0wMUE-3Xa2uA66mUyT4LheBJRiOLZDiN5-ZYI7xF9FOV6eFRs9KyGJ_7v7mnSYMyS9m3ooRXfNRvrw38UtnjvVXEnJJUpfwRgk1XCZU2Z9dmCHPn3I8vNtK9o7icRCHC83naIOESQD5eQk09w4iViFPYQ6DKUtUZ-nTEfOCiBGhccWmJzO1xNC98biy-dGBa5owFUp_4frmBqk8yjrOCKr0tg6Maw3ZstzZj19E8XC327sdV169gw"
-                    },
-                    "refreshToken": {
-                      "type": "string",
-                      "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjkzRmNiN0NrNEJNanUydU5tdTh5UndQdzVTRXdSaFRNRiJ9.eyJhdWQiOiJodHRwOi8vdW5pZGlyLmFwaS5pZ29vZHdvcmtzLmNvbS8iLCJleHAiOjE3NjMyNDgxNzEsImp0aSI6IlRpeE9RRm1TN0JxRnpwUWEiLCJ0ZW5hbnRfaWQiOiJhc2h1cnN0IiwiY2xpZW50X2lkIjoic2llOEwyVm45Z1ZpWm1DQ2RSWXV3NzJiNEo5M201a0kiLCJkZXZpY2VfaWQiOiI4YWQxZTAxNy1jNmIxLTRkZWMtOGEzNS01NDU1YjgyOTVmZmIiLCJ0b2tlbl91c2UiOiJyZWZyZXNoIn0.uHm5s-J3r5sN6KHr1k7WkYNTHAuIFswFG6dISSRqmOUcpcJ5uUeLDeCYKh6X8WmUiACOKIBaIHWyQ__C8IaajJldVu2rXIPJqJ_RDggttku9MKdYeDxYSksJpo8WrXfZ217Gtsfl0sx_A6hH9MfNtxqcC_MFELZlspvIp6gtybqfzkk0Ji44GDvqLX1ihdZeG8A8D14Rmbc_cmMGV1mJUFzFm2bAt56wvuHylHEK7sJwShtTBbxeqHndSdCMkkf7Vb9aw_5SpO_jj_pswf5sfGpINdzhrJwC0PFdJmXMiVaJ0WmqKVJM68y4rTadzCXkHEI2EdfsGz7fSA45KeJRSA"
-                    },
-                    "idToken": {
-                      "type": "string",
-                      "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6InZPbGxpMUhaV2dfaHh2cGwwVnlKeiJ9.eyJzdWIiOiJqYW1lcy5jaGFuZyIsImF1ZCI6InNpZThMMlZuOWdWaVptQ0NkUll1dzcyYjRKOTNtNWtJIiwiaXNzIjoiaHR0cDovL29hdXRoLnVuaWRpci5pZ29vZHdvcmtzLmNvbS8iLCJpYXQiOjE3NjIzODQxNzEsImlkIjoiamFtZXMuY2hhbmciLCJkaXNwbGF5TmFtZSI6IkphbWVzIENoYW5nIiwiY29tcGFueUlkIjoiaWdvb2R3b3JrcyIsImRvbWFpbklkIjoiaWdvb2R3b3Jrcy5jb20iLCJlbWFpbCI6ImphbWVzLmNoYW5nQGlnb29kd29ya3MuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9.nKjLYd9g-pjj9sxJD-WI4N644omdhkyCj5FfY3-pA6nkLwIIrPibiqboOui9w2owa7bGitpSVGA2rkrBNeSEQsZ6A0WVqe3aife5gRQIyz_kgpVzwhYUI_1e0mcSS-5hNTxyIpNmRURW2EbZyFm3VOXJ-wtCx_9s379AO74VjfhBWU0cM2zINEh3ewcXYM6VnO0cEsjOHYkTUVJSiMe5-hWT0lVTjW2zLz0XxMD5yNjAOBpl0tMUL-dyZWKPLapkwRzDzZLtOQsvIKL7j5fuj3sSYYwdnPIrhLaUpWSINgOY-8dSqoP8yN76H7gCckhoMc6U5D4cc4GUbDfLPCn1Zw"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
+        "responses": {},
         "tags": []
       }
     },
@@ -966,7 +941,61 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "primary": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      },
+                      "whenCreated": {
+                        "type": "object",
+                        "properties": {
+                          "seconds": {
+                            "type": "number"
+                          },
+                          "nanoseconds": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "primary",
+                      "name"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "tags": []
       },
       "post": {

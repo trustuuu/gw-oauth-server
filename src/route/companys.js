@@ -20,11 +20,10 @@ export default routerCompany;
 
 routerCompany.get(
   `/`,
-  GuardLeast.check(undefined, [
-    ["tenant:admin"],
-    ["company:admin"],
-    ["Ops:Admin"],
-  ]),
+  GuardLeast.check(
+    [["company:admin"]],
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     run(res, () => companyService.getData(req.params.id));
   }
@@ -32,11 +31,10 @@ routerCompany.get(
 
 routerCompany.get(
   `/:id`,
-  GuardLeast.check(undefined, [
-    ["tenant:admin"],
-    ["company:admin"],
-    ["Ops:Admin"],
-  ]),
+  GuardLeast.check(
+    [["company:admin"]],
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     run(res, () => companyService.getData(req.params.id));
   }
@@ -44,11 +42,10 @@ routerCompany.get(
 
 routerCompany.get(
   `/:id/childCompanys`,
-  GuardLeast.check(undefined, [
-    ["tenant:admin"],
-    ["company:admin"],
-    ["Ops:Admin"],
-  ]),
+  GuardLeast.check(
+    [["company:admin"]],
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     run(res, () => companyService.getChildCompanys(req.params.id));
   }
@@ -56,7 +53,10 @@ routerCompany.get(
 
 routerCompany.post(
   "/",
-  //GuardLeast.check(["company:write"], [["tenant:admin"], ["company:admin"]]),
+  GuardLeast.check(
+    [["company:admin"]],
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   async (req, res) => {
     const data = {
       ...req.body,
@@ -84,7 +84,10 @@ routerCompany.post(
 
 routerCompany.put(
   "/:id",
-  GuardLeast.check(undefined, [["tenant:admin"], ["company:admin"]]),
+  GuardLeast.check(
+    [["company:admin"]],
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
     run(res, () =>
@@ -98,7 +101,10 @@ routerCompany.put(
 
 routerCompany.delete(
   `/:id`,
-  GuardLeast.check(undefined, [["tenant:admin"], ["company:admin"]]),
+  GuardLeast.check(
+    [["company:admin"]],
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     const data = {};
     //run(res, () => companyService.deleteData(req.params.id));
@@ -113,7 +119,10 @@ routerCompany.delete(
 
 routerCompany.delete(
   `/`,
-  GuardLeast.check(undefined, [["tenant:admin"], ["company:admin"]]),
+  GuardLeast.check(
+    [["company:admin"]],
+    [["tenant:admin"], ["company:admin"], ["Ops:Admin"]]
+  ),
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {

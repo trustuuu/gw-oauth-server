@@ -81,11 +81,10 @@ export const verifyUser = async (companyId, domainName, email, password) => {
 };
 
 export const getClient = async (clientId) => {
-  console.log("appId, clientId", appId, clientId);
   let appData = await applicationService.getData(appId, clientId);
   let appPermissionData =
     await applicationService.getApplicationPermissionScopes(appId, clientId);
-  console.log("appPermissionData", appPermissionData);
+
   appData.PermissionScopes = appPermissionData
     ? Array.isArray(appPermissionData)
       ? appPermissionData.map((p) => p.permission)

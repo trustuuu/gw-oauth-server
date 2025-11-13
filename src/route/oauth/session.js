@@ -7,6 +7,13 @@ async function getSession(req, res, routerAuth) {
   const { companyId, domainId, userId, sessionId } = JSON.parse(
     req.cookies.user
   );
+  console.log(
+    "companyId, domainId, userId, sessionId in session",
+    companyId,
+    domainId,
+    userId,
+    sessionId
+  );
   if (!userId) return res.status(404).json({ error: "Not logged in" });
   const user = await getUserById(companyId, domainId, userId);
   if (user) {
