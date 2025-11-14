@@ -105,6 +105,7 @@ export const saveTokenToDB = async (data) => {
     refreshToken,
     idToken,
   } = data;
+  console.log("data in saveTokenToDB", data, companyId, domainId, userId);
   await userService.updateData.apply(
     userService,
     [

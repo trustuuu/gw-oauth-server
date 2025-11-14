@@ -941,61 +941,7 @@
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "primary": {
-                        "oneOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "boolean"
-                          }
-                        ]
-                      },
-                      "whenCreated": {
-                        "type": "object",
-                        "properties": {
-                          "seconds": {
-                            "type": "number"
-                          },
-                          "nanoseconds": {
-                            "type": "number"
-                          }
-                        }
-                      },
-                      "description": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "primary",
-                      "name"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
+        "responses": {},
         "tags": []
       },
       "post": {
@@ -1390,7 +1336,269 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "whenUpdated": {
+                        "type": "object",
+                        "properties": {
+                          "seconds": {
+                            "type": "number"
+                          },
+                          "nanoseconds": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "displayName": {
+                        "type": "string"
+                      },
+                      "mfa": {
+                        "type": "boolean"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "email_verified": {
+                        "type": "boolean"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "phoneNumbers": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "primary": {
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "primary",
+                            "value"
+                          ]
+                        }
+                      },
+                      "whenCreated": {
+                        "type": "object",
+                        "properties": {
+                          "seconds": {
+                            "type": "number"
+                          },
+                          "nanoseconds": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "userName": {
+                        "type": "string"
+                      },
+                      "addresses": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "streetAddress": {
+                              "type": "string"
+                            },
+                            "country": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "primary": {
+                              "type": "boolean"
+                            },
+                            "postalCode": {
+                              "type": "string"
+                            },
+                            "locality": {
+                              "type": "string"
+                            },
+                            "region": {
+                              "type": "string"
+                            },
+                            "formatted": {
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "postalCode",
+                            "primary",
+                            "country",
+                            "locality",
+                            "streetAddress",
+                            "region",
+                            "type"
+                          ]
+                        }
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "emails": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "primary": {
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value",
+                            "primary"
+                          ]
+                        }
+                      },
+                      "name": {
+                        "type": "object",
+                        "properties": {
+                          "familyName": {
+                            "type": "string"
+                          },
+                          "givenName": {
+                            "type": "string"
+                          },
+                          "honorificPrefix": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "honorificSuffix": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "formatted": {
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "password": {
+                        "nullable": true
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "userType": {
+                        "nullable": true
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "preferredLanguage": {
+                        "nullable": true
+                      },
+                      "timezone": {
+                        "nullable": true
+                      },
+                      "EnterpriseExtension": {
+                        "type": "object",
+                        "properties": {
+                          "Manager": {
+                            "nullable": true
+                          },
+                          "Division": {
+                            "nullable": true
+                          },
+                          "Organization": {
+                            "nullable": true
+                          },
+                          "EmployeeNumber": {
+                            "type": "string"
+                          },
+                          "Department": {
+                            "type": "string"
+                          },
+                          "CostCenter": {
+                            "nullable": true
+                          }
+                        }
+                      },
+                      "externalId": {
+                        "type": "string"
+                      },
+                      "nickName": {
+                        "nullable": true
+                      },
+                      "Schemas": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "ims": {
+                        "nullable": true
+                      },
+                      "locale": {
+                        "nullable": true
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "resourceType": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "customExtension": {
+                        "type": "object",
+                        "properties": {}
+                      },
+                      "roles": {
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "status",
+                      "mfa",
+                      "displayName",
+                      "email",
+                      "whenUpdated",
+                      "emails",
+                      "notes",
+                      "whenCreated",
+                      "name",
+                      "addresses",
+                      "phoneNumbers",
+                      "userName"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "tags": []
       },
       "post": {

@@ -41,7 +41,6 @@ export const refreshTokenGrant = async (req, res) => {
   );
   if (refreshTokenServer) {
     console.log("We found a matching refresh token");
-    console.log("refreshToken", refreshTokenServer);
 
     if (refreshTokenServer.client_id != clientId) {
       // tokenService.deleteData.apply(
@@ -143,7 +142,7 @@ export const refreshTokenGrant = async (req, res) => {
       sessionData = { ...sessionData, idToken: id_token };
       token_response = { ...token_response, id_token };
     }
-    saveTokenToDB(sessionData);
+    await saveTokenToDB(sessionData);
 
     ///////////////////////////////////////////////////////////
     return res.status(200).json(token_response);

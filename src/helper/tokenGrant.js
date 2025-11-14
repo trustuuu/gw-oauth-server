@@ -67,6 +67,11 @@ export const tokenGrant = async (req, res) => {
   const now_utc = getUTCNow();
   const expires_in = Math.floor(now_utc / 1000) + api[0].tokenExpiration * 60;
 
+  console.log(
+    "req.body.code_verifier, code.request.code_challenge",
+    req.body.code_verifier,
+    code.request.code_challenge
+  );
   if (
     !verifyCodeChallenge(req.body.code_verifier, code.request.code_challenge)
   ) {
