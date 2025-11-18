@@ -104,6 +104,7 @@ export const GuardLeast = {
         //   console.log(`Tenant checking has been passed for ${req.originalUrl}`);
       } else if (tokenTenant !== routeTenant) {
         if (routeTenant) {
+          console.log("trying company_all by routeTenant", routeTenant);
           const company_all = await getCompany(routeTenant);
           console.log("company_all =>", company_all);
           if (!company_all.find((c) => c == tokenTenant)) {
