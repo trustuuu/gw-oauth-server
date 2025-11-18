@@ -105,7 +105,7 @@ export const GuardLeast = {
       } else if (tokenTenant !== routeTenant) {
         if (routeTenant) {
           const company_all = await getCompany(routeTenant);
-          console.log("company_all", company_all);
+          console.log("company_all =>", company_all);
           if (!company_all.find((c) => c == tokenTenant)) {
             return res.status(403).json({
               error: `Access denied for tenant '${routeTenant}' under '${tokenTenant}'`,
