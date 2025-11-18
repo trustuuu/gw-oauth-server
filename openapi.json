@@ -16,8 +16,19 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "302": {
+            "description": "Found",
+            "schema": {
+              "type": "string",
+              "example": "<p>Found. Redirecting to http://localhost:3000/callback?code=BqpT0CDZ&amp;state=8fz9zysw7gq</p>"
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "text/html"
+        ]
       }
     },
     "/oauth/v1/login": {
@@ -27,8 +38,19 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "302": {
+            "description": "Found",
+            "schema": {
+              "type": "string",
+              "example": "<p>Found. Redirecting to http://localhost/oauth/v1/authorize?response_type=code&amp;email=james.chang%40igoodworks.com&amp;password=Hello%40!23&amp;client_id=sie8L2Vn9gViZmCCdRYuw72b4J93m5kI&amp;redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&amp;scope=username%20email%20email_verified%20openId%20profile%20user%3Aadmin&amp;state=8fz9zysw7gq&amp;code_challenge=aWVbj9Kt6-NYfmbYJbbNaoxxDbUNNV4Brf_8xh_IEYc&amp;code_challenge_method=sha256&amp;txId=hAnQ15WPbUv5RMyn</p>"
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "text/html"
+        ]
       }
     },
     "/oauth/v1/logout": {
@@ -104,8 +126,57 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_token": {
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6InZPbGxpMUhaV2dfaHh2cGwwVnlKeiJ9.eyJpc3MiOiJodHRwOi8vb2F1dGgudW5pZGlyLmlnb29kd29ya3MuY29tLyIsInN1YiI6ImphbWVzLmNoYW5nIiwiYXVkIjoiaHR0cDovL3VuaWRpci5hcGkuaWdvb2R3b3Jrcy5jb20vIiwiaWF0IjoxNzYzMjc2NDYwLCJleHAiOjE3NjMzNjI4NjAsImp0aSI6IkhaNE1nUEVFIiwicGVybWlzc2lvbnMiOlsiY29tcGFueTphZG1pbiIsImNvbXBhbnk6ZGVsZXRlIiwiY29tcGFueTpyZWFkIiwiY29tcGFueTp3cml0ZSIsImVtYWlsIiwiZW1haWxfdmVyaWZpZWQiLCJncm91cDpyZWFkIiwib3BlbklkIiwicHJvZmlsZSIsInVzZXI6YWRtaW4iLCJ1c2VyOnJlYWQiLCJ1c2VybmFtZSJdLCJyb2xlcyI6WyJPcHM6QWRtaW4iLCJPcHM6U3VwcG9ydCJdLCJ0ZW5hbnRfaWQiOiJpZ29vZHdvcmtzIiwiY2xpZW50X2lkIjoic2llOEwyVm45Z1ZpWm1DQ2RSWXV3NzJiNEo5M201a0kiLCJjb21wYW55SWQiOiJpZ29vZHdvcmtzIiwiZG9tYWluSWQiOiJpZ29vZHdvcmtzLmNvbSIsInRva2VuX3VzZSI6ImFjY2VzcyJ9.L4AzNaddE9tmZRKqblZFIDdTF6mTSpfDMytHt2SoE8JJCPX2tXT_IvEvafQgjFueg-0YFRIpDhnlTEVNzdPovbtmU6vr4tIaTGx2Ripex6Q5KVaEzwoBRF3WqW6rs3FVN0AYnz8GBKrRvTny08Bz_we6DILWLX6FlTqLgx3626kIwSoCoLssoICJwsYENoDxAZwxFZTz-uqzTLrGBTCg7arQdvj6LPOYm_AAhwb2zZsK2LDnKyhcPZlggWCPlkROt93dAYU2WINgFEW6F5gUn63rVkwO1JuCKwCNb597vaL_E8C3PUOiKYq8YSHCT6tl3zdG1jf_dHU-JLQq0auBfQ"
+                },
+                "refresh_token": {
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjkzRmNiN0NrNEJNanUydU5tdTh5UndQdzVTRXdSaFRNRiJ9.eyJhdWQiOiJodHRwOi8vdW5pZGlyLmFwaS5pZ29vZHdvcmtzLmNvbS8iLCJleHAiOjE3NjQxNDA0NjAsImp0aSI6IlR2MWdZaHdKRXZmQVpVRVYiLCJ0ZW5hbnRfaWQiOiJhc2h1cnN0IiwiY2xpZW50X2lkIjoic2llOEwyVm45Z1ZpWm1DQ2RSWXV3NzJiNEo5M201a0kiLCJkZXZpY2VfaWQiOiI4YWQxZTAxNy1jNmIxLTRkZWMtOGEzNS01NDU1YjgyOTVmZmIiLCJ0b2tlbl91c2UiOiJyZWZyZXNoIn0.hqzHBdy4cUhSBcDf0llQDP3qyO2U_dMsQ2pGe-f7SAqsPrwB2Y0Dk65MpnbNnUn38Jxpc22Zj3P61xPI9SqomGGUN4MjLt2wDxzRC-xFl51aIvJOGeyboLzbYsgI5dL0E2NLDwSG2qcQi5-IiG8kTLscd68ZbLKNWP2YepY6u28TeDS0N7Fxt_wEAQkBtDvwfLJmG-PmF2TGfnmDER5YeRP9HN6gpIHeXtJPiUADt-vOvPEcc9bghWDBVq9dfma2T8JD_Ej-5bL4ShhwpNnREKMLjxRNmsdJEXecYd5u9yKTq4kSUnb6yTDdDuApn8S05x6rUDMEF-52xVn8L8QZCQ"
+                },
+                "expires_in": {
+                  "type": "number",
+                  "example": 1763362860
+                },
+                "token_type": {
+                  "type": "string",
+                  "example": "Bearer"
+                },
+                "client": {
+                  "type": "object",
+                  "properties": {
+                    "client_id": {
+                      "type": "string",
+                      "example": "sie8L2Vn9gViZmCCdRYuw72b4J93m5kI"
+                    },
+                    "companyId": {
+                      "type": "string",
+                      "example": "igoodworks"
+                    },
+                    "domain": {
+                      "type": "string",
+                      "example": "igoodworks.com"
+                    }
+                  }
+                },
+                "id_token": {
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6InZPbGxpMUhaV2dfaHh2cGwwVnlKeiJ9.eyJzdWIiOiJqYW1lcy5jaGFuZyIsImF1ZCI6InNpZThMMlZuOWdWaVptQ0NkUll1dzcyYjRKOTNtNWtJIiwiaXNzIjoiaHR0cDovL29hdXRoLnVuaWRpci5pZ29vZHdvcmtzLmNvbS8iLCJpYXQiOjE3NjMyNzY0NjAsImlkIjoiamFtZXMuY2hhbmciLCJkaXNwbGF5TmFtZSI6IkphbWVzIENoYW5nIiwiY29tcGFueUlkIjoiaWdvb2R3b3JrcyIsImRvbWFpbklkIjoiaWdvb2R3b3Jrcy5jb20iLCJlbWFpbCI6ImphbWVzLmNoYW5nQGlnb29kd29ya3MuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9.mf0vTw_DMYH2cQpnYfaBoxVKX1j5y7ztGysgLMJA9xQ1HiSGXfoY0yCatEjDC3mbr1rP4n0JF7LvvMWnacKIRUP7vPOdsKVd5im525lRAQiPiPQguHlc4UbXUqrSG1eEq_Pl2duhFEH64agZgmFj3YeuFwFwem7Pf26q9nfySBK3kKjvxL_ARVVezG2p2o5xCKYzFZzlAXvQv5vyd2cRD3kwQnOH1-t4xo6cFj7yjl8W3HMJ49yS-Rix0wCMpCw9qEUQxQZx8_e5Mom2nxkvrM3ICVI-PGcSpwLV-XBoCKyg4_b-xPKntbIeW8yXE50tIF9egovm383jBO8tTefDVw"
+                }
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       }
     },
     "/oauth/v1/callback": {
@@ -115,8 +186,28 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "sessionId": {
+                  "type": "string",
+                  "example": "DcSrtwHigYWqhK6aLXmbQxQZDIlZuAHW"
+                }
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       }
     },
     "/oauth/v1/session": {
@@ -126,8 +217,44 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accessToken": {
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6InZPbGxpMUhaV2dfaHh2cGwwVnlKeiJ9.eyJpc3MiOiJodHRwOi8vb2F1dGgudW5pZGlyLmlnb29kd29ya3MuY29tLyIsInN1YiI6ImphbWVzLmNoYW5nIiwiYXVkIjoiaHR0cDovL3VuaWRpci5hcGkuaWdvb2R3b3Jrcy5jb20vIiwiaWF0IjoxNzYzMTg1NjMyLCJleHAiOjE3NjMyNzIwMzIsImp0aSI6Ik9nWlh6eUJEIiwicGVybWlzc2lvbnMiOlsiY29tcGFueTphZG1pbiIsImNvbXBhbnk6ZGVsZXRlIiwiY29tcGFueTpyZWFkIiwiY29tcGFueTp3cml0ZSIsImVtYWlsIiwiZW1haWxfdmVyaWZpZWQiLCJncm91cDpyZWFkIiwib3BlbklkIiwicHJvZmlsZSIsInVzZXI6YWRtaW4iLCJ1c2VyOnJlYWQiLCJ1c2VybmFtZSJdLCJyb2xlcyI6WyJPcHM6QWRtaW4iLCJPcHM6U3VwcG9ydCJdLCJ0ZW5hbnRfaWQiOiJpZ29vZHdvcmtzIiwiY2xpZW50X2lkIjoic2llOEwyVm45Z1ZpWm1DQ2RSWXV3NzJiNEo5M201a0kiLCJjb21wYW55SWQiOiJpZ29vZHdvcmtzIiwiZG9tYWluSWQiOiJpZ29vZHdvcmtzLmNvbSIsInRva2VuX3VzZSI6ImFjY2VzcyJ9.EpK4z0PJHKzXHQIRVHr75h1qqrV2vX5oC97VxPG1SxlUxmmnelr4ssd1cOjfMSxmj6he7yJIJqTlrUFx7SIeBtLKW27BDSvASkS8lhmG-65ubx8urD_pFJmOkApKyL9Vme1KQmwwuCtu3lsisGoNhyQLqKx2a02ZzeicFx6XCvh2QZ5glYTKWgHGejFWl0C4fEWcWmtXDqSV0pnthDvCVo99C8P-15cFU2xUuJne2mBl0pCRofzvGlVLeLWRG8pUmnsEr1XIrSQTkOCy3AXy7wQUBKyxyR6rZB-vJXATKyrC-FzuZWXCro_s2EZ_SJE03wUx3jIAiEEgeIGzZMvGHA"
+                },
+                "refreshToken": {
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjkzRmNiN0NrNEJNanUydU5tdTh5UndQdzVTRXdSaFRNRiJ9.eyJhdWQiOiJodHRwOi8vdW5pZGlyLmFwaS5pZ29vZHdvcmtzLmNvbS8iLCJleHAiOjE3NjQwNDk2MzIsImp0aSI6IllvMWxPV1Q2UUdhclV5aW0iLCJ0ZW5hbnRfaWQiOiJhc2h1cnN0IiwiY2xpZW50X2lkIjoic2llOEwyVm45Z1ZpWm1DQ2RSWXV3NzJiNEo5M201a0kiLCJkZXZpY2VfaWQiOiI4YWQxZTAxNy1jNmIxLTRkZWMtOGEzNS01NDU1YjgyOTVmZmIiLCJ0b2tlbl91c2UiOiJyZWZyZXNoIn0.YxSXIxMXQ3-TqBPu4FcSEbnQmEcWGCm2abW2bxsrC1aFYcpRm3MPctWdcPAKpXvrWuiu4yAeSC0OlulEyVJNLyEdqX49JZnLevocWoPzaXnlOr6JVvPXV9iSyVUVDzlA36HEAxcPlrAKl-0BqMNEiuHolBX-4vU-vSOm-9lOt4GhgN1IkJTFMUfTjahFob4N6mJtnhX7j-tREr4DKEaOKqt-FNFtzri2TjrBcTdjsVnmcRewe1qRfjsNIv-3MP9vYOGXR2g1p4ngzK48jRBoLACpg-H1OmKNd8Z_tOtStMCs3Pt0aCFHOCvUXaExVltQvfMkT6Pl13WEMWE8oz6VPA"
+                },
+                "idToken": {
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6InZPbGxpMUhaV2dfaHh2cGwwVnlKeiJ9.eyJzdWIiOiJqYW1lcy5jaGFuZyIsImF1ZCI6InNpZThMMlZuOWdWaVptQ0NkUll1dzcyYjRKOTNtNWtJIiwiaXNzIjoiaHR0cDovL29hdXRoLnVuaWRpci5pZ29vZHdvcmtzLmNvbS8iLCJpYXQiOjE3NjMxODU2MzIsImlkIjoiamFtZXMuY2hhbmciLCJkaXNwbGF5TmFtZSI6IkphbWVzIENoYW5nIiwiY29tcGFueUlkIjoiaWdvb2R3b3JrcyIsImRvbWFpbklkIjoiaWdvb2R3b3Jrcy5jb20iLCJlbWFpbCI6ImphbWVzLmNoYW5nQGlnb29kd29ya3MuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9.milJH3O1LjSXlmXZWJEvSHRLdbd8fyTlB2_o67GQz1uuPnFc-RLNgSKwAsEqHf5kIu2V4sPdZKOVJv_WsbR7hdBh71cMlrc4GPspX-YsAEeqRxPAW1CAYjLgMokGEasWCgoCasuzp-CkzvR0YnGTI06zroOv_NYTfO8vJOZQ3oZPLGIqR2bNj9amO-wGrujnEsv2ugIH1euSH14Co9zDKRpm4ILotc-mMVGANsaIaQ1DA7MeD9j2Mt0fZmGnDQ1ioLXOqs3Ukz8PKChvEyCdHJ_egn5MLdpamKrjS9bHlFJCaaHpSVbuygcwJlZgtYGmxE0bwWC5CLz78v_tv5MnlQ"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Token not found"
+                }
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       }
     },
     "/oauth/v1/mfa": {
@@ -833,8 +960,24 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       },
       "post": {
         "summary": "/v1/companys",
@@ -868,8 +1011,87 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "Gilbee"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Gilbee"
+                },
+                "whenUpdated": {
+                  "type": "object",
+                  "properties": {
+                    "seconds": {
+                      "type": "number",
+                      "example": 1708714038
+                    },
+                    "nanoseconds": {
+                      "type": "number",
+                      "example": 987000000
+                    }
+                  }
+                },
+                "primary": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "type": {
+                  "type": "string",
+                  "example": "customer"
+                },
+                "displayName": {
+                  "type": "string",
+                  "example": "Gilbee Ave."
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Gilbee Street"
+                },
+                "whenCreated": {
+                  "type": "object",
+                  "properties": {
+                    "nanoseconds": {
+                      "type": "number",
+                      "example": 601000000
+                    },
+                    "seconds": {
+                      "type": "number",
+                      "example": 1708046232
+                    }
+                  }
+                },
+                "status": {
+                  "type": "string",
+                  "example": "Updated"
+                },
+                "parent": {
+                  "type": "string",
+                  "example": "ashurst"
+                }
+              }
+            }
+          },
+          "304": {},
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string",
+              "example": "Missing or invalid Authorization header"
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json",
+          "text/html"
+        ]
       },
       "put": {
         "summary": "/v1/companys/{id}",
@@ -883,7 +1105,9 @@
             "required": true
           }
         ],
-        "responses": {},
+        "responses": {
+          "200": {}
+        },
         "tags": []
       },
       "delete": {
@@ -915,8 +1139,90 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "whenUpdated": {
+                    "type": "object",
+                    "properties": {
+                      "seconds": {
+                        "type": "number"
+                      },
+                      "nanoseconds": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "primary": {
+                    "type": "boolean"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "whenCreated": {
+                    "type": "object",
+                    "properties": {
+                      "nanoseconds": {
+                        "type": "number"
+                      },
+                      "seconds": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "parent": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "displayName",
+                  "parent",
+                  "whenCreated",
+                  "name",
+                  "type",
+                  "description",
+                  "primary",
+                  "status",
+                  "whenUpdated"
+                ]
+              }
+            }
+          },
+          "304": {},
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string",
+              "example": "Missing or invalid Authorization header"
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "text/html",
+          "application/json"
+        ]
       }
     },
     "/v1/companys/{id}/domainNames/primary": {
@@ -932,8 +1238,61 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "whenUpdated": {
+                    "type": "object",
+                    "properties": {
+                      "seconds": {
+                        "type": "number"
+                      },
+                      "nanoseconds": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "whenCreated": {
+                    "type": "object",
+                    "properties": {
+                      "nanoseconds": {
+                        "type": "number"
+                      },
+                      "seconds": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "primary": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "304": {}
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       }
     },
     "/v1/companys/{id}/domainNames/{domainId}": {
@@ -954,8 +1313,67 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "igoodworks.net"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "igoodworks.net"
+                },
+                "whenUpdated": {
+                  "type": "object",
+                  "properties": {
+                    "seconds": {
+                      "type": "number",
+                      "example": 1763425352
+                    },
+                    "nanoseconds": {
+                      "type": "number",
+                      "example": 739000000
+                    }
+                  }
+                },
+                "description": {
+                  "type": "string",
+                  "example": "igoodworks another domain"
+                },
+                "primary": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "whenCreated": {
+                  "type": "object",
+                  "properties": {
+                    "seconds": {
+                      "type": "number",
+                      "example": 1746643008
+                    },
+                    "nanoseconds": {
+                      "type": "number",
+                      "example": 671000000
+                    }
+                  }
+                },
+                "status": {
+                  "type": "string",
+                  "example": "Updated"
+                }
+              }
+            }
+          },
+          "304": {}
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       },
       "put": {
         "summary": "/v1/companys/{id}/domainNames/{domainId}",
@@ -974,7 +1392,9 @@
             "required": true
           }
         ],
-        "responses": {},
+        "responses": {
+          "200": {}
+        },
         "tags": []
       },
       "delete": {
@@ -1011,8 +1431,66 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "primary": {
+                    "type": [
+                      "string",
+                      "boolean"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "whenCreated": {
+                    "type": "object",
+                    "properties": {
+                      "seconds": {
+                        "type": "number"
+                      },
+                      "nanoseconds": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "primary"
+                ]
+              }
+            }
+          },
+          "304": {},
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string",
+              "example": "Missing or invalid Authorization header"
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json",
+          "text/html"
+        ]
       },
       "post": {
         "summary": "/v1/companys/{id}/domainNames",
@@ -1041,8 +1519,21 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       },
       "delete": {
         "summary": "/v1/companys/{id}/domainNames",
@@ -1078,8 +1569,148 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "members": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "whenUpdated": {
+                          "type": "object",
+                          "properties": {
+                            "seconds": {
+                              "type": "number"
+                            },
+                            "nanoseconds": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "$ref": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "value",
+                        "$ref",
+                        "whenUpdated"
+                      ]
+                    }
+                  },
+                  "email": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "whenCreated": {
+                    "type": "object",
+                    "properties": {
+                      "seconds": {
+                        "type": "number"
+                      },
+                      "nanoseconds": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "displayName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "CustomExtension": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "whenUpdated": {
+                    "type": "object",
+                    "properties": {
+                      "seconds": {
+                        "type": "number"
+                      },
+                      "nanoseconds": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "externalId": {
+                    "type": "string"
+                  },
+                  "Schemas": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "meta": {
+                    "type": "object",
+                    "properties": {
+                      "resourceType": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "notes",
+                  "members",
+                  "displayName",
+                  "name",
+                  "status",
+                  "email",
+                  "whenCreated",
+                  "externalId",
+                  "meta",
+                  "CustomExtension",
+                  "Schemas",
+                  "whenUpdated"
+                ]
+              }
+            }
+          },
+          "304": {},
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string",
+              "example": "Missing or invalid Authorization header"
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json",
+          "text/html"
+        ]
       },
       "post": {
         "summary": "/v1/companys/{id}/domainNames/{domainId}/groups",
@@ -1165,8 +1796,33 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "Supports-6239-4854-aa9e-7895036a48e"
+                }
+              }
+            }
+          },
+          "304": {},
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string",
+              "example": "Missing or invalid Authorization header"
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json",
+          "text/html"
+        ]
       },
       "put": {
         "summary": "/v1/companys/{id}/domainNames/{domainId}/groups/{groupId}",
@@ -1357,6 +2013,15 @@
                   "id": {
                     "type": "string"
                   },
+                  "email": {
+                    "type": "string"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "mfa": {
+                    "type": "boolean"
+                  },
                   "whenUpdated": {
                     "type": "object",
                     "properties": {
@@ -1368,34 +2033,39 @@
                       }
                     }
                   },
-                  "displayName": {
-                    "type": "string"
-                  },
-                  "mfa": {
-                    "type": "boolean"
-                  },
                   "status": {
                     "type": "string"
                   },
                   "email_verified": {
                     "type": "boolean"
                   },
-                  "email": {
+                  "userName": {
                     "type": "string"
+                  },
+                  "whenCreated": {
+                    "type": "object",
+                    "properties": {
+                      "nanoseconds": {
+                        "type": "number"
+                      },
+                      "seconds": {
+                        "type": "number"
+                      }
+                    }
                   },
                   "phoneNumbers": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
+                        "type": {
+                          "type": "string"
+                        },
                         "value": {
                           "type": "string"
                         },
                         "primary": {
                           "type": "boolean"
-                        },
-                        "type": {
-                          "type": "string"
                         }
                       },
                       "required": [
@@ -1405,94 +2075,17 @@
                       ]
                     }
                   },
-                  "whenCreated": {
-                    "type": "object",
-                    "properties": {
-                      "seconds": {
-                        "type": "number"
-                      },
-                      "nanoseconds": {
-                        "type": "number"
-                      }
-                    }
-                  },
-                  "userName": {
-                    "type": "string"
-                  },
-                  "addresses": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "streetAddress": {
-                          "type": "string"
-                        },
-                        "country": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string"
-                        },
-                        "primary": {
-                          "type": "boolean"
-                        },
-                        "postalCode": {
-                          "type": "string"
-                        },
-                        "locality": {
-                          "type": "string"
-                        },
-                        "region": {
-                          "type": "string"
-                        },
-                        "formatted": {
-                          "type": "null"
-                        }
-                      },
-                      "required": [
-                        "postalCode",
-                        "primary",
-                        "country",
-                        "locality",
-                        "streetAddress",
-                        "region",
-                        "type"
-                      ]
-                    }
-                  },
                   "notes": {
                     "type": "string"
-                  },
-                  "emails": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "primary": {
-                          "type": "boolean"
-                        },
-                        "type": {
-                          "type": "string"
-                        },
-                        "value": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "value",
-                        "primary"
-                      ]
-                    }
                   },
                   "name": {
                     "type": "object",
                     "properties": {
-                      "familyName": {
-                        "type": "string"
-                      },
-                      "givenName": {
-                        "type": "string"
+                      "formatted": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       "honorificPrefix": {
                         "type": [
@@ -1500,66 +2093,95 @@
                           "null"
                         ]
                       },
-                      "type": {
-                        "type": "string"
-                      },
                       "honorificSuffix": {
                         "type": [
                           "string",
                           "null"
                         ]
                       },
-                      "formatted": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
+                      "familyName": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "givenName": {
+                        "type": "string"
                       }
                     }
                   },
-                  "password": {
+                  "addresses": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "primary": {
+                          "type": "boolean"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "region": {
+                          "type": "string"
+                        },
+                        "locality": {
+                          "type": "string"
+                        },
+                        "streetAddress": {
+                          "type": "string"
+                        },
+                        "postalCode": {
+                          "type": "string"
+                        },
+                        "formatted": {
+                          "type": "null"
+                        }
+                      },
+                      "required": [
+                        "country",
+                        "postalCode",
+                        "locality",
+                        "region",
+                        "streetAddress",
+                        "primary",
+                        "type"
+                      ]
+                    }
+                  },
+                  "emails": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "primary": {
+                          "type": "boolean"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "primary",
+                        "value",
+                        "type"
+                      ]
+                    }
+                  },
+                  "userType": {
                     "type": "null"
                   },
                   "title": {
                     "type": "string"
                   },
-                  "userType": {
-                    "type": "null"
-                  },
-                  "active": {
-                    "type": "boolean"
-                  },
-                  "preferredLanguage": {
-                    "type": "null"
-                  },
-                  "timezone": {
-                    "type": "null"
-                  },
-                  "EnterpriseExtension": {
+                  "customExtension": {
                     "type": "object",
-                    "properties": {
-                      "Manager": {
-                        "type": "null"
-                      },
-                      "Division": {
-                        "type": "null"
-                      },
-                      "Organization": {
-                        "type": "null"
-                      },
-                      "EmployeeNumber": {
-                        "type": "string"
-                      },
-                      "Department": {
-                        "type": "string"
-                      },
-                      "CostCenter": {
-                        "type": "null"
-                      }
-                    }
-                  },
-                  "externalId": {
-                    "type": "string"
+                    "properties": {}
                   },
                   "nickName": {
                     "type": "null"
@@ -1570,10 +2192,42 @@
                       "type": "string"
                     }
                   },
-                  "ims": {
+                  "timezone": {
                     "type": "null"
                   },
                   "locale": {
+                    "type": "null"
+                  },
+                  "EnterpriseExtension": {
+                    "type": "object",
+                    "properties": {
+                      "Organization": {
+                        "type": "null"
+                      },
+                      "Department": {
+                        "type": "string"
+                      },
+                      "Manager": {
+                        "type": "null"
+                      },
+                      "EmployeeNumber": {
+                        "type": "string"
+                      },
+                      "CostCenter": {
+                        "type": "null"
+                      },
+                      "Division": {
+                        "type": "null"
+                      }
+                    }
+                  },
+                  "password": {
+                    "type": "null"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "preferredLanguage": {
                     "type": "null"
                   },
                   "meta": {
@@ -1584,35 +2238,58 @@
                       }
                     }
                   },
-                  "customExtension": {
-                    "type": "object",
-                    "properties": {}
-                  },
                   "roles": {
                     "type": "null"
+                  },
+                  "ims": {
+                    "type": "null"
+                  },
+                  "externalId": {
+                    "type": "string"
                   }
                 },
                 "required": [
                   "id",
-                  "status",
-                  "mfa",
-                  "displayName",
                   "email",
                   "whenUpdated",
-                  "emails",
+                  "status",
+                  "displayName",
+                  "mfa",
+                  "addresses",
+                  "userName",
+                  "name",
                   "notes",
                   "whenCreated",
-                  "name",
-                  "addresses",
-                  "phoneNumbers",
-                  "userName"
+                  "emails",
+                  "phoneNumbers"
                 ]
+              }
+            }
+          },
+          "304": {},
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string",
+              "example": "Missing or invalid Authorization header"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Access denied for tenant 'james.chang' under 'igoodworks'"
+                }
               }
             }
           }
         },
         "tags": [],
         "produces": [
+          "text/html",
           "application/json"
         ]
       },
@@ -1700,8 +2377,66 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "james.chang"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "james.chang@igoodworks.com"
+                },
+                "displayName": {
+                  "type": "string",
+                  "example": "James Chang"
+                },
+                "mfa": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "whenUpdated": {
+                  "type": "object",
+                  "properties": {
+                    "seconds": {
+                      "type": "number",
+                      "example": 1762869907
+                    },
+                    "nanoseconds": {
+                      "type": "number",
+                      "example": 413000000
+                    }
+                  }
+                },
+                "status": {
+                  "type": "string",
+                  "example": "active"
+                },
+                "email_verified": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          },
+          "304": {},
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string",
+              "example": "Missing or invalid Authorization header"
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json",
+          "text/html"
+        ]
       },
       "put": {
         "summary": "/v1/companys/{id}/domainNames/{domainId}/users/{userId}",
@@ -2248,7 +2983,9 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {},
+        "responses": {
+          "304": {}
+        },
         "tags": []
       }
     }

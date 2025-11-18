@@ -1,5 +1,7 @@
 // import guard from "express-jwt-permissions";
 
+import companyService from "./src/service/company-service.js";
+
 // export const Guard = guard({
 //   requestProperty: "auth",
 //   permissionsProperty: "permissions",
@@ -80,7 +82,7 @@ export const Guard = {
 
 export const GuardLeast = {
   check: function (requiredScopes, requiredRoles) {
-    return function (req, res, next) {
+    return async function (req, res, next) {
       const auth = req.auth || {};
       console.log("req.auth", req.auth);
       console.log(
@@ -98,10 +100,22 @@ export const GuardLeast = {
       console.log("tokenTenant, routeTenant", tokenTenant, routeTenant);
       if (req.originalUrl.includes("/oauthapi")) {
         console.log(`Tenant checking has been passed for ${req.originalUrl}`);
+        // } else if (tokenTenant && routeTenant === undefined) {
+        //   console.log(`Tenant checking has been passed for ${req.originalUrl}`);
       } else if (tokenTenant !== routeTenant) {
-        return res
-          .status(403)
-          .json({ error: `Access denied for tenant '${routeTenant}'` });
+        if (routeTenant) {
+          const company_all = await getCompany(routeTenant);
+          console.log("company_all", company_all);
+          if (!company_all.find((c) => c == tokenTenant)) {
+            return res.status(403).json({
+              error: `Access denied for tenant '${routeTenant}' under '${tokenTenant}'`,
+            });
+          }
+        } else {
+          return res
+            .status(403)
+            .json({ error: `Access denied for tenant '${routeTenant}'` });
+        }
       }
 
       //Permission checking
@@ -169,4 +183,12 @@ export const GuardLeast = {
       }
     };
   },
+};
+const getCompany = async (id, company_all = []) => {
+  company_all.push(id);
+  const company = await companyService.getData(id);
+  if (company?.parent) {
+    await getCompany(company.parent, company_all);
+  }
+  return company_all;
 };
