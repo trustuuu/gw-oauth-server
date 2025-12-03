@@ -25,6 +25,8 @@ const getApplicationsWhere = (appPath, companyId, domainId, condition) => {
 };
 const getApplicationPermissionScopes = (appPath, appId) =>
   getDoc(applicationPath(appPath, appId, "PermissionScopes"), null);
+const getApplicationTokenExchanges = (appPath, appId) =>
+  getDoc(applicationPath(appPath, appId, "TokenExchanges"), null);
 
 export default {
   ...createService(applicationPath),
@@ -32,4 +34,5 @@ export default {
   getApplications,
   getApplicationsWhere,
   getApplicationPermissionScopes,
+  getApplicationTokenExchanges,
 };

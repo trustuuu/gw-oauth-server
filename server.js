@@ -186,6 +186,7 @@ try {
       );
 
       if (req.method === "OPTIONS") {
+        console.log("request method is ", req.method);
         return res.sendStatus(200); // preflight
       }
 
@@ -198,7 +199,6 @@ try {
       return next();
     }
   });
-
   //app.use("/oauth/v1", cors(corsOptionsDelegate), routerAuth);
   app.use("/oauth/v1", cors(corsOptions), routerAuth);
   app.use(

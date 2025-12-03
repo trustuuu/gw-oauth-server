@@ -15,6 +15,11 @@ const getUsersWhere = (companyId, domainId, condition) =>
   getDoc(userPath(companyId, domainId), condition);
 const getUserPermissionScopes = (companyId, domainId, userId, condition) =>
   getDoc(userPath(companyId, domainId, userId, "PermissionScopes"), condition);
+const getExternalIdentityAccounts = (companyId, domainId, userId, condition) =>
+  getDoc(
+    userPath(companyId, domainId, userId, "ExternalIdentityAccounts"),
+    condition
+  );
 const getUserAppRoles = (companyId, domainId, userId, condition) =>
   getDoc(userPath(companyId, domainId, userId, "AppRoles"), condition);
 const getUserRef = (email) => getUserFromRef(email);
@@ -29,6 +34,7 @@ export default {
   getUserByEmail,
   getUsersWhere,
   getUserPermissionScopes,
+  getExternalIdentityAccounts,
   getUserAppRoles,
   getUserRef,
   createAuthUser,

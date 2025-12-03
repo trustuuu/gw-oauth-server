@@ -39,7 +39,6 @@ async function callback(req, res, routerAuth) {
       userId,
       sessionId,
     };
-    console.log("session data", data);
 
     await saveTokenToDB(data);
     await saveSession(req);

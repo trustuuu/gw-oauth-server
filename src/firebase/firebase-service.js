@@ -150,6 +150,7 @@ export function setDoc(path, data) {
   if (data.$ref) {
     data = { ...data, $ref: getDocByPath(data.$ref) };
   }
+  console.log("path, data", path, data);
   return db().doc(path).set(data);
 }
 

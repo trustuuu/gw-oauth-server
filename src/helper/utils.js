@@ -67,6 +67,7 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
   let tenant_id = null;
   let company_id = null;
   let domain_id = null;
+      console.log("iss, sub, aud, iat, exp, client, api, user",iss, sub, aud, iat, exp, client, api, user);
   if (api.addPermissionAccessToken && user){
     const userPermissionRaw = await userService.getUserPermissionScopes(
       user.companyId,
@@ -85,10 +86,7 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
       user.id,
       ["api", "==", api.id]
     );
-    console.log(
-      "authorization_code appRoles",
-      appRoles.map((r) => r.role)
-    );
+
     roles = appRoles ? appRoles.map((r) => r.role) : [];
   }
   if(user){
@@ -167,6 +165,36 @@ export const generateIdTokenCommon = (iss, iat, user, clientId, scopes, nonce) =
         privateKey);
     return id_token;
 }
+
+export function getTokenExchangeAccessToken({ iss, sub, aud, scopes, act, extraClaims = {}, expiresInSeconds }) {
+  const now = Math.floor(Date.now() / 1000);
+  const exp = now + (expiresInSeconds || 3600);
+
+  const payload = {
+    iss,
+    sub,
+    aud,
+    scope: Array.isArray(scopes) ? scopes.join(" ") : scopes,
+    iat: now,
+    exp,
+    ...extraClaims,
+  };
+
+  if (act) {
+    // RFC 8693 style actor claim (for impersonation/delegation)
+    payload.act = act;
+  }
+
+  var privateKey = jose.KEYUTIL.getKey(rsaKey);
+  var header = { 'typ': 'JWT', 'alg': rsaKey.alg, 'kid': rsaKey.kid };
+  var token = jose.jws.JWS.sign(header.alg,
+      JSON.stringify(header),
+      JSON.stringify(payload),
+      privateKey);
+
+  return token;
+}
+
 
 export const getJwtExpire = (token) => {
 	if (!token) throw new Error("there is no token");

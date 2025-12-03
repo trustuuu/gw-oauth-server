@@ -10,6 +10,7 @@ import md5 from "blueimp-md5";
 import { ntlmV1HashHex, convertPassword } from "../helper/secureWin.js";
 import { getQRCodeImageUrl } from "../helper/otp.js";
 import { GuardLeast } from "../../igwGuard.js";
+import { createPostHandler } from "../helper/httpHandler.js";
 
 const routerUser = express.Router();
 export default routerUser;
@@ -103,6 +104,19 @@ routerUser.get(
   (req, res) => {
     run(res, () =>
       userService.getUserPermissionScopes(
+        req.params.id,
+        req.params.domainId,
+        req.params.userId
+      )
+    );
+  }
+);
+
+routerUser.get(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/ExternalIdentityAccounts`,
+  (req, res) => {
+    run(res, () =>
+      userService.getExternalIdentityAccounts(
         req.params.id,
         req.params.domainId,
         req.params.userId
@@ -212,6 +226,7 @@ routerUser.post(
       postFn = () =>
         userService.createAuthUser(req.params.id, req.params.domainId, data.id);
     }
+
     run(
       res,
       () =>
@@ -229,43 +244,28 @@ routerUser.post(
 
 routerUser.post(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/PermissionScopes`,
-  async (req, res) => {
-    if (Array.isArray(req.body)) {
-      const datum = [...req.body];
-      const allAdds = datum.map((data) => {
-        return userService.setData.apply(
-          userService,
-          [data].concat([
-            req.params.id,
-            req.params.domainId,
-            req.params.userId,
-            "PermissionScopes",
-            data.id,
-          ])
-        );
-      });
-      run(res, () => Promise.all(allAdds));
-    } else {
-      const data = req.body;
-      run(
-        res,
-        () =>
-          userService.setData.apply(
-            userService,
-            [data].concat([
-              req.params.id,
-              req.params.domainId,
-              req.params.userId,
-              "PermissionScopes",
-              data.id,
-            ])
-          ),
-        undefined,
-        undefined,
-        data
-      );
+  createPostHandler(userService, (req) => [
+    req.params.id,
+    req.params.domainId,
+    req.params.userId,
+    "PermissionScopes",
+  ])
+);
+
+routerUser.post(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/ExternalIdentityAccounts`,
+  createPostHandler(
+    userService,
+    (req) => [
+      req.params.id,
+      req.params.domainId,
+      req.params.userId,
+      "ExternalIdentityAccounts",
+    ],
+    {
+      generateIdFn: (item) => generateId(item.name),
     }
-  }
+  )
 );
 
 routerUser.put(
@@ -277,6 +277,7 @@ routerUser.put(
       data = { ...req.body, authVerification, whenUpdated: new Date() };
     }
     if (data.password) delete data.password;
+    console.log("user data", data);
     run(res, () =>
       userService.updateData.apply(
         userService,
@@ -314,7 +315,27 @@ routerUser.put(
           req.params.id,
           req.params.domainId,
           req.params.userId,
+          "PermissionScopes",
           req.params.scopeId,
+        ])
+      )
+    );
+  }
+);
+
+routerUser.put(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/ExternalIdentityAccounts/:accountId`,
+  (req, res) => {
+    const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
+    run(res, () =>
+      userService.updateData.apply(
+        userService,
+        [data].concat([
+          req.params.id,
+          req.params.domainId,
+          req.params.userId,
+          "ExternalIdentityAccounts",
+          req.params.accountId,
         ])
       )
     );
@@ -374,6 +395,44 @@ routerUser.delete(
           req.params.domainId,
           req.params.userId,
           "PermissionScopes",
+          item.id,
+        ])
+      );
+    });
+    run(res, () => Promise.all(allDeletes));
+  }
+);
+
+routerUser.delete(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/ExternalIdentityAccounts/:accountId`,
+  (req, res) => {
+    run(res, () =>
+      userService.deleteData.apply(
+        userService,
+        [null].concat([
+          req.params.id,
+          req.params.domainId,
+          req.params.userId,
+          "ExternalIdentityAccounts",
+          req.params.accountId,
+        ])
+      )
+    );
+  }
+);
+
+routerUser.delete(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/ExternalIdentityAccounts`,
+  (req, res) => {
+    const data = [...req.body];
+    const allDeletes = data.map((item) => {
+      return userService.deleteData.apply(
+        userService,
+        [null].concat([
+          req.params.id,
+          req.params.domainId,
+          req.params.userId,
+          "ExternalIdentityAccounts",
           item.id,
         ])
       );
