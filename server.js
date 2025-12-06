@@ -59,11 +59,11 @@ if (isProduction) {
   app.use(compression());
 } else {
   // ⚡ initialize generator before routes
-  expressOasGenerator.handleResponses(app, {
-    alwaysServeDocs: true,
-    tags: ["default"],
-    specOutputPath: "./openapi.json",
-  });
+  // expressOasGenerator.handleResponses(app, {
+  //   alwaysServeDocs: true,
+  //   tags: ["default"],
+  //   specOutputPath: "./openapi.json",
+  // });
 }
 
 const corsOptions = {
@@ -277,9 +277,9 @@ app.get("/jwks.json", (req, res) => {
 });
 
 app.use(express.static(oauth_server_path));
-if (!isProduction) {
-  expressOasGenerator.handleRequests();
-}
+// if (!isProduction) {
+//   expressOasGenerator.handleRequests();
+// }
 
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err);

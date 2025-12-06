@@ -957,8 +957,61 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "igoodworks"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "US Entity"
+                },
+                "type": {
+                  "type": "string",
+                  "example": "root"
+                },
+                "whenUpdated": {
+                  "type": "object",
+                  "properties": {
+                    "seconds": {
+                      "type": "number",
+                      "example": 1763422562
+                    },
+                    "nanoseconds": {
+                      "type": "number",
+                      "example": 3000000
+                    }
+                  }
+                },
+                "status": {
+                  "type": "string",
+                  "example": "Updated"
+                },
+                "parent": {
+                  "type": "string",
+                  "example": ""
+                },
+                "displayName": {
+                  "type": "string",
+                  "example": "iGoodWorks Inc. in Seattle"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "iGoodWorks Inc"
+                }
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       },
       "put": {
         "summary": "/v1/companys/{id}",
@@ -1015,7 +1068,10 @@
                   "id": {
                     "type": "string"
                   },
-                  "parent": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "description": {
                     "type": "string"
                   },
                   "whenCreated": {
@@ -1029,19 +1085,16 @@
                       }
                     }
                   },
-                  "status": {
+                  "name": {
                     "type": "string"
                   },
                   "displayName": {
                     "type": "string"
                   },
-                  "description": {
+                  "status": {
                     "type": "string"
                   },
-                  "name": {
-                    "type": "string"
-                  },
-                  "type": {
+                  "parent": {
                     "type": "string"
                   },
                   "whenUpdated": {
@@ -1058,12 +1111,12 @@
                 },
                 "required": [
                   "id",
-                  "status",
-                  "name",
                   "description",
                   "type",
+                  "name",
+                  "displayName",
                   "parent",
-                  "displayName"
+                  "status"
                 ]
               }
             }
@@ -1110,8 +1163,49 @@
             "required": true
           }
         ],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "igoodworks.com"
+                },
+                "status": {
+                  "type": "string",
+                  "example": "Updated"
+                },
+                "primary": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "name": {
+                  "type": "string",
+                  "example": "igoodworks.com"
+                },
+                "whenUpdated": {
+                  "type": "object",
+                  "properties": {
+                    "seconds": {
+                      "type": "number",
+                      "example": 1763425352
+                    },
+                    "nanoseconds": {
+                      "type": "number",
+                      "example": 739000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
       },
       "put": {
         "summary": "/v1/companys/{id}/domainNames/{domainId}",
@@ -1181,6 +1275,12 @@
                   "status": {
                     "type": "string"
                   },
+                  "primary": {
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
                   "whenUpdated": {
                     "type": "object",
                     "properties": {
@@ -1192,32 +1292,26 @@
                       }
                     }
                   },
-                  "name": {
-                    "type": "string"
-                  },
-                  "primary": {
-                    "type": "boolean"
-                  },
-                  "description": {
-                    "type": "string"
-                  },
                   "whenCreated": {
                     "type": "object",
                     "properties": {
-                      "nanoseconds": {
+                      "seconds": {
                         "type": "number"
                       },
-                      "seconds": {
+                      "nanoseconds": {
                         "type": "number"
                       }
                     }
+                  },
+                  "description": {
+                    "type": "string"
                   }
                 },
                 "required": [
                   "id",
-                  "whenUpdated",
-                  "primary",
                   "name",
+                  "primary",
+                  "whenUpdated",
                   "status"
                 ]
               }
