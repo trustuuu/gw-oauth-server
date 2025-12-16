@@ -31,7 +31,6 @@ export function createPostHandler(serviceFn, serviceArgsFn, options = {}) {
     };
 
     const saveOne = (record) => {
-      console.log("record in saveOne", record);
       return serviceFn.setData.apply(
         serviceFn,
         [record].concat([...serviceArgsFn(req), record.id]) //[appPath, parentId, resourceName, record.id])
@@ -56,7 +55,6 @@ export function createPostHandler(serviceFn, serviceArgsFn, options = {}) {
 //==========================================================
 
 export function httpGetHandler(serviceFn, serviceArgsFn) {
-  console.log("serviceFn, serviceArgsFn", serviceFn, serviceArgsFn);
   return (req, res) => {
     httpRun(res, () => serviceFn.apply(applicationService, serviceArgsFn(req)));
   };

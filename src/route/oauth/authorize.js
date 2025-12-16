@@ -63,7 +63,7 @@ async function authorize(req, res, routerAuth) {
     if (Array.isArray(clientScopes)) {
       clientScopes = clientScopes.map((s) => s.permission);
     }
-    console.log("clientScopes", clientScopes);
+
     if (!Array.isArray(clientScopes)) {
       console.log("invalid_client_scope, %s", reqQuery.client_id);
       return res.status(400).json({ error: "invalid_client_scope" });
@@ -109,7 +109,7 @@ async function authorize(req, res, routerAuth) {
       code_challenge: reqQuery.code_challenge,
       code_challenge_method: reqQuery.code_challenge_method,
     };
-    console.log("params", params);
+
     const redirectURL = await buildQueryUrl("../../approve", params);
     res.redirect(redirectURL);
 

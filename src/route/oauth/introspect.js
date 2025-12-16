@@ -9,7 +9,6 @@ export async function instrospect(req, res, routerAuth) {
 
   const { companyId, domainId } = JSON.parse(req.cookies.user);
   const payload = await getVerifyJwtWithJwks(token);
-  console.log("payload", payload);
 
   if (companyId !== payload.tenant_id || domainId !== payload.domainId) {
     console.log(

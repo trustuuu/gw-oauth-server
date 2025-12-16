@@ -4,7 +4,7 @@ import userService from "../../service/user-service.js";
 
 export async function activate(req, res, routerAuth) {
   const { user_code, email } = req.body;
-  console.log("user_code, email", user_code, email);
+
   const devices = await deviceService.getUserDevice(user_code);
   let device = devices ? devices[0] : null;
   if (!device) {
@@ -12,7 +12,6 @@ export async function activate(req, res, routerAuth) {
     return res.status(401).send("device is not found");
   }
 
-  console.log("device", device, device.tenant_id, device.domain_id);
   const users = await userService.getUserByEmail(
     device.tenant_id,
     device.domain_id,

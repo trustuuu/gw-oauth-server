@@ -15,9 +15,23 @@ const getUsersWhere = (companyId, domainId, condition) =>
   getDoc(userPath(companyId, domainId), condition);
 const getUserPermissionScopes = (companyId, domainId, userId, condition) =>
   getDoc(userPath(companyId, domainId, userId, "PermissionScopes"), condition);
-const getExternalIdentityAccounts = (companyId, domainId, userId, condition) =>
+const getExternalIdentityAccounts = (
+  companyId,
+  domainId,
+  userId,
+  accountId,
+  condition
+) =>
   getDoc(
-    userPath(companyId, domainId, userId, "ExternalIdentityAccounts"),
+    accountId
+      ? userPath(
+          companyId,
+          domainId,
+          userId,
+          "ExternalIdentityAccounts",
+          accountId
+        )
+      : userPath(companyId, domainId, userId, "ExternalIdentityAccounts"),
     condition
   );
 const getUserAppRoles = (companyId, domainId, userId, condition) =>

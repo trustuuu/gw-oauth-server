@@ -18,7 +18,6 @@ export const deviceCodeGrant = async (req, res) => {
   }
 
   let device = await deviceService.getData(AUTH_PATH, device_code);
-  console.log("device, client_id", device, client_id);
   // if (!device || device.client_id !== client_id) {
   //   return res.status(400).json({ error: "invalid_grant" });
   // }
@@ -29,7 +28,6 @@ export const deviceCodeGrant = async (req, res) => {
     device.whenUpdated.seconds * 1000 +
     Math.floor(device.whenUpdated.nanoseconds / 1e6);
   const deviceExpiresAt = deviceUpdatedMs + device.expires_in * 1000;
-  console.log("now, deviceUpdatedMs", now, deviceUpdatedMs);
   if (now > deviceExpiresAt) {
     return res.status(400).json({ error: "expired_token" });
   }

@@ -52,7 +52,6 @@ export function getAuthUser() {
 
 export async function getDoc(path, whereArgs) {
   const [collectionPath, docName] = getCollectionPathAndDocId(path);
-
   let ref = db().collection(collectionPath);
   if (docName) {
     return ref.doc(docName).get().then(toObject);
@@ -150,7 +149,6 @@ export function setDoc(path, data) {
   if (data.$ref) {
     data = { ...data, $ref: getDocByPath(data.$ref) };
   }
-  console.log("path, data", path, data);
   return db().doc(path).set(data);
 }
 

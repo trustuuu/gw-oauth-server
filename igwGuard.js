@@ -84,7 +84,7 @@ export const GuardLeast = {
   check: function (requiredScopes, requiredRoles) {
     return async function (req, res, next) {
       const auth = req.auth || {};
-      console.log("req.auth", req.auth);
+      //console.log("req.auth", req.auth);
       console.log(
         "requiredScopes, requiredRoles",
         requiredScopes,
@@ -97,7 +97,7 @@ export const GuardLeast = {
       if (!tokenTenant) {
         return res.status(401).json({ error: "Missing tenant_id in token" });
       }
-      console.log("tokenTenant, routeTenant", tokenTenant, routeTenant);
+
       if (req.originalUrl.includes("/oauthapi")) {
         console.log(`Tenant checking has been passed for ${req.originalUrl}`);
         // } else if (tokenTenant && routeTenant === undefined) {

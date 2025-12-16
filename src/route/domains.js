@@ -1,8 +1,9 @@
 import express from "express";
 //const { default: express } = await import("express");
 import domainService from "../service/domain-service.js";
-import { DOMAIN_COLL } from "../service/remote-path-service.js";
+import { DOMAIN_COLL, generateId } from "../service/remote-path-service.js";
 import { GuardLeast } from "../../igwGuard.js";
+import { createPostHandler } from "../helper/httpHandler.js";
 
 const routerDomain = express.Router();
 export default routerDomain;
@@ -30,6 +31,30 @@ routerDomain.get(
   GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () => domainService.getData(req.params.id));
+  }
+);
+
+routerDomain.get(
+  `/:id/${DOMAIN_COLL}/:domainId/Connections`,
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    run(res, () =>
+      domainService.getDomainConnections(req.params.id, req.params.domainId)
+    );
+  }
+);
+
+routerDomain.get(
+  `/:id/${DOMAIN_COLL}/:domainId/Connections/:connectionId`,
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    run(res, () =>
+      domainService.getDomainConnections(
+        req.params.id,
+        req.params.domainId,
+        req.params.connectionId
+      )
+    );
   }
 );
 
@@ -62,6 +87,18 @@ routerDomain.post(
       data
     );
   }
+);
+
+routerDomain.post(
+  `/:id/${DOMAIN_COLL}/:domainId/Connections`,
+  GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
+  createPostHandler(
+    domainService,
+    (req) => [req.params.id, req.params.domainId, "Connections"],
+    {
+      generateIdFn: (item) => generateId(item.name),
+    }
+  )
 );
 
 routerDomain.put(
@@ -97,6 +134,24 @@ routerDomain.put(
   }
 );
 
+routerDomain.put(
+  `/:id/${DOMAIN_COLL}/:domainId/Connections/:connectionId`,
+  (req, res) => {
+    const data = { ...req.body, whenUpdated: new Date(), status: "Updated" };
+    run(res, () =>
+      domainService.updateData.apply(
+        domainService,
+        [data].concat([
+          req.params.id,
+          req.params.domainId,
+          "Connections",
+          req.params.connectionId,
+        ])
+      )
+    );
+  }
+);
+
 routerDomain.delete(
   `/:id/${DOMAIN_COLL}/:domainId`,
   GuardLeast.check([["company:admin"]], [["Ops:Admin"], ["tenant:admin"]]),
@@ -125,6 +180,39 @@ routerDomain.delete(
     run(res, () => Promise.all(allDeletes));
   }
 );
+
+routerDomain.delete(
+  `/:id/${DOMAIN_COLL}/:domainId/Connections/:accountId`,
+  (req, res) => {
+    run(res, () =>
+      domainService.deleteData.apply(
+        domainService,
+        [null].concat([
+          req.params.id,
+          req.params.domainId,
+          "Connections",
+          req.params.accountId,
+        ])
+      )
+    );
+  }
+);
+
+routerDomain.delete(`/:id/${DOMAIN_COLL}/:domainId/Connections`, (req, res) => {
+  const data = [...req.body];
+  const allDeletes = data.map((item) => {
+    return domainService.deleteData.apply(
+      domainService,
+      [null].concat([
+        req.params.id,
+        req.params.domainId,
+        "Connections",
+        item.id,
+      ])
+    );
+  });
+  run(res, () => Promise.all(allDeletes));
+});
 
 // common functions
 function run(response, fn, success, error, data) {

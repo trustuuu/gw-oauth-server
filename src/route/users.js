@@ -126,6 +126,20 @@ routerUser.get(
 );
 
 routerUser.get(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/ExternalIdentityAccounts/:accountId`,
+  (req, res) => {
+    run(res, () =>
+      userService.getExternalIdentityAccounts(
+        req.params.id,
+        req.params.domainId,
+        req.params.userId,
+        req.params.accountId
+      )
+    );
+  }
+);
+
+routerUser.get(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/AppRoles`,
   (req, res) => {
     run(res, () =>
@@ -163,10 +177,6 @@ routerUser.put(
       return res.status(401).send("user or password is not found");
     }
 
-    // if (user.authVerification !== md5(req.body.password)) {
-    //   console.log("user password is wrong", req.params.email);
-    //   return res.status(401).send("user or password is not found");
-    // }
     if (user.authVerification.startsWith("NTLM")) {
       if (user.authVerification.slice(4) != ntlmV1HashHex(req.body.password)) {
         console.log("user password is wrong", req.params.email);
@@ -268,6 +278,20 @@ routerUser.post(
   )
 );
 
+routerUser.post(
+  `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/ExternalIdentityAccounts/:accountId`,
+  async (req, res) => {
+    run(res, () =>
+      userService.getExternalIdentityAccounts(
+        req.params.id,
+        req.params.domainId,
+        req.params.userId,
+        req.params.accountId
+      )
+    );
+  }
+);
+
 routerUser.put(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId`,
   (req, res) => {
@@ -277,7 +301,7 @@ routerUser.put(
       data = { ...req.body, authVerification, whenUpdated: new Date() };
     }
     if (data.password) delete data.password;
-    console.log("user data", data);
+
     run(res, () =>
       userService.updateData.apply(
         userService,

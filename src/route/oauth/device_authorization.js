@@ -8,9 +8,7 @@ import applicationService from "../../service/application-service.js";
 
 export async function device_authorization(req, res, routerAuth) {
   const { client_id, scope } = req.body;
-  console.log("client_id, scope", client_id, scope);
   const client = await getClient(client_id);
-  console.log("client", client);
   if (!client) {
     console.log("invalid_client, %s", client_id);
     return res.status(400).json({ error: "invalid_client" });
@@ -23,7 +21,7 @@ export async function device_authorization(req, res, routerAuth) {
   if (Array.isArray(clientScopes)) {
     clientScopes = clientScopes.map((s) => s.permission);
   }
-  console.log("clientScopes", clientScopes);
+
   if (!Array.isArray(clientScopes)) {
     console.log("invalid_client_scope, %s", client_id);
     return res.status(400).json({ error: "invalid_client_scope" });
@@ -51,7 +49,6 @@ export async function device_authorization(req, res, routerAuth) {
     approved: false,
     whenCreated: new Date(),
   };
-  console.log("data", data);
   await deviceService.setData.apply(
     deviceService,
     [data].concat([AUTH_PATH, device_code])

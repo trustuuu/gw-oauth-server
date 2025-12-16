@@ -30,8 +30,20 @@ const concat = (...param) =>
   param.reduce((acc, cur) => R.concat(acc, cur ? `/${cur}` : ""));
 
 export const companyPath = (companyId) => concat(COMPANY_COLL, companyId);
-export const domainPath = (companyId, domainId) =>
-  concat(companyPath(companyId), DOMAIN_COLL, domainId);
+export const domainPath = (companyId, domainId, connectionProp, connectionId) =>
+  concat(
+    companyPath(companyId),
+    DOMAIN_COLL,
+    domainId,
+    connectionProp,
+    connectionId
+  );
+// export const domainConnectionPath = (
+//   companyId,
+//   domainId,
+//   otherProp,
+//   otherPropId
+// ) => concat(domainPath(companyId, domainId), otherProp, otherPropId);
 export const groupPath = (companyId, domainId, groupId, memberPath, memberId) =>
   concat(
     domainPath(companyId, domainId),
@@ -40,19 +52,13 @@ export const groupPath = (companyId, domainId, groupId, memberPath, memberId) =>
     memberPath,
     memberId
   );
-export const userPath = (
-  companyId,
-  domainId,
-  userId,
-  permissionScopes,
-  permissionScopeId
-) =>
+export const userPath = (companyId, domainId, userId, otherProp, otherPropId) =>
   concat(
     domainPath(companyId, domainId),
     USER_COLL,
     userId,
-    permissionScopes,
-    permissionScopeId
+    otherProp,
+    otherPropId
   );
 export const provisioningPath = (companyId, provisioningId) =>
   concat(companyPath(companyId), PROVISIONING_COLL, provisioningId);

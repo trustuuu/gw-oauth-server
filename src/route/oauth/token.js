@@ -8,19 +8,20 @@ import {
 } from "../../helper/utils.js";
 import { getClient } from "./auth_service.js";
 import apiService from "../../service/api-service.js";
-import { handleTokenExchange } from "../../helper/handleTokenExchangeGrant.js";
+//import { handleTokenExchange } from "../../helper/handleTokenExchangeGrant.js";
 import { refreshTokenGrant } from "../../helper/refreshTokenGrant.js";
 import { tokenGrant } from "../../helper/tokenGrant.js";
 import { API_PATH, APP_PATH } from "../../service/remote-path-service.js";
 import { deviceCodeGrant } from "../../helper/deviceCodeGrant.js";
 import applicationService from "../../service/application-service.js";
+import { tokenExchangeGrant } from "../../helper/tokenExchangeGrant.js";
 
 async function token(req, res, routerAuth) {
-  console.log("req.body", req.body);
   if (
     req.body.grant_type === "urn:ietf:params:oauth:grant-type:token-exchange"
   ) {
-    return handleTokenExchange(req, res);
+    //return handleTokenExchange(req, res);
+    return tokenExchangeGrant(req, res);
   }
 
   const auth = req.headers["authorization"];

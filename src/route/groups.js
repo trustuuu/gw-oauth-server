@@ -57,13 +57,6 @@ routerGroup.get(
         req.params.groupId
       );
       return group.members;
-      // const group = groupService.getGroupMembers(
-      //   req.params.id,
-      //   req.params.domainId,
-      //   req.params.groupId
-      // );
-      // console.log("group.member", group);
-      // return group;
     });
   }
 );

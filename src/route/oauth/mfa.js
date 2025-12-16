@@ -160,7 +160,7 @@ export const mfaQuery = async (req, res, routerAuth) => {
 export const mfaImage = async (req, res, routerAuth) => {
   const token = req.query.token;
   const { e, u, d, ts } = decryptPayload(token, APP_SECRET);
-  console.log(" e, u, d, ts in mfaImage", e, u, d, ts);
+
   if (
     typeof e !== "string" ||
     typeof u !== "string" ||
@@ -189,7 +189,6 @@ export const mfaImage = async (req, res, routerAuth) => {
 
 export const mfaVerify = async (req, res, routerAuth) => {
   const { totp, user, txId } = req.body;
-  console.log("totp, user, txId in mfaVerify", totp, user, txId);
   if (txId) {
     const tx = await reqidService.getData(AUTH_PATH, txId);
     const authorizationEndpoint =

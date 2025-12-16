@@ -105,7 +105,7 @@ export const saveTokenToDB = async (data) => {
     refreshToken,
     idToken,
   } = data;
-  console.log("data in saveTokenToDB", data, companyId, domainId, userId);
+
   await userService.updateData.apply(
     userService,
     [
@@ -171,8 +171,8 @@ export const SignUpUser = async (companyId, domainId, userData) => {
     data.email
   );
   if (user.length > 0) {
-    console.log("user exist", user);
-    throw Error("User exists");
+    console.log("User already existed", user);
+    throw Error("User already existed");
   }
   await userService.setData.apply(
     userService,

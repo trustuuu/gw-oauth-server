@@ -67,7 +67,7 @@ export const generateAccessTokenCommon = async (selectedRasKey, iss, sub, aud, i
   let tenant_id = null;
   let company_id = null;
   let domain_id = null;
-      console.log("iss, sub, aud, iat, exp, client, api, user",iss, sub, aud, iat, exp, client, api, user);
+
   if (api.addPermissionAccessToken && user){
     const userPermissionRaw = await userService.getUserPermissionScopes(
       user.companyId,

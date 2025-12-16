@@ -8,9 +8,18 @@ const getPrimaryDomain = (companyId) =>
   getDoc(domainPath(companyId), ["primary", "==", true]);
 const getDomainByName = (companyId, domainName) =>
   getDoc(domainPath(companyId), ["name", "==", domainName]);
+const getDomainConnections = (companyId, domainId, connectionId, condition) =>
+  getDoc(
+    connectionId
+      ? domainPath(companyId, domainId, "Connections", connectionId)
+      : domainPath(companyId, domainId, "Connections"),
+    condition
+  );
+
 export default {
   ...createService(domainPath),
   getDomainInfo,
   getPrimaryDomain,
   getDomainByName,
+  getDomainConnections,
 };

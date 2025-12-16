@@ -21,6 +21,7 @@ import { logout } from "./oauth/logout.js";
 import { instrospect } from "./oauth/introspect.js";
 import { device_authorization } from "./oauth/device_authorization.js";
 import { activate } from "./oauth/activate.js";
+import { callbackEx } from "./oauth/callbackEx.js";
 
 const routerAuth = express.Router();
 export default routerAuth;
@@ -85,6 +86,11 @@ routerAuth.post(
 routerAuth.post(
   "/callback",
   async (req, res) => await callback(req, res, routerAuth)
+);
+
+routerAuth.get(
+  "/callbackex",
+  async (req, res) => await callbackEx(req, res, routerAuth)
 );
 
 routerAuth.post(

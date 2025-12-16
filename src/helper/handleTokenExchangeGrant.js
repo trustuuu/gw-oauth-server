@@ -75,6 +75,11 @@ export async function handleTokenExchange(req, res) {
   if (grant_type !== 'urn:ietf:params:oauth:grant-type:token-exchange') {
     return res.status(400).json({ error: 'unsupported_grant_type' });
   }
+// (subject_token_type common values)
+// urn:ietf:params:oauth:token-type:access_token
+// urn:ietf:params:oauth:token-type:id_token
+// urn:ietf:params:oauth:token-type:refresh_token
+// urn:ietf:params:oauth:token-type:jwt
 
   if (!subject_token || subject_token_type !== 'urn:ietf:params:oauth:token-type:access_token') {
     return res.status(400).json({ error: 'invalid_request', error_description: 'Missing subject_token_type' });
@@ -94,15 +99,6 @@ export async function handleTokenExchange(req, res) {
     return res.status(401).json({ error: 'invalid_token', error_description: 'Invalid subject_token' });
   }
 
-  let actorPayload = null;
-  if (actor_token) {
-    try {
-      actorPayload = verifyJwt(actor_token, publicKeys);
-    } catch (err) {
-      return res.status(401).json({ error: 'invalid_token', error_description: 'Invalid actor_token' });
-    }
-  }
-
   const now = KJUR.jws.IntDate.get('now');
   const exp = KJUR.jws.IntDate.get('now + 1hour');
   const requestedScopes = scope?.split(/\s+/) || subjectPayload.permissions || [];
@@ -119,6 +115,19 @@ export async function handleTokenExchange(req, res) {
     exp: exp,
     jti: generateJti()
   };
+
+// grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+// subject_token=<user_token>   # who you want to act as
+// actor_token=<admin_token>    # who is performing impersonation
+
+  let actorPayload = null;
+  if (actor_token) {
+    try {
+      actorPayload = verifyJwt(actor_token, publicKeys);
+    } catch (err) {
+      return res.status(401).json({ error: 'invalid_token', error_description: 'Invalid actor_token' });
+    }
+  }
 
   if (actorPayload) {
     newPayload.act = { sub: actorPayload.sub };

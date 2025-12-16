@@ -44,7 +44,7 @@ async function approve(req, res, routerAuth) {
       if (Array.isArray(clientScopes)) {
         clientScopes = clientScopes.map((s) => s.permission);
       }
-      console.log("clientScopes", clientScopes);
+
       if (!Array.isArray(clientScopes)) {
         console.log("invalid_client_scope, %s", query.client_id);
         return res.status(400).json({ error: "invalid_client_scope" });

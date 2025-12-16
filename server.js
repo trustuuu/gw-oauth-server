@@ -25,7 +25,7 @@ import { COMPANY_COLL } from "./src/service/remote-path-service.js";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import { authenticate } from "./jwks.js";
+import { authenticate, authenticateOptional } from "./jwks.js";
 import { decodeClientCredentials } from "./src/helper/utils.js";
 import { getClient } from "./src/route/oauth/auth_service.js";
 import { GuardLeast } from "./igwGuard.js";
@@ -164,7 +164,7 @@ try {
   app.use(async (req, res, next) => {
     try {
       const origin = req.headers.origin;
-      console.log("origin", origin, req.path.replace(/\/$/, ""));
+
       if (!origin) return next();
       if (req.path.replace(/\/$/, "") == "/oauth/v1/token") return next();
       if (req.path.replace(/\/$/, "") == "/oauth/v1/signup") return next();
@@ -200,7 +200,7 @@ try {
     }
   });
   //app.use("/oauth/v1", cors(corsOptionsDelegate), routerAuth);
-  app.use("/oauth/v1", cors(corsOptions), routerAuth);
+  app.use("/oauth/v1", cors(corsOptions), authenticateOptional, routerAuth);
   app.use(
     `/oauthapi/v1`,
     cors(corsOptions),
@@ -251,7 +251,6 @@ try {
 app.get("/jwks.json", (req, res) => {
   const jwksPath = path.join(oauth_server_path, "jwks.json");
   const origin = req.headers.origin;
-  console.log("Serving JWKS for origin:", origin);
 
   res.setHeader("Access-Control-Allow-Origin", origin || "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");

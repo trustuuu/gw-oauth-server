@@ -26,6 +26,14 @@ export const jwtCheckService = expressjwt({
   algorithms: ["RS256"],
 });
 
+export const authenticateOptional = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next();
+  }
+  authenticate(req, res, next);
+};
+
 export function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
