@@ -275,44 +275,76 @@ try {
 //   });
 // });
 
-app.get("/jwks.json", (req, res) => {
-  const jwksPath = path.join(oauth_server_path, "jwks.json");
-  const origin = req.headers.origin;
+// app.get("/jwks.json", (req, res) => {
+//   const jwksPath = path.join(oauth_server_path, "jwks.json");
+//   const origin = req.headers.origin;
 
-  // 🔒 CORS headers (echo only approved origins)
-  res.setHeader("Access-Control-Allow-Origin", origin || "*"); // see whitelist below
+//   // 🔒 CORS headers (echo only approved origins)
+//   res.setHeader("Access-Control-Allow-Origin", origin || "*"); // see whitelist below
+//   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+//   res.setHeader(
+//     "Access-Control-Allow-Headers",
+//     `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`
+//   );
+//   res.setHeader("Access-Control-Allow-Credentials", "true");
+
+//   // ✅ Make this response safe for caches/CDNs
+//   res.setHeader("Vary", "Origin");
+//   res.setHeader(
+//     "Cache-Control",
+//     "no-store, no-cache, must-revalidate, max-age=0"
+//   );
+//   res.setHeader("Pragma", "no-cache");
+//   res.setHeader("Expires", "0");
+
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200);
+//   }
+
+//   return res.sendFile(jwksPath, {
+//     headers: {
+//       "Access-Control-Allow-Origin": origin || "",
+//       "Access-Control-Allow-Methods": "GET, OPTIONS",
+//       "Access-Control-Allow-Headers": `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`,
+//       "Access-Control-Allow-Credentials": "true",
+//       Vary: "Origin",
+//       "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+//       Pragma: "no-cache",
+//       Expires: "0",
+//     },
+//   });
+// });
+
+app.options("/jwks.json", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader(
     "Access-Control-Allow-Headers",
     `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`
   );
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+  return res.sendStatus(204);
+});
 
-  // ✅ Make this response safe for caches/CDNs
-  res.setHeader("Vary", "Origin");
+app.get("/jwks.json", (req, res) => {
+  const jwksPath = path.join(oauth_server_path, "jwks.json");
+
+  // ✅ PUBLIC RESOURCE — allow any origin
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  // ❌ DO NOT send credentials for JWKS
+  // res.setHeader("Access-Control-Allow-Credentials", "true"); ← removed
+
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader(
-    "Cache-Control",
-    "no-store, no-cache, must-revalidate, max-age=0"
+    "Access-Control-Allow-Headers",
+    `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`
   );
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
+  // ✅ Required by OIDC — allow caching
+  res.setHeader("Cache-Control", "public, max-age=3600, immutable");
+  res.setHeader("Vary", "Accept-Encoding");
 
-  return res.sendFile(jwksPath, {
-    headers: {
-      "Access-Control-Allow-Origin": origin || "",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`,
-      "Access-Control-Allow-Credentials": "true",
-      Vary: "Origin",
-      "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
+  return res.sendFile(jwksPath);
 });
 
 app.use(express.static(oauth_server_path));
