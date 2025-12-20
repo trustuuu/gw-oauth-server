@@ -48,7 +48,7 @@ async function token(req, res, routerAuth) {
     clientSecret = req.body.client_secret;
     //var { client_id: clientId, client_secret: clientSecret } = req.body;
   }
-
+  console.log("clientId, req.body", clientId, req.body);
   const client = await getClient(clientId);
 
   if (!client) {

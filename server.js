@@ -248,11 +248,39 @@ try {
 //     origin: "*", // or specify allowed origins: ['http://localhost:3000']
 //   })
 // );
+// app.get("/jwks.json", (req, res) => {
+//   const jwksPath = path.join(oauth_server_path, "jwks.json");
+//   const origin = req.headers.origin;
+//   console.log("origin in jwks", origin);
+//   res.setHeader("Access-Control-Allow-Origin", origin || "*");
+//   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+//   res.setHeader(
+//     "Access-Control-Allow-Headers",
+//     `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`
+//   );
+//   res.setHeader("Access-Control-Allow-Credentials", "true");
+
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200);
+//   }
+
+//   // ensure these headers persist through sendFile
+//   return res.sendFile(jwksPath, {
+//     headers: {
+//       "Access-Control-Allow-Origin": origin || "*",
+//       "Access-Control-Allow-Methods": "GET, OPTIONS",
+//       "Access-Control-Allow-Headers": `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`,
+//       "Access-Control-Allow-Credentials": "true",
+//     },
+//   });
+// });
+
 app.get("/jwks.json", (req, res) => {
   const jwksPath = path.join(oauth_server_path, "jwks.json");
   const origin = req.headers.origin;
 
-  res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  // 🔒 CORS headers (echo only approved origins)
+  res.setHeader("Access-Control-Allow-Origin", origin || "*"); // see whitelist below
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader(
     "Access-Control-Allow-Headers",
@@ -260,17 +288,29 @@ app.get("/jwks.json", (req, res) => {
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
+  // ✅ Make this response safe for caches/CDNs
+  res.setHeader("Vary", "Origin");
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, max-age=0"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
 
-  // ensure these headers persist through sendFile
   return res.sendFile(jwksPath, {
     headers: {
-      "Access-Control-Allow-Origin": origin || "*",
+      "Access-Control-Allow-Origin": origin || "",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`,
       "Access-Control-Allow-Credentials": "true",
+      Vary: "Origin",
+      "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+      Pragma: "no-cache",
+      Expires: "0",
     },
   });
 });

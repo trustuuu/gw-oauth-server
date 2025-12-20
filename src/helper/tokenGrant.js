@@ -21,7 +21,17 @@ export const tokenGrant = async (req, res) => {
     // check the auth header
     const clientCredentials = decodeClientCredentials(auth);
     clientId = clientCredentials.id;
+  } else {
+    clientId = req.body.client_id;
   }
+  console.log(
+    "auth, clientId, req.body in tokenGrant",
+    auth,
+    clientId,
+    req.body,
+    deviceId
+  );
+
   if (!clientId) {
     console.log("Unknown client");
     return res.status(400).json({ error: "invalid_grant" });
@@ -41,6 +51,7 @@ export const tokenGrant = async (req, res) => {
     );
     return res.status(400).json({ error: "invalid_grant" });
   }
+  console.log("code", code);
   await codeService.deleteData.apply(
     codeService,
     [{}].concat([AUTH_PATH, req.body.code])
@@ -55,6 +66,7 @@ export const tokenGrant = async (req, res) => {
 
   //const api = await apiService.getApiByIdentifier.apply(apiService, [{}].concat([API_PATH, client.audience]));
   const api = await apiService.getApiByAudience(API_PATH, client.audience);
+  console.log("api", api);
   if (api.length < 1) {
     console.log(
       "Authence has not been found, expected %s got %s",
@@ -82,7 +94,7 @@ export const tokenGrant = async (req, res) => {
     api[0],
     code.user
   );
-
+  console.log("access_token in tokenGrant", access_token);
   const refresh_expires_in =
     Math.floor(now_utc / 1000) + api[0].tokenExpiration * 600;
   const refresh_token = await generateRefreshAccessToken(
@@ -94,6 +106,7 @@ export const tokenGrant = async (req, res) => {
     code.scope,
     "refresh"
   );
+  console.log("refresh_token in tokenGrant", refresh_token);
   const tokenClient = {
     client_id: clientId,
     companyId: code.user.companyId,
@@ -108,7 +121,7 @@ export const tokenGrant = async (req, res) => {
     client: tokenClient,
   };
 
-  if (code.scope.includes("openId")) {
+  if (code.scope.includes("openId") || code.scope.includes("openid")) {
     const id_token = generateIdToken(
       api[0].issuer, //process.env.OAUTH_ISSUER,
       Math.floor(now_utc / 1000),

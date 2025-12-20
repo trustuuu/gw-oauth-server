@@ -32,7 +32,7 @@ async function authorize(req, res, routerAuth) {
   let client = null;
 
   const reqQuery = req.query;
-
+  console.log("reqQuery", reqQuery);
   client = await getClient(reqQuery.client_id);
   if (R.includes("authorization_code", client.grant_types)) {
     if (!reqQuery.email && !reqQuery.password && reqQuery.stage != "mfa") {
@@ -54,16 +54,18 @@ async function authorize(req, res, routerAuth) {
     res.render("error", { error: "Invalid redirect URI" });
     return;
   } else {
-    rscope = reqQuery.scope ? reqQuery.scope.split(" ") : undefined;
+    rscope = reqQuery.scope
+      ? reqQuery.scope.toLowerCase().split(" ")
+      : undefined;
 
     let clientScopes = await applicationService.getApplicationPermissionScopes(
       APP_PATH,
       reqQuery.client_id
     );
     if (Array.isArray(clientScopes)) {
-      clientScopes = clientScopes.map((s) => s.permission);
+      clientScopes = clientScopes.map((s) => s.permission.toLowerCase());
     }
-
+    console.log("rscope, clientScopes", rscope, clientScopes);
     if (!Array.isArray(clientScopes)) {
       console.log("invalid_client_scope, %s", reqQuery.client_id);
       return res.status(400).json({ error: "invalid_client_scope" });
