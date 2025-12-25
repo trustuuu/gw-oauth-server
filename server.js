@@ -130,11 +130,11 @@ try {
       }
 
       const allowedOrigins = allowedOriginsCache.get(clientId);
-      // console.log(
-      //   "allowedOriginsCache, allowedOrigins",
-      //   allowedOriginsCache,
-      //   allowedOrigins
-      // );
+      console.log(
+        "allowedOriginsCache, allowedOrigins",
+        allowedOriginsCache,
+        allowedOrigins
+      );
       if (
         allowedOrigins &&
         allowedOrigins.some((o) => o === origin || o === "*")
@@ -143,13 +143,20 @@ try {
       }
 
       const client = await getClient(clientId);
+      console.log("client in fetchOriginFromDB", client);
       if (!client) return false;
       if (!client.allowed_web_orgins || !client.allowed_web_orgins[0]) {
+        console.log(client.client_id, ": allowed_web_orgins set to *");
         allowedOriginsCache.set(client.client_id, ["*"]);
         return true;
       }
 
       if (client.allowed_web_orgins.some((o) => o === origin)) {
+        console.log(
+          client.client_id,
+          ": allowed_web_orgins set to ",
+          client.allowed_web_orgins
+        );
         allowedOriginsCache.set(client.client_id, client.allowed_web_orgins);
         return true;
       } else {
