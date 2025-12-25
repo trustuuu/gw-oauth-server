@@ -229,14 +229,17 @@ try {
       );
 
       // 4. SET HEADERS (Do this for EVERY request that has an origin)
+      // 4. SET HEADERS
       if (isAllowed || isAuthRoute) {
-        // If it's a known auth route or a DB-allowed origin, mirror the origin back
         res.setHeader("Access-Control-Allow-Origin", origin);
-      } else {
-        // If NOT allowed, do not set the Allow-Origin header
-        // This will cause the browser to block the request naturally
+        res.setHeader("Vary", "Origin");
+        res.setHeader(
+          "Cache-Control",
+          "no-store, no-cache, must-revalidate, proxy-revalidate"
+        );
       }
 
+      // These headers are fine to set globally for the response
       res.setHeader("Access-Control-Allow-Credentials", "true");
       res.setHeader(
         "Access-Control-Allow-Headers",
@@ -249,16 +252,15 @@ try {
         "GET, POST, PUT, DELETE, OPTIONS"
       );
 
-      // 5. Handle Preflight (OPTIONS)
-      if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
-      }
-
-      // 6. Security Enforcement
-      // If it's not a public auth route and not in our DB, block it
+      // 5. & 6. Combined Security & Preflight Handling
       if (!isAllowed && !isAuthRoute) {
         console.warn(`Blocked unauthorized origin: ${origin}`);
         return res.status(403).send("CORS Policy: Origin not allowed.");
+      }
+
+      // If we reach here, it IS allowed. Now handle the OPTIONS preflight.
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
       }
 
       return next();
