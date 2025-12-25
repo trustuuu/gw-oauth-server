@@ -50,6 +50,7 @@ export const generateRefreshAccessToken = async (aud, exp, client, deviceId, use
     user,
     scope
   }
+  console.log('refresh_token_save, deviceId', refresh_token_save, deviceId)
   await refreshTokenService.setData.apply(refreshTokenService, [refresh_token_save].concat(([AUTH_PATH, deviceId])));
 
   //const payload_server = {...payload, user, scope};

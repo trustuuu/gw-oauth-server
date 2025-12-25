@@ -161,44 +161,107 @@ try {
     }
   }
 
+  // app.use(async (req, res, next) => {
+  //   try {
+  //     const origin = req.headers.origin;
+
+  //     if (!origin) return next();
+  //     if (req.path.replace(/\/$/, "") == "/oauth/v1/token") return next();
+  //     if (req.path.replace(/\/$/, "") == "/oauth/v1/signup") return next();
+
+  //     const isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
+  //     console.log("origin isAllowed", isAllowed);
+
+  //     if (isAllowed) {
+  //       res.setHeader("Access-Control-Allow-Origin", origin);
+  //     }
+  //     res.setHeader("Access-Control-Allow-Credentials", "true");
+  //     res.setHeader(
+  //       "Access-Control-Allow-Headers",
+  //       `Origin, X-Requested-With, Content-Type, Accept, Authorization, ${process.env.DEVICE_ID_HEADER}`
+  //     );
+  //     res.setHeader(
+  //       "Access-Control-Allow-Methods",
+  //       "GET, POST, PUT, DELETE, OPTIONS"
+  //     );
+
+  //     if (req.method === "OPTIONS") {
+  //       console.log("request method is ", req.method);
+  //       return res.sendStatus(200); // preflight
+  //     }
+
+  //     if (!isAllowed) {
+  //       return res.sendStatus(401);
+  //     }
+  //     return next();
+  //   } catch (error) {
+  //     console.log(`origin checking error: ${error}`);
+  //     return next();
+  //   }
+  // });
+
   app.use(async (req, res, next) => {
     try {
       const origin = req.headers.origin;
 
+      // 1. If there's no origin (e.g., server-to-server), just move on
       if (!origin) return next();
-      if (req.path.replace(/\/$/, "") == "/oauth/v1/token") return next();
-      if (req.path.replace(/\/$/, "") == "/oauth/v1/signup") return next();
 
-      const isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
-      console.log("origin isAllowed", isAllowed);
+      const cleanOrigin = origin.replace(/\/$/, "");
+      const cleanPath = req.path.replace(/\/$/, "");
 
-      if (isAllowed) {
+      // 2. Identify "Public" or "Always Allowed" paths
+      const isAuthRoute = ["/oauth/v1/token", "/oauth/v1/signup"].includes(
+        cleanPath
+      );
+
+      // 3. Check DB for the origin
+      const isAllowed = await fetchOriginFromDB(cleanOrigin, req);
+      console.log(
+        `Origin: ${cleanOrigin} | Path: ${cleanPath} | Allowed: ${isAllowed}`
+      );
+
+      // 4. SET HEADERS (Do this for EVERY request that has an origin)
+      if (isAllowed || isAuthRoute) {
+        // If it's a known auth route or a DB-allowed origin, mirror the origin back
         res.setHeader("Access-Control-Allow-Origin", origin);
+      } else {
+        // If NOT allowed, do not set the Allow-Origin header
+        // This will cause the browser to block the request naturally
       }
+
       res.setHeader("Access-Control-Allow-Credentials", "true");
       res.setHeader(
         "Access-Control-Allow-Headers",
-        `Origin, X-Requested-With, Content-Type, Accept, Authorization, ${process.env.DEVICE_ID_HEADER}`
+        `Origin, X-Requested-With, Content-Type, Accept, Authorization, ${
+          process.env.DEVICE_ID_HEADER || "x-device-id"
+        }`
       );
       res.setHeader(
         "Access-Control-Allow-Methods",
         "GET, POST, PUT, DELETE, OPTIONS"
       );
 
+      // 5. Handle Preflight (OPTIONS)
       if (req.method === "OPTIONS") {
-        console.log("request method is ", req.method);
-        return res.sendStatus(200); // preflight
+        return res.sendStatus(200);
       }
 
-      if (!isAllowed) {
-        return res.sendStatus(401);
+      // 6. Security Enforcement
+      // If it's not a public auth route and not in our DB, block it
+      if (!isAllowed && !isAuthRoute) {
+        console.warn(`Blocked unauthorized origin: ${origin}`);
+        return res.status(403).send("CORS Policy: Origin not allowed.");
       }
+
       return next();
     } catch (error) {
-      console.log(`origin checking error: ${error}`);
-      return next();
+      console.error(`CORS Middleware Error: ${error}`);
+      // On error, it's safer to block than to allow
+      return res.status(500).send("Internal Server Error during CORS check");
     }
   });
+
   //app.use("/oauth/v1", cors(corsOptionsDelegate), routerAuth);
   app.use("/oauth/v1", cors(corsOptions), authenticateOptional, routerAuth);
   app.use(
@@ -243,78 +306,6 @@ try {
   console.log("authentication retuns error:", error);
 }
 
-// app.use(
-//   cors({
-//     origin: "*", // or specify allowed origins: ['http://localhost:3000']
-//   })
-// );
-// app.get("/jwks.json", (req, res) => {
-//   const jwksPath = path.join(oauth_server_path, "jwks.json");
-//   const origin = req.headers.origin;
-//   console.log("origin in jwks", origin);
-//   res.setHeader("Access-Control-Allow-Origin", origin || "*");
-//   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-//   res.setHeader(
-//     "Access-Control-Allow-Headers",
-//     `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`
-//   );
-//   res.setHeader("Access-Control-Allow-Credentials", "true");
-
-//   if (req.method === "OPTIONS") {
-//     return res.sendStatus(200);
-//   }
-
-//   // ensure these headers persist through sendFile
-//   return res.sendFile(jwksPath, {
-//     headers: {
-//       "Access-Control-Allow-Origin": origin || "*",
-//       "Access-Control-Allow-Methods": "GET, OPTIONS",
-//       "Access-Control-Allow-Headers": `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`,
-//       "Access-Control-Allow-Credentials": "true",
-//     },
-//   });
-// });
-
-// app.get("/jwks.json", (req, res) => {
-//   const jwksPath = path.join(oauth_server_path, "jwks.json");
-//   const origin = req.headers.origin;
-
-//   // 🔒 CORS headers (echo only approved origins)
-//   res.setHeader("Access-Control-Allow-Origin", origin || "*"); // see whitelist below
-//   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-//   res.setHeader(
-//     "Access-Control-Allow-Headers",
-//     `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`
-//   );
-//   res.setHeader("Access-Control-Allow-Credentials", "true");
-
-//   // ✅ Make this response safe for caches/CDNs
-//   res.setHeader("Vary", "Origin");
-//   res.setHeader(
-//     "Cache-Control",
-//     "no-store, no-cache, must-revalidate, max-age=0"
-//   );
-//   res.setHeader("Pragma", "no-cache");
-//   res.setHeader("Expires", "0");
-
-//   if (req.method === "OPTIONS") {
-//     return res.sendStatus(200);
-//   }
-
-//   return res.sendFile(jwksPath, {
-//     headers: {
-//       "Access-Control-Allow-Origin": origin || "",
-//       "Access-Control-Allow-Methods": "GET, OPTIONS",
-//       "Access-Control-Allow-Headers": `Content-Type, Authorization, ${process.env.DEVICE_ID_HEADER}`,
-//       "Access-Control-Allow-Credentials": "true",
-//       Vary: "Origin",
-//       "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-//       Pragma: "no-cache",
-//       Expires: "0",
-//     },
-//   });
-// });
-
 app.options("/jwks.json", (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -332,7 +323,7 @@ app.get("/jwks.json", (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   // ❌ DO NOT send credentials for JWKS
-  // res.setHeader("Access-Control-Allow-Credentials", "true"); ← removed
+  // res.setHeader("Access-Control-Allow-Credentials", "true");
 
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader(
