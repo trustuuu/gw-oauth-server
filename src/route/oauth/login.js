@@ -43,7 +43,8 @@ async function login(req, res, routerAuth) {
 
     let user = await getUserRef(reqQuery.email);
     if (!user) {
-      user = await getUser();
+      return res.status(401).json({ error: "invalid user" });
+      //user = await getUser();
     }
 
     if (user) {

@@ -130,20 +130,16 @@ try {
       }
 
       const allowedOrigins = allowedOriginsCache.get(clientId);
-      console.log(
-        "allowedOriginsCache, allowedOrigins",
-        allowedOriginsCache,
-        allowedOrigins
-      );
       if (
         allowedOrigins &&
         allowedOrigins.some((o) => o === origin || o === "*")
       ) {
+        console.log("allowedOrigins from Cache", allowedOrigins);
         return true;
       }
 
       const client = await getClient(clientId);
-      console.log("client in fetchOriginFromDB", client);
+
       if (!client) return false;
       if (!client.allowed_web_orgins || !client.allowed_web_orgins[0]) {
         console.log(client.client_id, ": allowed_web_orgins set to *");

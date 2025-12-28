@@ -187,14 +187,6 @@ export async function verifyUser(path, password, whereArgs) {
     } else {
       if (user.authVerification == md5(password)) successLogin = true;
     }
-    // if (successLogin) {
-    //   const qrImageUrl = await getQRCodeImageUrl(
-    //     path,
-    //     user.email,
-    //     "JBSWY3DPEHPK3PXP"
-    //   );
-    //   console.log("path, user, qrImageUrl", path, user, qrImageUrl);
-    // }
   }
 
   return { user, verified: successLogin };
@@ -212,16 +204,7 @@ function isEven(num) {
   return num % 2 === 0;
 }
 
-// function toObject(fbReturn) {
-//   if (!fbReturn.exists) {
-//     console.log("no exist");
-//     return null;
-//   }
-//   return { id: fbReturn.id, ...fbReturn.data() };
-// }
-
 function toObject(fbReturn) {
-  //console.log("fbReturn.data()", fbReturn.data());
   return { id: fbReturn.id, ...fbReturn.data() };
 }
 

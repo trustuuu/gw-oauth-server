@@ -51,7 +51,7 @@ export const tokenGrant = async (req, res) => {
     );
     return res.status(400).json({ error: "invalid_grant" });
   }
-  console.log("code", code);
+
   await codeService.deleteData.apply(
     codeService,
     [{}].concat([AUTH_PATH, req.body.code])
@@ -64,9 +64,8 @@ export const tokenGrant = async (req, res) => {
     );
   }
 
-  //const api = await apiService.getApiByIdentifier.apply(apiService, [{}].concat([API_PATH, client.audience]));
   const api = await apiService.getApiByAudience(API_PATH, client.audience);
-  console.log("api", api);
+
   if (api.length < 1) {
     console.log(
       "Authence has not been found, expected %s got %s",
@@ -94,7 +93,7 @@ export const tokenGrant = async (req, res) => {
     api[0],
     code.user
   );
-  console.log("access_token in tokenGrant", access_token);
+
   const refresh_expires_in =
     Math.floor(now_utc / 1000) + api[0].tokenExpiration * 600;
   const refresh_token = await generateRefreshAccessToken(
@@ -106,7 +105,7 @@ export const tokenGrant = async (req, res) => {
     code.scope,
     "refresh"
   );
-  console.log("refresh_token in tokenGrant", refresh_token);
+
   const tokenClient = {
     client_id: clientId,
     companyId: code.user.companyId,

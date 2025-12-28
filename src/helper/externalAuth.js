@@ -6,11 +6,8 @@ import randomstring from "randomstring";
 
 const GOOGLE_PROVIDER = "google";
 const tokenEndpointGoogle = "https://oauth2.googleapis.com/token";
+const tokenEndpointAzure = `https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token`;
 const authUrlGoogle = "https://accounts.google.com/o/oauth2/v2/auth";
-// This function must be called from your server after the user is redirected
-// back from Google with the authorization 'code' in the URL query parameters.
-
-// This function runs on your server (e.g., in an Express route handler)
 
 /**
  * Generates the Google Authorization URL and redirects the user.
@@ -41,7 +38,6 @@ export async function redirectToGoogleAuth(
     userId,
     accountId,
     connectionId: connection.id,
-    // Add a unique token and store it in the session for CSRF check
     csrfToken: reqId,
   };
 
@@ -49,12 +45,10 @@ export async function redirectToGoogleAuth(
     reqidService,
     [stateData].concat([AUTH_PATH, reqId])
   );
-  // Encode the object into a URL-safe string
+
   const encodedState = btoa(JSON.stringify(stateData));
-  // Now send this encodedState in your authorization request
   authUrl.searchParams.append("state", encodedState);
-  console.log(authUrl);
-  // Example using Express:
+
   res.redirect(authUrl.toString());
 }
 
@@ -66,30 +60,21 @@ export async function redirectToGoogleAuth(
  */
 export async function getGoogleInitialTokens(connection, authorizationCode) {
   try {
-    // 1. Setup the request parameters for the Token Endpoint
     const params = new URLSearchParams({
       client_id: connection.clientId,
       client_secret: connection.clientSecret,
       code: authorizationCode, // The code from Google's redirect
-      redirect_uri: connection.redirectUrl, // MUST exactly match the URI used in the initial redirect
-      grant_type: "authorization_code", // The critical parameter for initial exchange
+      redirect_uri: connection.redirectUrl,
+      grant_type: "authorization_code",
     });
 
-    // 2. Make the POST request to the Token Endpoint
-    // const response = await axios.post(
-    //   "https://oauth2.googleapis.com/token",
-    //   params.toString(),
-    //   { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-    // );
     const response = await fetch(tokenEndpointGoogle, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params.toString(),
     });
 
-    // 1. Check if the request was successful
     if (!response.ok) {
-      // Handle error response (e.g., Google returns a non-200 status code)
       const errorBody = await response
         .json()
         .catch(() => ({ message: "Failed to parse error body" }));
@@ -100,7 +85,6 @@ export async function getGoogleInitialTokens(connection, authorizationCode) {
       );
     }
 
-    // 2. THIS IS THE KEY STEP: Read the stream and parse the JSON body
     const tokenData = await response.json();
 
     return tokenData;
@@ -109,28 +93,10 @@ export async function getGoogleInitialTokens(connection, authorizationCode) {
       "Failed to exchange code for tokens:",
       error.response ? error.response.data : error.message
     );
-    // Redirect to a login error page if token exchange fails.
     throw new Error(error.response ? error.response.data : error.message);
   }
-  // const data = response.data;
-
-  // // 3. Return the tokens
-  // // NOTE: This initial exchange is where you receive the Refresh Token for the first time.
-  // return {
-  //   access_token: data.access_token,
-  //   expires_at: new Date(Date.now() + data.expires_in * 1000).toISOString(),
-  //   refresh_token: data.refresh_token, // This is the long-lived token! Store it securely.
-  // };
 }
 
-/**
- * Helper: refresh Google access token using refresh_token.
- *
- * - Uses connection.clientId / clientSecret
- * - Calls Google's standard token endpoint
- * - Updates ExternalIdentityAccount with new access token, expiry, scopes
- * - Returns the updated account object
- */
 export async function refreshGoogleAccessToken(
   companyId,
   domainId,
@@ -151,9 +117,6 @@ export async function refreshGoogleAccessToken(
   params.append("refresh_token", account.providerRefreshToken);
   params.append("grant_type", "refresh_token");
 
-  //   const response = await axios.post(tokenEndpointGoogle, params.toString(), {
-  //     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  //   });
   const response = await fetch(tokenEndpointGoogle, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -171,7 +134,6 @@ export async function refreshGoogleAccessToken(
       error: `Failed to refresh Google access token ${response.status},
       ${errorBody}`,
     };
-    //throw new Error("Failed to refresh Google access token");
   }
 
   const data = await response.json();
@@ -188,8 +150,6 @@ export async function refreshGoogleAccessToken(
 }
 
 export async function getAzureAccessToken(refreshToken) {
-  const tenantId = process.env.AZURE_TENANT_ID;
-
   const params = new URLSearchParams({
     client_id: process.env.AZURE_CLIENT_ID,
     client_secret: process.env.AZURE_CLIENT_SECRET,
@@ -198,18 +158,18 @@ export async function getAzureAccessToken(refreshToken) {
     grant_type: "refresh_token",
   });
 
-  const response = await axios.post(
-    `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
-    params.toString(),
-    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-  );
+  const response = await fetch(tokenEndpointAzure, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
 
   const data = response.data;
 
   return {
     access_token: data.access_token,
     expires_at: new Date(Date.now() + data.expires_in * 1000).toISOString(),
-    refresh_token: data.refresh_token, // sometimes rotated
+    refresh_token: data.refresh_token,
   };
 }
 
@@ -238,10 +198,6 @@ export async function updateTokenToServer(
     status: "Updated",
   };
 
-  // TODO: adapt to your real update API
-  // e.g. externalIdentityAccountService.updateData(path, account.id, updatedAccount)
-  //await userService.updateExternal.updateAccount(updatedAccount);
-
   await userService.updateData.apply(
     userService,
     [updatedAccount].concat([
@@ -255,23 +211,12 @@ export async function updateTokenToServer(
   return updatedAccount;
 }
 
-/**
- * Helper: lookup ExternalIdentityAccount by UniDir user + provider.
- *
- * You said ExternalIdentityAccount has:
- *   id, name, provider, providerAccessExpiresAt, providerAccessToken,
- *   providerRefreshToken, providerScopes, providerUserId, status, userId
- *
- * Adjust the service call to match your real API.
- */
 export async function findExternalAccount({
   companyId,
   domainId,
   userId,
   accountId,
 }) {
-  // EXAMPLE: you may actually filter by tenant/domain in your DB query.
-  // Replace this with your real implementation.
   const accounts = await userService.getExternalIdentityAccounts(
     companyId,
     domainId,
@@ -296,14 +241,6 @@ export async function findExternalAccount({
   return account;
 }
 
-/**
- * Helper: lookup Google connection (clientId/clientSecret/etc.)
- *
- * connection table fields:
- *   clientId, clientSecret, id, name, provider, redirectUrl, scopes
- *
- * Adjust this implementation to your real service.
- */
 export async function findConnection({ companyId, domainId, connectionId }) {
   const connections = await domainService.getDomainConnections(
     companyId,

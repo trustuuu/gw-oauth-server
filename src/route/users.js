@@ -11,6 +11,8 @@ import { ntlmV1HashHex, convertPassword } from "../helper/secureWin.js";
 import { getQRCodeImageUrl } from "../helper/otp.js";
 import { GuardLeast } from "../../igwGuard.js";
 import { createPostHandler } from "../helper/httpHandler.js";
+import { deleteDoc } from "firebase/firestore";
+import accountService from "../service/account-service.js";
 
 const routerUser = express.Router();
 export default routerUser;
@@ -314,10 +316,10 @@ routerUser.put(
 routerUser.put(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
   const data = [...req.body];
   const allUpdates = data.map((item) => {
-    let itemData = { ...req.body, whenUpdated: new Date() };
+    let itemData = { ...item, whenUpdated: new Date() };
     if (item.password) {
-      const authVerification = convertPassword(req.body);
-      itemData = { ...item, authVerification, whenUpdated: new Date() };
+      const authVerification = convertPassword(item);
+      itemData = { ...item, authVerification };
     }
     if (itemData.password) delete itemData.password;
     return userService.updateData.apply(
@@ -369,19 +371,44 @@ routerUser.put(
 routerUser.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId`,
   (req, res) => {
-    run(res, () =>
+    run(res, async () => {
+      const user = await userService.getData(
+        req.params.id,
+        req.params.domainId,
+        req.params.userId
+      );
+      if (user) {
+        accountService.deleteData.apply(
+          accountService,
+          [{}].concat([user.email])
+        );
+      }
+
       userService.deleteData.apply(
         userService,
         [{}].concat([req.params.id, req.params.domainId, req.params.userId])
-      )
-    );
+      );
+    });
   }
 );
 
 routerUser.delete(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
   const data = [...req.body];
-  const allDeletes = data.map((item) => {
-    return userService.deleteData.apply(
+  const allDeletes = data.map(async (item) => {
+    const user = await userService.getData(
+      req.params.id,
+      req.params.domainId,
+      item.id
+    );
+    if (user) {
+      console.log("user in delete", user);
+      accountService.deleteData.apply(
+        accountService,
+        [{}].concat([user.email])
+      );
+    }
+
+    userService.deleteData.apply(
       userService,
       [null].concat([req.params.id, req.params.domainId, item.id])
     );
@@ -392,7 +419,7 @@ routerUser.delete(`/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}`, (req, res) => {
 routerUser.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${USER_COLL}/:userId/PermissionScopes/:scopeId`,
   (req, res) => {
-    run(res, () =>
+    run(res, async () =>
       userService.deleteData.apply(
         userService,
         [null].concat([
