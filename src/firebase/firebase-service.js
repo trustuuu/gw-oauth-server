@@ -96,13 +96,16 @@ export async function getUserFromRef(email) {
   }
 }
 
-export async function addUserToAuth(path) {
+export async function addUserToAuth(path, companyId, domainId, userId) {
   if (path) {
     const userRef = await getDocByPath(path);
     const user = await userRef.get();
     if ("email" in user.data()) {
       return await setDoc(`accounts/${user.data().email}`, {
         ref: userRef,
+        ...(companyId !== undefined && { companyId }),
+        ...(domainId !== undefined && { domainId }),
+        ...(userId !== undefined && { userId }),
       });
     } else {
       return null;

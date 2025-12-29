@@ -38,7 +38,12 @@ const getUserAppRoles = (companyId, domainId, userId, condition) =>
   getDoc(userPath(companyId, domainId, userId, "AppRoles"), condition);
 const getUserRef = (email) => getUserFromRef(email);
 const createAuthUser = (companyId, domainId, userId) =>
-  addUserToAuth(userPath(companyId, domainId, userId));
+  addUserToAuth(
+    userPath(companyId, domainId, userId),
+    companyId,
+    domainId,
+    userId
+  );
 
 // const userResetPassword = (companyId, domainId, email, password, newPassword) =>
 //   verifyUser(userPath(companyId, domainId), password, ["email", "==", email]);
