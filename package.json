@@ -12,7 +12,6 @@
     "client": "cd ./src && node client",
     "build": "webpack",
     "prod": "node server",
-    "test": "react-scripts test",
     "eslint": "eslint ./src & eslint server.js",
     "eslint-fix": "eslint ./src --fix"
   },
