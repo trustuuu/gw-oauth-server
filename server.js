@@ -7,8 +7,6 @@ import cons from "consolidate";
 import routerAuth from "./src/route/routes_auth.js";
 import logger from "morgan";
 
-import expressOasGenerator from "express-oas-generator";
-
 import compression from "compression";
 import dotenv from "dotenv";
 dotenv.config();
@@ -39,6 +37,9 @@ const __dirname = path.dirname(__filename);
 const oauth_server_path = path.join(__dirname, "./public/oauth-server");
 
 const app = express();
+const hostheader = isProduction ? "" : "0.0.0.0";
+const port = isProduction ? process.env.SERVER_PORT : 80;
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -296,6 +297,13 @@ try {
     }
   );
 
+  // const basePath = `/v1/${COMPANY_COLL}`;
+  // app.use(basePath, cors(corsOptions), authenticate, routerCompany);
+  // app.use(basePath, cors(corsOptions), authenticate, routerDomain);
+  // app.use(basePath, cors(corsOptions), authenticate, routerGroup);
+  // app.use(basePath, cors(corsOptions), authenticate, routerUser);
+  // app.use(basePath, cors(corsOptions), authenticate, routerConnection);
+  // app.use(basePath, cors(corsOptions), authenticate, routerProvisioning);
   app.use(
     `/v1/${COMPANY_COLL}`,
     cors(corsOptions),
@@ -310,6 +318,16 @@ try {
 } catch (error) {
   console.log("authentication retuns error:", error);
 }
+
+////////////////////////////////////////////////
+//Swagger
+////////////////////////////////////////////////
+
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from './swagger-output.json' with { type: 'json' };
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+////////////////////////////////////////////////
 
 app.options("/jwks.json", (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -357,8 +375,6 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(oauth_server_path, "index.html"));
 });
 
-const hostheader = isProduction ? "" : "0.0.0.0";
-const port = isProduction ? process.env.SERVER_PORT : 80;
 const server = app.listen(port || 8080, hostheader, () => {
   const host = server.address().address;
   const port = server.address().port;

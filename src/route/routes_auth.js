@@ -38,10 +38,10 @@ const authServer = {
 
 const requests = {};
 routerAuth.locals = { ...authServer, requests };
-routerAuth.get(
-  `/authorize`,
-  async (req, res) => await authorize(req, res, routerAuth)
-);
+
+routerAuth.get(`/authorize`, async (req, res) => {
+  await authorize(req, res, routerAuth);
+});
 
 routerAuth.post(
   "/login",
