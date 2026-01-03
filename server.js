@@ -379,14 +379,26 @@ app.use('/api-docs', (req, res, next) => {
 
 // Use a standard GET route for the final rendering
 app.get('/api-docs', (req, res) => {
-  // generateHTML creates the string; we send it manually to ensure no local asset injection
-  const html = swaggerUi.generateHTML(swaggerDocument, {
+  const options = {
+    swaggerOptions: {
+      url: "/swagger-json",
+    },
     customCssUrl: CSS_URL,
     customJs: JS_URLS,
-    swaggerOptions: {
-      url: "/swagger-json", 
-    },
-  });
+    // ADD THIS LINE: It forces the library to use the provided URLs 
+    // instead of searching for the local swagger-ui.css file.
+    customCss: '.swagger-ui .topbar { display: none }', 
+  };
+
+  // Use generateHTML and manually strip out the local relative link if it persists
+  let html = swaggerUi.generateHTML(swaggerDocument, options);
+  
+  // The "Nuclear Option": Manually remove the relative link via regex
+  // before sending it to the browser.
+  html = html.replace('<link rel="stylesheet" type="text/css" href="./swagger-ui.css" >', "");
+  html = html.replace('<script src="./swagger-ui-bundle.js"> </script>', "");
+  html = html.replace('<script src="./swagger-ui-standalone-preset.js"> </script>', "");
+
   res.send(html);
 });
 
