@@ -359,13 +359,27 @@ app.get("/jwks.json", (req, res) => {
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './swagger-output.json' with { type: 'json' };
 
-// CDN URLs for Swagger UI assets
+// 1. Define the CDN assets
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css";
 const JS_URLS = [
   "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
   "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js"
 ];
 
+// 2. Add CSP headers ONLY for the swagger route if using Helmet
+// If you aren't using helmet, this manually sets the header to allow cdnjs
+app.use('/api-docs', (req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
+    "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
+    "img-src 'self' data: https://cdnjs.cloudflare.com;"
+  );
+  next();
+});
+
+// 3. Setup Swagger UI with the CDN assets
 app.use(
   '/api-docs',
   swaggerUi.serve,
