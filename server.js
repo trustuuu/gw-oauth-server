@@ -359,42 +359,39 @@ app.get("/jwks.json", (req, res) => {
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './swagger-output.json' with { type: 'json' };
 
-// 1. Define the CDN assets explicitly
 const CSS_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui.css";
 const JS_URLS = [
   "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-bundle.js",
   "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"
 ];
 
-// 2. Setup the route correctly
-app.use(
-  '/api-docs',
-  (req, res, next) => {
-    // Apply CSP for the CDN
-    res.setHeader(
-      "Content-Security-Policy",
-      "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
-      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-      "img-src 'self' data: https://cdn.jsdelivr.net; " +
-      "connect-src 'self' https://cdn.jsdelivr.net;"
-    );
-    next();
-  },
-  swaggerUi.serve, // Still needed to prepare the internal middleware
-  (req, res) => {
-    // Call setup here directly to ensure the options are passed correctly
-    swaggerUi.setup(swaggerDocument, {
-      customCssUrl: CSS_URL,
-      customJs: JS_URLS,
-      // This is the secret sauce for Vercel:
-      // It tells Swagger to NOT try to find the JS/CSS on your own server
-      swaggerOptions: {
-        url: "/swagger-json", 
-      },
-    })(req, res);
-  }
-);
+app.use('/api-docs', (req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+    "img-src 'self' data: https://cdn.jsdelivr.net; " +
+    "connect-src 'self' https://cdn.jsdelivr.net;"
+  );
+  next();
+});
+
+// Use a standard GET route for the final rendering
+app.get('/api-docs', (req, res) => {
+  // generateHTML creates the string; we send it manually to ensure no local asset injection
+  const html = swaggerUi.generateHTML(swaggerDocument, {
+    customCssUrl: CSS_URL,
+    customJs: JS_URLS,
+    swaggerOptions: {
+      url: "/swagger-json", 
+    },
+  });
+  res.send(html);
+});
+
+// This is still required to handle internal Swagger requests
+app.use('/api-docs', swaggerUi.serve);
 
 // // 1. Serve the JSON file directly so it's accessible
 // app.get('/swagger-json', (req, res) => {
