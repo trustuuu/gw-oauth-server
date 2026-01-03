@@ -359,14 +359,31 @@ app.get("/jwks.json", (req, res) => {
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './swagger-output.json' with { type: 'json' };
 
-//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// CDN URLs for Swagger UI assets
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css";
+const JS_URLS = [
+  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js"
+];
+
 app.use(
   '/api-docs',
   swaggerUi.serve,
   swaggerUi.setup(swaggerDocument, {
-    customCss: '.swagger-ui .topbar { display: none }'
+    customCss: '.swagger-ui .topbar { display: none }',
+    customCssUrl: CSS_URL,
+    customJs: JS_URLS,
   })
 );
+
+//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// app.use(
+//   '/api-docs',
+//   swaggerUi.serve,
+//   swaggerUi.setup(swaggerDocument, {
+//     customCss: '.swagger-ui .topbar { display: none }'
+//   })
+// );
 ////////////////////////////////////////////////
 
 app.use(express.static(oauth_server_path));
