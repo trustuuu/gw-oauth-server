@@ -359,36 +359,35 @@ app.get("/jwks.json", (req, res) => {
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './swagger-output.json' with { type: 'json' };
 
-// 1. Define the CDN assets
-const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css";
+// 1. Serve the JSON file directly so it's accessible
+app.get('/swagger-json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerDocument);
+});
+
+// 2. Updated Swagger UI Setup with explicit asset redirection
+const CSS_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui.css";
 const JS_URLS = [
-  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
-  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js"
+  "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-bundle.js",
+  "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"
 ];
 
-// 2. Add CSP headers ONLY for the swagger route if using Helmet
-// If you aren't using helmet, this manually sets the header to allow cdnjs
 app.use('/api-docs', (req, res, next) => {
+  // Relax CSP further for Vercel compatibility
   res.setHeader(
     "Content-Security-Policy",
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
-    "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
-    "img-src 'self' data: https://cdnjs.cloudflare.com;"
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+    "img-src 'self' data: https://cdn.jsdelivr.net;"
   );
   next();
-});
+}, swaggerUi.serve);
 
-// 3. Setup Swagger UI with the CDN assets
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocument, {
-    customCss: '.swagger-ui .topbar { display: none }',
-    customCssUrl: CSS_URL,
-    customJs: JS_URLS,
-  })
-);
+app.get('/api-docs', swaggerUi.setup(swaggerDocument, {
+  customCssUrl: CSS_URL,
+  customJs: JS_URLS,
+}));
 
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // app.use(
