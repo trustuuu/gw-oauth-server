@@ -319,16 +319,6 @@ try {
   console.log("authentication retuns error:", error);
 }
 
-////////////////////////////////////////////////
-//Swagger
-////////////////////////////////////////////////
-
-import swaggerUi from "swagger-ui-express";
-import swaggerDocument from './swagger-output.json' with { type: 'json' };
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-////////////////////////////////////////////////
-
 app.options("/jwks.json", (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -360,6 +350,24 @@ app.get("/jwks.json", (req, res) => {
 
   return res.sendFile(jwksPath);
 });
+
+
+////////////////////////////////////////////////
+//Swagger
+////////////////////////////////////////////////
+
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from './swagger-output.json' with { type: 'json' };
+
+//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    customCss: '.swagger-ui .topbar { display: none }'
+  })
+);
+////////////////////////////////////////////////
 
 app.use(express.static(oauth_server_path));
 // if (!isProduction) {
