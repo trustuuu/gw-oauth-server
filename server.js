@@ -359,50 +359,77 @@ app.get("/jwks.json", (req, res) => {
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from './swagger-output.json' with { type: 'json' };
 
-// 1. Serve the JSON file directly so it's accessible
-app.get('/swagger-json', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(swaggerDocument);
-});
-
-// 2. Updated Swagger UI Setup with explicit asset redirection
+// 1. Define the CDN assets explicitly
 const CSS_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui.css";
 const JS_URLS = [
   "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-bundle.js",
   "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"
 ];
 
-app.use('/api-docs', (req, res, next) => {
-  // Relax CSP further for Vercel compatibility
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
-    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-    "img-src 'self' data: https://cdn.jsdelivr.net;"
-  );
-  next();
-}, swaggerUi.serve);
+// 2. Setup the route correctly
+app.use(
+  '/api-docs',
+  (req, res, next) => {
+    // Apply CSP for the CDN
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+      "img-src 'self' data: https://cdn.jsdelivr.net; " +
+      "connect-src 'self' https://cdn.jsdelivr.net;"
+    );
+    next();
+  },
+  swaggerUi.serve, // Still needed to prepare the internal middleware
+  (req, res) => {
+    // Call setup here directly to ensure the options are passed correctly
+    swaggerUi.setup(swaggerDocument, {
+      customCssUrl: CSS_URL,
+      customJs: JS_URLS,
+      // This is the secret sauce for Vercel:
+      // It tells Swagger to NOT try to find the JS/CSS on your own server
+      swaggerOptions: {
+        url: "/swagger-json", 
+      },
+    })(req, res);
+  }
+);
 
-app.get('/api-docs', swaggerUi.setup(swaggerDocument, {
-  customCssUrl: CSS_URL,
-  customJs: JS_URLS,
-}));
+// // 1. Serve the JSON file directly so it's accessible
+// app.get('/swagger-json', (req, res) => {
+//   res.setHeader('Content-Type', 'application/json');
+//   res.send(swaggerDocument);
+// });
 
-//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-// app.use(
-//   '/api-docs',
-//   swaggerUi.serve,
-//   swaggerUi.setup(swaggerDocument, {
-//     customCss: '.swagger-ui .topbar { display: none }'
-//   })
-// );
+// // 2. Updated Swagger UI Setup with explicit asset redirection
+// const CSS_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui.css";
+// const JS_URLS = [
+//   "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-bundle.js",
+//   "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"
+// ];
+
+// app.use('/api-docs', (req, res, next) => {
+//   // Relax CSP further for Vercel compatibility
+//   res.setHeader(
+//     "Content-Security-Policy",
+//     "default-src 'self'; " +
+//     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+//     "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+//     "img-src 'self' data: https://cdn.jsdelivr.net;" +
+//     "connect-src 'self' https://cdn.jsdelivr.net;"
+//   );
+//   next();
+// }, swaggerUi.serve);
+
+// app.get('/api-docs', swaggerUi.setup(swaggerDocument, {
+//   customCssUrl: CSS_URL,
+//   customJs: JS_URLS,
+// }));
+
 ////////////////////////////////////////////////
 
 app.use(express.static(oauth_server_path));
-// if (!isProduction) {
-//   expressOasGenerator.handleRequests();
-// }
 
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err);
