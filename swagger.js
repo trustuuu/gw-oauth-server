@@ -50,6 +50,21 @@ const doc = {
   info: { title: "Universal Directory API", version: "1.0.0" },
   host: "oauth.igoodworks.com",
   schemes: ["https"],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
+  },
+  // This applies security globally to all endpoints
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
 };
 
 const outputFile = "./swagger-output.json";
