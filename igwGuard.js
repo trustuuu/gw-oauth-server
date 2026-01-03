@@ -84,7 +84,7 @@ export const GuardLeast = {
   check: function (requiredScopes, requiredRoles) {
     return async function (req, res, next) {
       const auth = req.auth || {};
-      //console.log("req.auth", req.auth);
+      console.log("req.auth", req.auth);
       console.log(
         "requiredScopes, requiredRoles",
         requiredScopes,
