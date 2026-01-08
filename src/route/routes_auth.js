@@ -22,6 +22,10 @@ import { instrospect } from "./oauth/introspect.js";
 import { device_authorization } from "./oauth/device_authorization.js";
 import { activate } from "./oauth/activate.js";
 import { callbackEx } from "./oauth/callbackEx.js";
+import {
+  requestPasswordReset,
+  resetPassword,
+} from "../helper/userForgetPassword.js";
 
 const routerAuth = express.Router();
 export default routerAuth;
@@ -123,4 +127,13 @@ routerAuth.post(
 routerAuth.post(
   `/mfaLinkValue`,
   async (req, res) => await getDecryptMfaLink(req, res, routerAuth)
+);
+
+routerAuth.post(
+  `/forgot-pw`,
+  async (req, res) => await requestPasswordReset(req, res)
+);
+routerAuth.post(
+  `/forgot-pw-reset`,
+  async (req, res) => await resetPassword(req, res)
 );

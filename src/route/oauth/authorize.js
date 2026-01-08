@@ -51,8 +51,9 @@ async function authorize(req, res, routerAuth) {
       client.redirect_uris,
       reqQuery.redirect_uri
     );
-    res.render("error", { error: "Invalid redirect URI" });
-    return;
+    return res.status(400).json({ error: "Invalid redirect URI" });
+    // res.render("error", { error: "Invalid redirect URI" });
+    // return;
   } else {
     rscope = reqQuery.scope
       ? reqQuery.scope.toLowerCase().split(" ")

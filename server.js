@@ -165,45 +165,6 @@ try {
     }
   }
 
-  // app.use(async (req, res, next) => {
-  //   try {
-  //     const origin = req.headers.origin;
-
-  //     if (!origin) return next();
-  //     if (req.path.replace(/\/$/, "") == "/oauth/v1/token") return next();
-  //     if (req.path.replace(/\/$/, "") == "/oauth/v1/signup") return next();
-
-  //     const isAllowed = await fetchOriginFromDB(origin.replace(/\/$/, ""), req);
-  //     console.log("origin isAllowed", isAllowed);
-
-  //     if (isAllowed) {
-  //       res.setHeader("Access-Control-Allow-Origin", origin);
-  //     }
-  //     res.setHeader("Access-Control-Allow-Credentials", "true");
-  //     res.setHeader(
-  //       "Access-Control-Allow-Headers",
-  //       `Origin, X-Requested-With, Content-Type, Accept, Authorization, ${process.env.DEVICE_ID_HEADER}`
-  //     );
-  //     res.setHeader(
-  //       "Access-Control-Allow-Methods",
-  //       "GET, POST, PUT, DELETE, OPTIONS"
-  //     );
-
-  //     if (req.method === "OPTIONS") {
-  //       console.log("request method is ", req.method);
-  //       return res.sendStatus(200); // preflight
-  //     }
-
-  //     if (!isAllowed) {
-  //       return res.sendStatus(401);
-  //     }
-  //     return next();
-  //   } catch (error) {
-  //     console.log(`origin checking error: ${error}`);
-  //     return next();
-  //   }
-  // });
-
   app.use(async (req, res, next) => {
     try {
       const origin = req.headers.origin;
@@ -215,7 +176,7 @@ try {
       const cleanPath = req.path.replace(/\/$/, "");
 
       // 2. Identify "Public" or "Always Allowed" paths
-      const isAuthRoute = ["/oauth/v1/token", "/oauth/v1/signup"].includes(
+      const isAuthRoute = ["/oauth/v1/token", "/oauth/v1/signup", "/oauth/v1/forget-pw", "/oauth/v1/forgot-pw-reset"].includes(
         cleanPath
       );
 
@@ -270,6 +231,7 @@ try {
 
   //app.use("/oauth/v1", cors(corsOptionsDelegate), routerAuth);
   app.use("/oauth/v1", cors(corsOptions), authenticateOptional, routerAuth);
+
   app.use(
     `/oauthapi/v1`,
     cors(corsOptions),
@@ -385,7 +347,7 @@ app.get('/api-docs', (req, res) => {
     },
     customCssUrl: CSS_URL,
     customJs: JS_URLS,
-    // ADD THIS LINE: It forces the library to use the provided URLs 
+    // It forces the library to use the provided URLs 
     // instead of searching for the local swagger-ui.css file.
     customCss: '.swagger-ui .topbar { display: none }', 
   };
@@ -402,39 +364,7 @@ app.get('/api-docs', (req, res) => {
   res.send(html);
 });
 
-// This is still required to handle internal Swagger requests
 app.use('/api-docs', swaggerUi.serve);
-
-// // 1. Serve the JSON file directly so it's accessible
-// app.get('/swagger-json', (req, res) => {
-//   res.setHeader('Content-Type', 'application/json');
-//   res.send(swaggerDocument);
-// });
-
-// // 2. Updated Swagger UI Setup with explicit asset redirection
-// const CSS_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui.css";
-// const JS_URLS = [
-//   "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-bundle.js",
-//   "https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"
-// ];
-
-// app.use('/api-docs', (req, res, next) => {
-//   // Relax CSP further for Vercel compatibility
-//   res.setHeader(
-//     "Content-Security-Policy",
-//     "default-src 'self'; " +
-//     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
-//     "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-//     "img-src 'self' data: https://cdn.jsdelivr.net;" +
-//     "connect-src 'self' https://cdn.jsdelivr.net;"
-//   );
-//   next();
-// }, swaggerUi.serve);
-
-// app.get('/api-docs', swaggerUi.setup(swaggerDocument, {
-//   customCssUrl: CSS_URL,
-//   customJs: JS_URLS,
-// }));
 
 ////////////////////////////////////////////////
 

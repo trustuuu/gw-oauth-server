@@ -158,7 +158,7 @@ export const generateIdTokenCommon = (iss, iat, user, clientId, scopes, nonce) =
         email_verified: user.email_verified
       }
     }
-
+console.log("id_token", payload);
     var privateKey = jose.KEYUTIL.getKey(rsaKey);
     var id_token = jose.jws.JWS.sign(header.alg,
         JSON.stringify(header),

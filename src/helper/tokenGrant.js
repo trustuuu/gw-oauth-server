@@ -128,6 +128,7 @@ export const tokenGrant = async (req, res) => {
       clientId,
       code.scope
     );
+
     token_response = { ...token_response, id_token };
   }
 
