@@ -23,6 +23,7 @@ export const APP_PATH = "application";
 export const PRODUCT_COLL = "products";
 export const COMPUTER_COLL = "computers";
 export const CONNECTION_COLL = "connections";
+export const SCIM_COLL = "scims";
 export const SYNC_COLL = "syncronizations";
 export const ACCOUNT_COLL = "accounts";
 
@@ -38,6 +39,9 @@ export const domainPath = (companyId, domainId, connectionProp, connectionId) =>
     connectionProp,
     connectionId
   );
+  export const scimPath = (companyId, domainId, scimId) =>
+  concat(domainPath(companyId, domainId), SCIM_COLL, scimId);
+
 // export const domainConnectionPath = (
 //   companyId,
 //   domainId,

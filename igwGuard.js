@@ -93,12 +93,16 @@ export const GuardLeast = {
       //Tenant Checking
       const tokenTenant = auth?.tenant_id;
       const routeTenant = req.params.id ? req.params.id : req.params.companyId;
-
+      console.log("tokenTenant, routeTenant", tokenTenant, routeTenant);
       if (!tokenTenant) {
         return res.status(401).json({ error: "Missing tenant_id in token" });
       }
 
-      if (req.originalUrl.includes("/oauthapi")) {
+      if (req.originalUrl.endsWith("/companys") && req.method === "POST") {
+        console.log(
+          `Tenant checking has been passed for ${req.originalUrl} : Method: ${req.method}`
+        );
+      } else if (req.originalUrl.includes("/oauthapi")) {
         console.log(`Tenant checking has been passed for ${req.originalUrl}`);
         // } else if (tokenTenant && routeTenant === undefined) {
         //   console.log(`Tenant checking has been passed for ${req.originalUrl}`);
@@ -106,10 +110,28 @@ export const GuardLeast = {
         if (routeTenant) {
           console.log("trying company_all by routeTenant", routeTenant);
           const company_all = await getCompany(routeTenant);
-          console.log("company_all =>", company_all);
+          console.log("company_all routeTenant =>", company_all);
           if (!company_all.find((c) => c == tokenTenant)) {
             return res.status(403).json({
               error: `Access denied for tenant '${routeTenant}' under '${tokenTenant}'`,
+            });
+          }
+        } else if (
+          req.originalUrl.endsWith("/companys") &&
+          tokenTenant &&
+          req.method === "DELETE" &&
+          req.body
+        ) {
+          console.log(
+            "trying company_all by deleteTenant",
+            req.originalUrl,
+            req.body[0]
+          );
+          const company_all = await getCompany(req.body[0]);
+          console.log("company_all deleteTenant =>", company_all);
+          if (!company_all.find((c) => c == tokenTenant)) {
+            return res.status(403).json({
+              error: `Access denied for tenant '${req.body[0]}' under '${tokenTenant}'`,
             });
           }
         } else {
@@ -125,7 +147,7 @@ export const GuardLeast = {
         : [];
       //Roles checking
       const roles = Array.isArray(auth.roles) ? auth.roles : [];
-
+      console.log("permissions, roles", permissions, roles);
       // Scope OR Role checking
       const scopesAuthorized =
         requiredScopes === undefined
@@ -172,6 +194,12 @@ export const GuardLeast = {
                 return roles.includes(roleGroup);
               }
             });
+      console.log(
+        "scopesAuthorized => ",
+        scopesAuthorized,
+        "rolesAuthorized => ",
+        rolesAuthorized
+      );
       if (
         (scopesAuthorized === true || rolesAuthorized === true) &&
         (scopesAuthorized !== false || rolesAuthorized !== false)
@@ -188,6 +216,7 @@ export const GuardLeast = {
 const getCompany = async (id, company_all = []) => {
   company_all.push(id);
   const company = await companyService.getData(id);
+  console.log("company, company_all", company, company_all);
   if (company?.parent) {
     await getCompany(company.parent, company_all);
   }

@@ -19,6 +19,7 @@ import routerUser from "./src/route/users.js";
 import routerProvisioning from "./src/route/provisionings.js";
 import routerApplication from "./src/route/application.js";
 import routerApi from "./src/route/api.js";
+import routerScim from "./src/route/scims.js";
 import { COMPANY_COLL } from "./src/service/remote-path-service.js";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -275,7 +276,8 @@ try {
     routerGroup,
     routerUser,
     routerConnection,
-    routerProvisioning
+    routerProvisioning,
+    routerScim
   );
 } catch (error) {
   console.log("authentication retuns error:", error);

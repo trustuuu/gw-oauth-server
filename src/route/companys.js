@@ -126,6 +126,7 @@ routerCompany.delete(
   (req, res) => {
     const data = [...req.body];
     const allDeletes = data.map((item) => {
+      console.log("delete item", item);
       return companyService.deleteData.apply(companyService, [item]);
     });
     run(res, () => Promise.all(allDeletes));
