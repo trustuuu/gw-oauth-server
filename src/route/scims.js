@@ -6,6 +6,7 @@ import {
   SCIM_COLL,
   generateId,
 } from "../service/remote-path-service.js";
+import {GuardLeast} from "../../igwGuard.js";
 
 const routerScim = express.Router();
 
@@ -13,7 +14,7 @@ export default routerScim;
 
 routerScim.get(
   `/:id/${DOMAIN_COLL}/:domainId/${SCIM_COLL}`,
-  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["scim:read"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     if (req.query.condition) {
       run(res, () =>
@@ -31,7 +32,7 @@ routerScim.get(
 
 routerScim.get(
   `/:id/${DOMAIN_COLL}/:domainId/${SCIM_COLL}/:scimId`,
-  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check(["scim:read"], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     run(res, () =>
       scimService.getData(
@@ -45,7 +46,7 @@ routerScim.get(
 
 routerScim.post(
   `/:id/${DOMAIN_COLL}/:domainId/${SCIM_COLL}`,
-  ////GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   async (req, res) => {
     const id = generateId(
       req.body.name ?? req.body.displayName.replace(/\s+/g, "")
@@ -84,7 +85,7 @@ routerScim.post(
 
 routerScim.put(
   `/:id/${DOMAIN_COLL}/:domainId/${SCIM_COLL}/:scimId`,
-  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["scim:read"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = { ...req.body, whenUpdated: new Date() };
     run(res, () =>
@@ -98,7 +99,7 @@ routerScim.put(
 
 routerScim.put(
   `/:id/${DOMAIN_COLL}/:domainId/${SCIM_COLL}`,
-  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check([["scim:read"]], [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
     const data = [...req.body];
     const allUpdates = data.map((item) => {
@@ -117,13 +118,14 @@ routerScim.put(
 
 routerScim.delete(
   `/:id/${DOMAIN_COLL}/:domainId/${SCIM_COLL}`,
-  //GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
   (req, res) => {
+    console.log(req.body);
     const data = [...req.body];
     const allDeletes = data.map((item) => {
       return scimService.deleteData.apply(
         scimService,
-        [null].concat([req.params.id, req.params.domainId, item.id])
+        [null].concat([req.params.id, req.params.domainId, item])
       );
     });
     run(res, () => Promise.all(allDeletes));

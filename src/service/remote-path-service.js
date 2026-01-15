@@ -104,7 +104,8 @@ export const devicePath = (authId, deviceId) =>
   concat(authPath(authId), DEVICE_COLL, deviceId);
 
 export const generateId = (id) => {
-  const reg = new RegExp(`.{1,${id.length}}`);
+  const newId = id.replaceAll(" ", "-");
+  const reg = new RegExp(`.{1,${newId.length}}`);
   let guid = URL.createObjectURL(new Blob([])).slice(-36);
-  return guid.replace(reg, id);
+  return guid.replace(reg, newId);
 };
