@@ -1,0 +1,125 @@
+import express from "express";
+//const { default: express } = await import("express");
+import connectionService from "../service/connection-service.js";
+import {
+  CONNECTION_COLL,
+  PROVISIONING_COLL,
+  generateId,
+} from "../service/remote-path-service.js";
+import { GuardLeast } from "../../igwGuard.js";
+
+const routerConnection = express.Router();
+export default routerConnection;
+
+// common functions
+function run(response: any, fn: any, success?: any, error?: any, data?: any) {
+  return fn()
+    .then((result: any) =>
+      response
+        .status(200)
+        .send(data ? data : success ? success(result) : result)
+    )
+    .catch((err: any) => {
+      console.error(err);
+      return response.status(500).send(error ? error(err) : err);
+    });
+}
+
+routerConnection.get(
+  `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    run(res, () =>
+      connectionService.getData(
+        req.params.id,
+        req.params.provisioningId,
+        req.params.connectionId
+      )
+    );
+  }
+);
+
+routerConnection.get(
+  `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}`,
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    run(res, () =>
+      connectionService.getData(req.params.id, req.params.provisioningId)
+    );
+  }
+);
+
+routerConnection.post(
+  `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}`,
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  async (req, res) => {
+    const data = {
+      ...req.body,
+      id: generateId(req.body.name),
+      whenCreated: new Date(),
+      enabled: false,
+      status: "New",
+    };
+
+    const connection: any = await connectionService.getData(
+      req.params.id,
+      req.params.provisioningId,
+      data.id
+    );
+    if (connection.name) {
+      console.log("connection exist", connection);
+      return res.status(409).send("Item exists");
+    }
+
+    run(
+      res,
+      () =>
+        connectionService.setData(
+          data,
+          req.params.id,
+          req.params.provisioningId,
+          data.id
+        ),
+      undefined,
+      undefined,
+      data
+    );
+  }
+);
+
+routerConnection.put(
+  `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    const data = {
+      ...req.body,
+      whenUpdated: new Date(),
+      enabled: true,
+      status: "Updated",
+    };
+    run(res, () =>
+      connectionService.updateData(
+        data,
+        req.params.id,
+        req.params.provisioningId,
+        req.params.connectionId
+      )
+    );
+  }
+);
+
+routerConnection.delete(
+  `/:id/${PROVISIONING_COLL}/:provisioningId/${CONNECTION_COLL}/:connectionId`,
+  GuardLeast.check(undefined, [["Ops:Admin"], ["tenant:admin"]]),
+  (req, res) => {
+    const data = {};
+    run(res, () =>
+      connectionService.deleteData(
+        data,
+        req.params.id,
+        req.params.provisioningId,
+        req.params.connectionId
+      )
+    );
+  }
+);
